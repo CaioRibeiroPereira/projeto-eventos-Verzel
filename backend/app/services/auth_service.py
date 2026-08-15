@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 
 from app.core.security import create_access_token, hash_password, verify_password
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import LoginRequest, Token, UserCreate
 
@@ -11,6 +11,11 @@ class AuthService:
         self.repository = repository
 
     def register(self, data: UserCreate) -> User:
+        if data.role == UserRole.gate:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Conta de portaria não pode ser autocadastrada",
+            )
         if self.repository.get_by_email(data.email):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
