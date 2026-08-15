@@ -1,0 +1,207 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Paleta A — Cinema clássico (reference/design/paleta.md)
+   Tema escuro, fundo e superfícies quentes, acento âmbar.
+   ============================================================ */
+:root {
+  /* --- Escala: noite (neutros quentes) --------------------- */
+  --noite-50: #f4ecde;
+  --noite-100: #e7dcc8;
+  --noite-200: #d2c4a9;
+  --noite-300: #b4a588;
+  --noite-400: #93866b;
+  --noite-500: #726550;
+  --noite-600: #574b39;
+  --noite-700: #3e3529;
+  --noite-800: #2c251c;
+  --noite-850: #221d16;
+  --noite-900: #1c1815;
+  --noite-950: #12100e;
+
+  /* --- Escala: âmbar (marquise / acento primário) ---------- */
+  --ambar-50: #fbf4e1;
+  --ambar-100: #f7e7bd;
+  --ambar-200: #f2d392;
+  --ambar-300: #eec468;
+  --ambar-400: #eab14c;
+  --ambar-500: #d69a34;
+  --ambar-600: #b27c22;
+  --ambar-700: #8c6018;
+  --ambar-800: #664511;
+  --ambar-900: #422c0a;
+
+  /* --- Escala: vermelho (poltrona / acento 2 + erro) ------- */
+  --vermelho-50: #f8e6e1;
+  --vermelho-100: #efc3b7;
+  --vermelho-200: #e29b8a;
+  --vermelho-300: #d2705b;
+  --vermelho-400: #cb5741;
+  --vermelho-500: #c1442f;
+  --vermelho-600: #a2371f;
+  --vermelho-700: #7d2a17;
+  --vermelho-800: #591f10;
+  --vermelho-900: #3a140a;
+
+  /* --- Escala: verde-tela (sucesso) ------------------------- */
+  --verde-100: #c3dea3;
+  --verde-200: #9bc96a;
+  --verde-400: #6fa043;
+  --verde-600: #4c7029;
+  --verde-900: #1b2713;
+
+  /* --- Tokens de propósito ---------------------------------- */
+  --color-bg: var(--noite-950);
+  --color-surface-1: var(--noite-900);
+  --color-surface-2: var(--noite-850);
+  --color-surface-3: var(--noite-800);
+
+  --color-border: var(--noite-800);
+  --color-border-strong: var(--noite-700);
+
+  --color-text: var(--noite-50);
+  --color-text-secondary: var(--noite-300);
+  --color-text-muted: var(--noite-500);
+
+  --color-accent: var(--ambar-400);
+  --color-accent-hover: var(--ambar-300);
+  --color-on-accent: var(--noite-950);
+
+  --color-red: var(--vermelho-500);
+  --color-red-hover: var(--vermelho-400);
+  --color-on-red: var(--noite-50);
+
+  --color-bg-success: var(--verde-900);
+  --color-text-success: var(--verde-200);
+  --color-border-success: var(--verde-600);
+
+  --color-bg-warning: #2a200e;
+  --color-text-warning: var(--ambar-200);
+  --color-border-warning: var(--ambar-700);
+
+  --color-bg-danger: #2c130d;
+  --color-text-danger: var(--vermelho-200);
+  --color-border-danger: var(--vermelho-700);
+
+  /* --- Mapa de assentos (componente-herói) — estados -------- */
+  --seat-available-bg: transparent;
+  --seat-available-border: var(--noite-600);
+  --seat-available-text: var(--noite-300);
+
+  --seat-selected-bg: var(--ambar-400);
+  --seat-selected-text: var(--noite-950);
+
+  --seat-occupied-bg: var(--noite-850);
+  --seat-occupied-text: var(--noite-600);
+
+  --seat-just-taken-bg: var(--vermelho-500);
+  --seat-just-taken-text: var(--noite-50);
+
+  /* ============================================================
+     Tipografia — Cinema clássico (reference/design/fontes.md)
+     Famílias carregadas via next/font em layout.tsx.
+     ============================================================ */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+  --font-mono: "Space Mono", "SF Mono", ui-monospace, monospace;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-display: 600;
+
+  --text-display: 2rem;
+  --leading-display: 1.1;
+  --text-h1: 1.5rem;
+  --text-h2: 1.1875rem;
+  --text-h3: 1rem;
+  --leading-heading: 1.2;
+  --text-body: 0.9375rem;
+  --leading-body: 1.6;
+  --text-label: 0.8125rem;
+  --text-caption: 0.6875rem;
+  --text-mono: 0.8125rem;
+}
+
+/* ============================================================
+   Tailwind v4 — expõe os tokens como classes utilitárias
+   (ex: bg-bg, text-accent, border-border)
+   ============================================================ */
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface-1: var(--color-surface-1);
+  --color-surface-2: var(--color-surface-2);
+  --color-surface-3: var(--color-surface-3);
+
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+
+  --color-text: var(--color-text);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-on-accent: var(--color-on-accent);
+
+  --color-red: var(--color-red);
+  --color-red-hover: var(--color-red-hover);
+  --color-on-red: var(--color-on-red);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  font-weight: var(--weight-regular);
+}
+
+/* Título de filme — o momento display do sistema */
+.movie-title {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-display);
+  line-height: var(--leading-display);
+  color: var(--color-text);
+}
+
+h1 {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-h1);
+  line-height: var(--leading-heading);
+}
+h2 {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-h2);
+  line-height: var(--leading-heading);
+}
+h3 {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-h3);
+  line-height: var(--leading-heading);
+}
+
+.code,
+.ticket-code {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
+}
+
+.label {
+  font-size: var(--text-label);
+  color: var(--color-text-secondary);
+}
+.caption {
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}

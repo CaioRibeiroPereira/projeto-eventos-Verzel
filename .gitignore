@@ -1,0 +1,22 @@
+# Node / frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env
+frontend/.env.local
+
+# Python / backend
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.venv/
+backend/*.egg-info/
+backend/.pytest_cache/
+backend/.env
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.claude/settings.local.json
+
+# Docker
+*.log
