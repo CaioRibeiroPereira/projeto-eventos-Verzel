@@ -20,3 +20,7 @@ Thumbs.db
 
 # Docker
 *.log
+
+# Material de referência e configuração local do Claude Code
+reference/
+.claude/
