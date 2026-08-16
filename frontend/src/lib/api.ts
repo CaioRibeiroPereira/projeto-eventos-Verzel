@@ -57,3 +57,86 @@ export function me(token: string) {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
+
+export interface Movie {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  release_date: string | null;
+}
+
+export interface SeatRow {
+  label: string;
+  slots: boolean[];
+}
+
+export interface EventCreateInput {
+  tmdb_movie_id: number;
+  local: string;
+  starts_at: string;
+  price: number;
+  seat_layout: SeatRow[];
+}
+
+export type EventStatus = "draft" | "published";
+
+export interface Event {
+  id: number;
+  organizer_id: number;
+  tmdb_movie_id: number;
+  title: string;
+  poster_path: string | null;
+  local: string;
+  starts_at: string;
+  price: number;
+  status: EventStatus;
+  seat_count: number;
+}
+
+export interface EventFilters {
+  q?: string;
+  date?: string;
+  local?: string;
+  price_max?: number;
+}
+
+export function posterUrl(path: string | null, size: "w185" | "w342" = "w342") {
+  return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
+}
+
+export function searchMovies(token: string, query: string) {
+  return request<Movie[]>(`/movies/search?query=${encodeURIComponent(query)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function createEvent(token: string, data: EventCreateInput) {
+  return request<Event>("/events", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export function publishEvent(token: string, id: number) {
+  return request<Event>(`/events/${id}/publish`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function listMyEvents(token: string) {
+  return request<Event[]>("/events/mine", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function listPublicEvents(filters: EventFilters = {}) {
+  const params = new URLSearchParams();
+  if (filters.q) params.set("q", filters.q);
+  if (filters.date) params.set("date", filters.date);
+  if (filters.local) params.set("local", filters.local);
+  if (filters.price_max != null) params.set("price_max", String(filters.price_max));
+  const qs = params.toString();
+  return request<Event[]>(`/events${qs ? `?${qs}` : ""}`);
+}

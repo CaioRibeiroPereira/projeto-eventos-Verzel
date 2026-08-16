@@ -7,6 +7,7 @@ const TOKEN_KEY = "auth_token";
 
 interface AuthContextValue {
   user: api.User | null;
+  token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<api.User>;
   logout: () => void;
@@ -16,17 +17,21 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<api.User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) {
+    const stored = localStorage.getItem(TOKEN_KEY);
+    if (!stored) {
       setLoading(false);
       return;
     }
     api
-      .me(token)
-      .then(setUser)
+      .me(stored)
+      .then((loggedUser) => {
+        setUser(loggedUser);
+        setToken(stored);
+      })
       .catch(() => localStorage.removeItem(TOKEN_KEY))
       .finally(() => setLoading(false));
   }, []);
@@ -36,16 +41,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(TOKEN_KEY, access_token);
     const loggedUser = await api.me(access_token);
     setUser(loggedUser);
+    setToken(access_token);
     return loggedUser;
   }
 
   function logout() {
     localStorage.removeItem(TOKEN_KEY);
     setUser(null);
+    setToken(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
