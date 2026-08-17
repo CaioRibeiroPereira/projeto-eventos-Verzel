@@ -52,11 +52,16 @@ ROOMS = ["Sala 1", "Sala 2", "Sala IMAX", "Sala VIP"]
 
 
 def build_layout(rows: int, seats_per_row: int, aisle_after: int) -> list[dict]:
+    """Gera fileiras com um corredor no meio e os dois assentos das pontas
+    da última fileira (a de baixo no mapa) marcados como acessíveis."""
     layout = []
     for i in range(rows):
         label = chr(ord("A") + i)
-        slots = [True] * seats_per_row
-        slots.insert(aisle_after, False)
+        slots = ["seat"] * seats_per_row
+        slots.insert(aisle_after, "gap")
+        if i == rows - 1:
+            slots[0] = "accessible"
+            slots[-1] = "accessible"
         layout.append({"label": label, "slots": slots})
     return layout
 
@@ -88,7 +93,7 @@ def seed_events(session: Session, organizer: User) -> None:
         if not results:
             print(f"Filme não encontrado no TMDb: {title}")
             continue
-        movie = results[0]
+        movie = tmdb.get_movie(results[0].id)
 
         event = Event(
             organizer_id=organizer.id,
@@ -96,6 +101,17 @@ def seed_events(session: Session, organizer: User) -> None:
             title=movie.title,
             poster_path=movie.poster_path,
             backdrop_path=movie.backdrop_path,
+            overview=movie.overview,
+            genres=", ".join(movie.genres) or None,
+            runtime_minutes=movie.runtime,
+            director=movie.director,
+            cast=[
+                {"name": c.name, "character": c.character, "profile_path": c.profile_path}
+                for c in movie.cast
+            ]
+            or None,
+            tagline=movie.tagline,
+            vote_average=movie.vote_average,
             local=f"Cine Verzel - {ROOMS[i % len(ROOMS)]}",
             starts_at=datetime.utcnow() + timedelta(days=(i % 7) + 1, hours=(i % 4) * 2),
             price=round(28 + (i % 5) * 6.5, 2),
@@ -109,12 +125,18 @@ def seed_events(session: Session, organizer: User) -> None:
         seats = []
         for row in layout:
             seat_number = 0
-            for col, is_seat in enumerate(row["slots"]):
-                if not is_seat:
+            for col, kind in enumerate(row["slots"]):
+                if kind == "gap":
                     continue
                 seat_number += 1
                 seats.append(
-                    Seat(event_id=event.id, label=f"{row['label']}{seat_number}", row_label=row["label"], col=col)
+                    Seat(
+                        event_id=event.id,
+                        label=f"{row['label']}{seat_number}",
+                        row_label=row["label"],
+                        col=col,
+                        accessible=kind == "accessible",
+                    )
                 )
         session.add_all(seats)
         session.commit()

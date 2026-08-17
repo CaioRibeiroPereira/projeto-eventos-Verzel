@@ -27,6 +27,7 @@ class ReservationService:
                 label=seat.label,
                 row_label=seat.row_label,
                 col=seat.col,
+                accessible=seat.accessible,
                 occupied=occupied,
             )
             for seat, occupied in self.repository.seat_map(event_id)

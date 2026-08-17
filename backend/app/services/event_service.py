@@ -34,8 +34,8 @@ def _build_seats(event_id: int, layout: list) -> list[Seat]:
     seats: list[Seat] = []
     for row in layout:
         seat_number = 0
-        for col, is_seat in enumerate(row.slots):
-            if not is_seat:
+        for col, kind in enumerate(row.slots):
+            if kind == "gap":
                 continue
             seat_number += 1
             seats.append(
@@ -44,6 +44,7 @@ def _build_seats(event_id: int, layout: list) -> list[Seat]:
                     label=f"{row.label}{seat_number}",
                     row_label=row.label,
                     col=col,
+                    accessible=kind == "accessible",
                 )
             )
     if not seats:

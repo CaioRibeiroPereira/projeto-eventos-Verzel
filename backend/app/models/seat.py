@@ -12,3 +12,4 @@ class Seat(SQLModel, table=True):
     col: int
     """Índice do slot dentro da fileira (0-based), incluindo corredores —
     permite reconstruir o layout visual com os mesmos vãos no mapa de assentos."""
+    accessible: bool = False

@@ -1,14 +1,18 @@
 from datetime import datetime
+from typing import Literal
 
 from sqlmodel import SQLModel
 
 from app.models.event import EventStatus
 
+SlotKind = Literal["seat", "accessible", "gap"]
+
 
 class SeatRowInput(SQLModel):
     label: str
-    slots: list[bool]
-    """Um slot por posição na fileira; True = assento, False = corredor/vão."""
+    slots: list[SlotKind]
+    """Um slot por posição na fileira: assento comum, assento acessível
+    (cadeirante) ou corredor/vão."""
 
 
 class EventCreate(SQLModel):

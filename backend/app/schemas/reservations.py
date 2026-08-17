@@ -24,4 +24,5 @@ class SeatState(SQLModel):
     label: str
     row_label: str
     col: int
+    accessible: bool
     occupied: bool
