@@ -95,6 +95,14 @@ class ReservationRepository:
         self.session.refresh(reservation)
         return reservation
 
+    def issue_ticket(self, ticket: Ticket, qr_signature: str, share_token: str) -> Ticket:
+        ticket.qr_signature = qr_signature
+        ticket.share_token = share_token
+        self.session.add(ticket)
+        self.session.commit()
+        self.session.refresh(ticket)
+        return ticket
+
     def mark_failed(self, reservation: Reservation, ticket: Ticket) -> Reservation:
         reservation.status = ReservationStatus.failed
         ticket.status = TicketStatus.cancelled

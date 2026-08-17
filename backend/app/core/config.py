@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expires_minutes: int = 60 * 24
     tmdb_api_key: str = ""
+    ticket_secret: str = "change-me-in-env-too"
 
 
 settings = Settings()

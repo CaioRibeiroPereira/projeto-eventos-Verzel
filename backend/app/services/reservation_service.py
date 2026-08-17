@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, status
 
+from app.core.qr import generate_share_token, sign_ticket
 from app.models.event import EventStatus
 from app.models.reservation import Reservation, ReservationStatus
 from app.repositories.reservation_repository import (
@@ -86,6 +87,7 @@ class ReservationService:
         reservation = self._get_owned_pending_reservation(customer_id, reservation_id)
         ticket = self.repository.get_ticket_for_reservation(reservation.id)
         reservation = self.repository.mark_paid(reservation)
+        self.repository.issue_ticket(ticket, sign_ticket(ticket.id), generate_share_token())
         return ReservationRead(
             id=reservation.id,
             event_id=reservation.event_id,
