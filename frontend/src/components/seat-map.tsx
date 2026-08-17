@@ -3,6 +3,29 @@
 import { WheelchairIcon } from "@/components/icons";
 import type { SeatState } from "@/lib/api";
 
+const SEAT_STYLES: Record<"available" | "accessible" | "selected" | "occupied", React.CSSProperties> = {
+  available: {
+    background: "var(--seat-available-bg)",
+    borderWidth: 1,
+    borderColor: "var(--seat-available-border)",
+    color: "var(--seat-available-text)",
+  },
+  accessible: {
+    background: "var(--verde-900)",
+    borderWidth: 2,
+    borderColor: "var(--verde-400)",
+    color: "var(--verde-200)",
+  },
+  selected: {
+    background: "var(--seat-selected-bg)",
+    color: "var(--seat-selected-text)",
+  },
+  occupied: {
+    background: "var(--seat-occupied-bg)",
+    color: "var(--seat-occupied-text)",
+  },
+};
+
 function groupByRow(seats: SeatState[]) {
   const rows = new Map<string, SeatState[]>();
   for (const seat of seats) {
@@ -38,11 +61,13 @@ export function SeatMap({
               if (!seat) return <span key={col} className="h-11 w-11" />;
 
               const isSelected = seat.id === selectedSeatId;
-              const state = seat.occupied
-                ? "occupied"
-                : isSelected
-                  ? "selected"
-                  : "available";
+              const state = isSelected
+                ? "selected"
+                : seat.occupied
+                  ? "occupied"
+                  : seat.accessible
+                    ? "accessible"
+                    : "available";
 
               return (
                 <button
@@ -52,28 +77,7 @@ export function SeatMap({
                   onClick={() => onSelect(seat)}
                   title={seat.accessible ? `${seat.label} — assento acessível` : seat.label}
                   className="flex h-11 w-11 items-center justify-center rounded-md text-sm font-medium transition-colors disabled:cursor-not-allowed"
-                  style={
-                    state === "selected"
-                      ? {
-                          background: "var(--seat-selected-bg)",
-                          color: "var(--seat-selected-text)",
-                        }
-                      : state === "occupied"
-                        ? {
-                            background: "var(--seat-occupied-bg)",
-                            color: "var(--seat-occupied-text)",
-                          }
-                        : {
-                            background: seat.accessible
-                              ? "var(--ambar-900)"
-                              : "var(--seat-available-bg)",
-                            borderWidth: seat.accessible ? 2 : 1,
-                            borderColor: seat.accessible
-                              ? "var(--color-accent)"
-                              : "var(--seat-available-border)",
-                            color: "var(--seat-available-text)",
-                          }
-                  }
+                  style={SEAT_STYLES[state]}
                 >
                   {seat.accessible ? (
                     <WheelchairIcon className="h-5 w-5" />
@@ -89,12 +93,7 @@ export function SeatMap({
 
       <div className="mt-4 flex flex-wrap justify-center gap-4">
         <Legend swatch="var(--seat-available-bg)" border="var(--seat-available-border)" label="Disponível" />
-        <Legend
-          swatch="var(--ambar-900)"
-          border="var(--color-accent)"
-          icon
-          label="Acessível"
-        />
+        <Legend swatch="var(--verde-900)" border="var(--verde-400)" iconColor="var(--verde-400)" icon label="Acessível" />
         <Legend swatch="var(--seat-selected-bg)" label="Selecionado" />
         <Legend swatch="var(--seat-occupied-bg)" label="Ocupado" />
       </div>
@@ -107,11 +106,13 @@ function Legend({
   border,
   label,
   icon,
+  iconColor,
 }: {
   swatch: string;
   border?: string;
   label: string;
   icon?: boolean;
+  iconColor?: string;
 }) {
   return (
     <div className="flex items-center gap-2">
@@ -119,7 +120,7 @@ function Legend({
         className="flex h-4 w-4 items-center justify-center rounded"
         style={{ background: swatch, borderWidth: border ? 1.5 : 0, borderColor: border }}
       >
-        {icon && <WheelchairIcon className="h-3 w-3 text-accent" />}
+        {icon && <WheelchairIcon className="h-3 w-3" style={{ color: iconColor }} />}
       </span>
       <span className="caption">{label}</span>
     </div>

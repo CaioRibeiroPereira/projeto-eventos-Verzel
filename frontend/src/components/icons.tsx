@@ -104,9 +104,12 @@ export function BarcodeIcon({ className }: IconProps) {
   );
 }
 
-export function WheelchairIcon({ className }: IconProps) {
+export function WheelchairIcon({
+  className,
+  style,
+}: IconProps & { style?: React.CSSProperties }) {
   return (
-    <svg {...base} className={className}>
+    <svg {...base} className={className} style={style}>
       <circle cx="12" cy="4" r="1.6" fill="currentColor" stroke="none" />
       <path d="M11 7v5l5 3" />
       <path d="M8 10h6" />

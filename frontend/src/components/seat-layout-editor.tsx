@@ -118,9 +118,9 @@ export function SeatLayoutEditor({
                       }
                     : kind === "accessible"
                       ? {
-                          background: "var(--color-accent)",
-                          borderColor: "var(--color-accent)",
-                          color: "var(--color-on-accent)",
+                          background: "var(--verde-900)",
+                          borderColor: "var(--verde-400)",
+                          color: "var(--verde-200)",
                         }
                       : {
                           borderColor: "var(--color-border)",
