@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
+from sqlalchemy import JSON, Column
 from sqlmodel import Field, SQLModel
 
 
@@ -20,6 +21,10 @@ class Event(SQLModel, table=True):
     overview: str | None = None
     genres: str | None = None
     runtime_minutes: int | None = None
+    director: str | None = None
+    cast: list[dict] | None = Field(default=None, sa_column=Column(JSON))
+    tagline: str | None = None
+    vote_average: float | None = None
 
     local: str
     starts_at: datetime

@@ -18,6 +18,10 @@ def _to_read(event: Event, seat_count: int) -> EventRead:
         overview=event.overview,
         genres=event.genres,
         runtime_minutes=event.runtime_minutes,
+        director=event.director,
+        cast=event.cast,
+        tagline=event.tagline,
+        vote_average=event.vote_average,
         local=event.local,
         starts_at=event.starts_at,
         price=event.price,
@@ -69,6 +73,14 @@ class EventService:
                 overview=movie.overview,
                 genres=", ".join(movie.genres) or None,
                 runtime_minutes=movie.runtime,
+                director=movie.director,
+                cast=[
+                    {"name": c.name, "character": c.character, "profile_path": c.profile_path}
+                    for c in movie.cast
+                ]
+                or None,
+                tagline=movie.tagline,
+                vote_average=movie.vote_average,
                 local=data.local,
                 starts_at=data.starts_at,
                 price=data.price,

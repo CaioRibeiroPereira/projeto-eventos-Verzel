@@ -6,6 +6,13 @@ from app.core.config import settings
 BASE_URL = "https://api.themoviedb.org/3"
 
 
+class CastMember:
+    def __init__(self, name: str, character: str | None, profile_path: str | None):
+        self.name = name
+        self.character = character
+        self.profile_path = profile_path
+
+
 class TMDbMovie:
     def __init__(
         self,
@@ -17,6 +24,10 @@ class TMDbMovie:
         overview: str | None = None,
         genres: list[str] | None = None,
         runtime: int | None = None,
+        director: str | None = None,
+        cast: list[CastMember] | None = None,
+        tagline: str | None = None,
+        vote_average: float | None = None,
     ):
         self.id = id
         self.title = title
@@ -26,6 +37,10 @@ class TMDbMovie:
         self.overview = overview
         self.genres = genres or []
         self.runtime = runtime
+        self.director = director
+        self.cast = cast or []
+        self.tagline = tagline
+        self.vote_average = vote_average
 
 
 def _get(path: str, params: dict) -> dict:
@@ -63,7 +78,22 @@ def search_movies(query: str) -> list[TMDbMovie]:
 
 
 def get_movie(movie_id: int) -> TMDbMovie:
-    data = _get(f"/movie/{movie_id}", {})
+    data = _get(f"/movie/{movie_id}", {"append_to_response": "credits"})
+
+    credits = data.get("credits", {})
+    director = next(
+        (c["name"] for c in credits.get("crew", []) if c.get("job") == "Director"),
+        None,
+    )
+    cast = [
+        CastMember(
+            name=c["name"],
+            character=c.get("character") or None,
+            profile_path=c.get("profile_path"),
+        )
+        for c in credits.get("cast", [])[:8]
+    ]
+
     return TMDbMovie(
         id=data["id"],
         title=data["title"],
@@ -73,4 +103,8 @@ def get_movie(movie_id: int) -> TMDbMovie:
         overview=data.get("overview") or None,
         genres=[g["name"] for g in data.get("genres", [])],
         runtime=data.get("runtime") or None,
+        director=director,
+        cast=cast,
+        tagline=data.get("tagline") or None,
+        vote_average=data.get("vote_average") or None,
     )

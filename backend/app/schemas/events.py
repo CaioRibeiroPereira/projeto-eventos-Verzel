@@ -19,6 +19,12 @@ class EventCreate(SQLModel):
     seat_layout: list[SeatRowInput]
 
 
+class CastMember(SQLModel):
+    name: str
+    character: str | None
+    profile_path: str | None
+
+
 class EventRead(SQLModel):
     id: int
     organizer_id: int
@@ -29,6 +35,10 @@ class EventRead(SQLModel):
     overview: str | None
     genres: str | None
     runtime_minutes: int | None
+    director: str | None
+    cast: list[CastMember] | None
+    tagline: str | None
+    vote_average: float | None
     local: str
     starts_at: datetime
     price: float
