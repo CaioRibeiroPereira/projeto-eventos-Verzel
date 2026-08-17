@@ -28,10 +28,12 @@ class ReservationRepository:
     def get_reservation(self, reservation_id: int) -> Reservation | None:
         return self.session.get(Reservation, reservation_id)
 
-    def get_ticket_for_reservation(self, reservation_id: int) -> Ticket | None:
-        return self.session.exec(
-            select(Ticket).where(Ticket.reservation_id == reservation_id)
-        ).first()
+    def get_tickets_for_reservation(self, reservation_id: int) -> list[Ticket]:
+        return list(
+            self.session.exec(
+                select(Ticket).where(Ticket.reservation_id == reservation_id)
+            )
+        )
 
     def seat_map(self, event_id: int) -> list[tuple[Seat, bool]]:
         seats = self.session.exec(
@@ -59,25 +61,24 @@ class ReservationRepository:
 
         return [(seat, seat.id in blocked_seat_ids) for seat in seats]
 
-    def create_reservation_with_ticket(
-        self, customer_id: int, event: Event, seat: Seat
-    ) -> tuple[Reservation, Ticket]:
+    def create_reservation_with_tickets(
+        self, customer_id: int, event: Event, seats: list[Seat]
+    ) -> tuple[Reservation, list[Ticket]]:
         reservation = Reservation(
             customer_id=customer_id,
             event_id=event.id,
             status=ReservationStatus.pending,
-            total=event.price,
+            total=event.price * len(seats),
             expires_at=datetime.utcnow() + timedelta(minutes=RESERVATION_HOLD_MINUTES),
         )
         self.session.add(reservation)
         self.session.flush()
 
-        ticket = Ticket(
-            reservation_id=reservation.id,
-            event_id=event.id,
-            seat_id=seat.id,
-        )
-        self.session.add(ticket)
+        tickets = [
+            Ticket(reservation_id=reservation.id, event_id=event.id, seat_id=seat.id)
+            for seat in seats
+        ]
+        self.session.add_all(tickets)
         try:
             self.session.commit()
         except IntegrityError:
@@ -85,8 +86,9 @@ class ReservationRepository:
             raise SeatTakenError()
 
         self.session.refresh(reservation)
-        self.session.refresh(ticket)
-        return reservation, ticket
+        for ticket in tickets:
+            self.session.refresh(ticket)
+        return reservation, tickets
 
     def mark_paid(self, reservation: Reservation) -> Reservation:
         reservation.status = ReservationStatus.paid
@@ -103,11 +105,12 @@ class ReservationRepository:
         self.session.refresh(ticket)
         return ticket
 
-    def mark_failed(self, reservation: Reservation, ticket: Ticket) -> Reservation:
+    def mark_failed(self, reservation: Reservation, tickets: list[Ticket]) -> Reservation:
         reservation.status = ReservationStatus.failed
-        ticket.status = TicketStatus.cancelled
+        for ticket in tickets:
+            ticket.status = TicketStatus.cancelled
+            self.session.add(ticket)
         self.session.add(reservation)
-        self.session.add(ticket)
         self.session.commit()
         self.session.refresh(reservation)
         return reservation
