@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CinemaBackdrop } from "@/components/cinema-backdrop";
 import {
   backdropUrl,
   listPublicEvents,
@@ -33,8 +32,6 @@ export default function Home() {
 
   return (
     <main className="flex flex-1 flex-col">
-      <CinemaBackdrop />
-
       {featured && (
         <section className="relative flex min-h-[360px] items-end overflow-hidden">
           {backdropUrl(featured.backdrop_path) && (

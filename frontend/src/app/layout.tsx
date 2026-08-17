@@ -3,6 +3,7 @@ import { Fraunces, Hanken_Grotesk, Space_Mono } from "next/font/google";
 import { AuthProvider } from "@/context/auth-context";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { CinemaBackdrop } from "@/components/cinema-backdrop";
 import "./globals.css";
 
 const display = Fraunces({
@@ -36,9 +37,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          <SiteHeader />
-          {children}
-          <SiteFooter />
+          <div className="relative flex min-h-full flex-1 flex-col">
+            <CinemaBackdrop />
+            <SiteHeader />
+            {children}
+            <SiteFooter />
+          </div>
         </AuthProvider>
       </body>
     </html>
