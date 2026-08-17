@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routers import auth, events
+from app.api.routers import auth, events, reservations
 
 app = FastAPI(title="Plataforma de Eventos e Ingressos")
 
@@ -15,6 +15,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(events.router)
+app.include_router(reservations.router)
 
 
 @app.get("/health")

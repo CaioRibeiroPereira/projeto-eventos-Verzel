@@ -6,7 +6,9 @@ from sqlmodel import SQLModel
 
 from app.core.config import settings
 from app.models.event import Event  # noqa: F401 — registra o modelo no metadata
+from app.models.reservation import Reservation  # noqa: F401 — registra o modelo no metadata
 from app.models.seat import Seat  # noqa: F401 — registra o modelo no metadata
+from app.models.ticket import Ticket  # noqa: F401 — registra o modelo no metadata
 from app.models.user import User  # noqa: F401 — registra o modelo no metadata
 
 config = context.config
