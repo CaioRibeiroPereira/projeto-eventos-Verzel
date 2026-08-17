@@ -103,9 +103,10 @@ export default function Home() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {events?.map((event) => (
-          <div
+          <Link
             key={event.id}
-            className="flex gap-4 rounded-lg border border-border bg-surface-1 p-4"
+            href={`/eventos/${event.id}`}
+            className="flex gap-4 rounded-lg border border-border bg-surface-1 p-4 hover:border-accent"
           >
             {posterUrl(event.poster_path, "w185") && (
               <img
@@ -120,7 +121,7 @@ export default function Home() {
               <p className="label">{formatDateTime(event.starts_at)}</p>
               <p className="label">{formatPrice(event.price)}</p>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </main>

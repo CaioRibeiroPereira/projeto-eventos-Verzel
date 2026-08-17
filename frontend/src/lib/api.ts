@@ -131,6 +131,56 @@ export function listMyEvents(token: string) {
   });
 }
 
+export function getPublicEvent(id: number) {
+  return request<Event>(`/events/${id}`);
+}
+
+export interface SeatState {
+  id: number;
+  label: string;
+  row_label: string;
+  col: number;
+  occupied: boolean;
+}
+
+export type ReservationStatus = "pending" | "paid" | "failed" | "cancelled";
+
+export interface Reservation {
+  id: number;
+  event_id: number;
+  seat_id: number;
+  seat_label: string;
+  status: ReservationStatus;
+  total: number;
+  expires_at: string;
+}
+
+export function getSeatMap(eventId: number) {
+  return request<SeatState[]>(`/events/${eventId}/seats`);
+}
+
+export function createReservation(token: string, eventId: number, seatId: number) {
+  return request<Reservation>(`/events/${eventId}/reservations`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ seat_id: seatId }),
+  });
+}
+
+export function confirmPayment(token: string, reservationId: number) {
+  return request<Reservation>(`/reservations/${reservationId}/confirm`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function declinePayment(token: string, reservationId: number) {
+  return request<Reservation>(`/reservations/${reservationId}/decline`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function listPublicEvents(filters: EventFilters = {}) {
   const params = new URLSearchParams();
   if (filters.q) params.set("q", filters.q);
