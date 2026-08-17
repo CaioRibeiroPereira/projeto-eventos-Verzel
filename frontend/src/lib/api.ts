@@ -171,7 +171,7 @@ export interface SeatState {
 
 export type ReservationStatus = "pending" | "paid" | "failed" | "cancelled";
 
-export const MAX_SEATS_PER_RESERVATION = 5;
+export const MAX_SEATS_PER_RESERVATION = 2;
 
 export interface SeatSummary {
   seat_id: number;

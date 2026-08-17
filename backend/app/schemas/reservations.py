@@ -4,7 +4,7 @@ from sqlmodel import SQLModel
 
 from app.models.reservation import ReservationStatus
 
-MAX_SEATS_PER_RESERVATION = 5
+MAX_SEATS_PER_RESERVATION = 2
 
 
 class ReservationCreate(SQLModel):
