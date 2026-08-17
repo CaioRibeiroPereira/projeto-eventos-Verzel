@@ -25,6 +25,16 @@ Discovery API (o PDF permite isso). Decidimos adiar: o prazo é curto
 (entrega 21/08) e ainda faltava fechar a Fase 6 (seed, README, deploy).
 Fica como possível próximo passo, não como parte do escopo atual.
 
+## 2026-08-17 — Reserva de múltiplos assentos, limite de 5 por pessoa
+
+Uma reserva agora pode incluir de 1 a 5 assentos numa compra só, em vez de
+sempre um por vez. A Reservation continua sendo uma linha só, mas gera um
+Ticket por assento (cada um com seu próprio QR). O requisito crítico de não
+vender o mesmo lugar duas vezes se estende ao lote inteiro: todos os
+assentos são inseridos na mesma transação, então se qualquer um do lote já
+estiver ocupado, a reserva inteira falha — nunca fica parcialmente
+reservada.
+
 ## 2026-08-17 — Checkout com 4 formas de pagamento simuladas
 
 O pagamento simulado tinha só dois botões crus ("aprovar"/"recusar"), o que o
