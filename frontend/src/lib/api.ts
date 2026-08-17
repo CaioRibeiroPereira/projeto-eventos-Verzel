@@ -81,6 +81,12 @@ export interface EventCreateInput {
 
 export type EventStatus = "draft" | "published";
 
+export interface CastMember {
+  name: string;
+  character: string | null;
+  profile_path: string | null;
+}
+
 export interface Event {
   id: number;
   organizer_id: number;
@@ -91,6 +97,10 @@ export interface Event {
   overview: string | null;
   genres: string | null;
   runtime_minutes: number | null;
+  director: string | null;
+  cast: CastMember[] | null;
+  tagline: string | null;
+  vote_average: number | null;
   local: string;
   starts_at: string;
   price: number;
@@ -110,6 +120,10 @@ export function posterUrl(path: string | null, size: "w185" | "w342" = "w342") {
 }
 
 export function backdropUrl(path: string | null, size: "w780" | "w1280" = "w1280") {
+  return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
+}
+
+export function profileUrl(path: string | null, size: "w185" = "w185") {
   return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
 }
 

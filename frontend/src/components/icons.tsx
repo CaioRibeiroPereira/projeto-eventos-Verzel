@@ -45,6 +45,14 @@ export function TagIcon({ className }: IconProps) {
   );
 }
 
+export function StarIcon({ className }: IconProps) {
+  return (
+    <svg {...base} fill="currentColor" stroke="none" viewBox="0 0 24 24" className={className}>
+      <path d="M12 2.5l2.9 6.3 6.9.7-5.2 4.7 1.5 6.8L12 17.6l-6.1 3.4 1.5-6.8-5.2-4.7 6.9-.7Z" />
+    </svg>
+  );
+}
+
 export function BuildingIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
