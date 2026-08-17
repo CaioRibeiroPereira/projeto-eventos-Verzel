@@ -13,6 +13,7 @@ import {
   declinePayment,
   getPublicEvent,
   getSeatMap,
+  MAX_SEATS_PER_RESERVATION,
   type Event,
   type Reservation,
   type SeatState,
@@ -29,7 +30,7 @@ export default function ReservarPage() {
 
   const [event, setEvent] = useState<Event | null>(null);
   const [seats, setSeats] = useState<SeatState[] | null>(null);
-  const [selected, setSelected] = useState<SeatState | null>(null);
+  const [selected, setSelected] = useState<SeatState[]>([]);
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [step, setStep] = useState<Step>("select");
   const [error, setError] = useState<string | null>(null);
@@ -51,23 +52,35 @@ export default function ReservarPage() {
     loadSeats();
   }, [eventId, loadSeats]);
 
-  function handleSelect(seat: SeatState) {
+  function handleToggle(seat: SeatState) {
     setError(null);
-    setSelected(seat);
+    setSelected((prev) => {
+      const already = prev.some((s) => s.id === seat.id);
+      if (already) return prev.filter((s) => s.id !== seat.id);
+      if (prev.length >= MAX_SEATS_PER_RESERVATION) {
+        setError(`Máximo de ${MAX_SEATS_PER_RESERVATION} assentos por pessoa.`);
+        return prev;
+      }
+      return [...prev, seat];
+    });
   }
 
   async function handleReserve() {
-    if (!selected || !token) return;
+    if (selected.length === 0 || !token) return;
     setBusy(true);
     setError(null);
     try {
-      const res = await createReservation(token, eventId, selected.id);
+      const res = await createReservation(
+        token,
+        eventId,
+        selected.map((s) => s.id),
+      );
       setReservation(res);
       setStep("payment");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível reservar.");
       loadSeats();
-      setSelected(null);
+      setSelected([]);
     } finally {
       setBusy(false);
     }
@@ -93,7 +106,7 @@ export default function ReservarPage() {
 
   function handleTryAgain() {
     setStep("select");
-    setSelected(null);
+    setSelected([]);
     setReservation(null);
     setError(null);
     loadSeats();
@@ -118,21 +131,25 @@ export default function ReservarPage() {
 
       {step === "select" && (
         <>
-          <SeatMap seats={seats} selectedSeatId={selected?.id ?? null} onSelect={handleSelect} />
+          <SeatMap seats={seats} selectedSeatIds={selected.map((s) => s.id)} onToggle={handleToggle} />
+
+          <p className="text-center caption">Até {MAX_SEATS_PER_RESERVATION} assentos por pessoa.</p>
 
           {error && <p className="text-center text-sm text-red">{error}</p>}
 
-          {selected && (
+          {selected.length > 0 && (
             <div className="flex flex-col items-center gap-2">
               <p className="label">
-                Assento {selected.label} — {formatPrice(event.price)}
+                Assentos {selected.map((s) => s.label).join(", ")} — {formatPrice(event.price * selected.length)}
               </p>
               <button
                 onClick={handleReserve}
                 disabled={busy}
                 className="rounded bg-accent px-6 py-2 font-medium text-on-accent hover:bg-accent-hover disabled:opacity-60"
               >
-                {busy ? "Reservando..." : "Reservar este assento"}
+                {busy
+                  ? "Reservando..."
+                  : `Reservar ${selected.length > 1 ? `estes ${selected.length} assentos` : "este assento"}`}
               </button>
             </div>
           )}
@@ -142,7 +159,7 @@ export default function ReservarPage() {
       {step === "payment" && reservation && (
         <PaymentPanel
           total={reservation.total}
-          seatLabel={reservation.seat_label}
+          seatLabels={reservation.seats.map((s) => s.seat_label)}
           busy={busy}
           error={error}
           onApprove={() => handlePayment(true)}
@@ -153,9 +170,13 @@ export default function ReservarPage() {
       {step === "success" && reservation && (
         <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-3 rounded-lg border border-border-success bg-bg-success p-6 text-center">
           <h2 className="text-lg font-medium text-text-success">Pagamento aprovado</h2>
-          <p className="label">Assento {reservation.seat_label} confirmado.</p>
+          <p className="label">
+            {reservation.seats.length > 1 ? "Assentos" : "Assento"}{" "}
+            {reservation.seats.map((s) => s.seat_label).join(", ")} confirmado
+            {reservation.seats.length > 1 ? "s" : ""}.
+          </p>
           <Link href="/cliente" className="text-accent">
-            Ver meu ingresso com QR
+            {reservation.seats.length > 1 ? "Ver meus ingressos com QR" : "Ver meu ingresso com QR"}
           </Link>
         </div>
       )}
@@ -163,12 +184,12 @@ export default function ReservarPage() {
       {step === "declined" && (
         <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-3 rounded-lg border border-border-danger bg-bg-danger p-6 text-center">
           <h2 className="text-lg font-medium text-text-danger">Pagamento recusado</h2>
-          <p className="label">O assento foi liberado. Você pode tentar novamente.</p>
+          <p className="label">Os assentos foram liberados. Você pode tentar novamente.</p>
           <button
             onClick={handleTryAgain}
             className="rounded bg-accent px-4 py-2 font-medium text-on-accent hover:bg-accent-hover"
           >
-            Escolher outro assento
+            Escolher outros assentos
           </button>
         </div>
       )}

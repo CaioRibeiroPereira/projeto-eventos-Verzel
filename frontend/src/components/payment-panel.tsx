@@ -34,14 +34,14 @@ function formatExpiry(value: string) {
 
 export function PaymentPanel({
   total,
-  seatLabel,
+  seatLabels,
   busy,
   error,
   onApprove,
   onDecline,
 }: {
   total: number;
-  seatLabel: string;
+  seatLabels: string[];
   busy: boolean;
   error: string | null;
   onApprove: () => void;
@@ -53,12 +53,14 @@ export function PaymentPanel({
   const cardValid =
     card.number.replace(/\s/g, "").length >= 16 && card.name.trim().length > 2 && card.expiry.length === 5 && card.cvv.length >= 3;
 
+  const seatLabel = seatLabels.join(", ");
+
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-4 rounded-lg border border-border bg-surface-1 p-6">
       <div>
         <h2 className="text-lg font-medium">Pagamento</h2>
         <p className="label">
-          Assento {seatLabel} — {formatPrice(total)}
+          {seatLabels.length > 1 ? "Assentos" : "Assento"} {seatLabel} — {formatPrice(total)}
         </p>
       </div>
 

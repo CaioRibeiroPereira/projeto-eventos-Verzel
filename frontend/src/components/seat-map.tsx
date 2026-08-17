@@ -38,12 +38,12 @@ function groupByRow(seats: SeatState[]) {
 
 export function SeatMap({
   seats,
-  selectedSeatId,
-  onSelect,
+  selectedSeatIds,
+  onToggle,
 }: {
   seats: SeatState[];
-  selectedSeatId: number | null;
-  onSelect: (seat: SeatState) => void;
+  selectedSeatIds: number[];
+  onToggle: (seat: SeatState) => void;
 }) {
   const rows = groupByRow(seats);
 
@@ -60,7 +60,7 @@ export function SeatMap({
               const seat = byCol.get(col);
               if (!seat) return <span key={col} className="h-11 w-11" />;
 
-              const isSelected = seat.id === selectedSeatId;
+              const isSelected = selectedSeatIds.includes(seat.id);
               const state = isSelected
                 ? "selected"
                 : seat.occupied
@@ -74,7 +74,7 @@ export function SeatMap({
                   key={col}
                   type="button"
                   disabled={seat.occupied}
-                  onClick={() => onSelect(seat)}
+                  onClick={() => onToggle(seat)}
                   title={seat.accessible ? `${seat.label} — assento acessível` : seat.label}
                   className="flex h-11 w-11 items-center justify-center rounded-md text-sm font-medium transition-colors disabled:cursor-not-allowed"
                   style={SEAT_STYLES[state]}

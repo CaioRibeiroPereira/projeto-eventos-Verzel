@@ -171,11 +171,17 @@ export interface SeatState {
 
 export type ReservationStatus = "pending" | "paid" | "failed" | "cancelled";
 
+export const MAX_SEATS_PER_RESERVATION = 5;
+
+export interface SeatSummary {
+  seat_id: number;
+  seat_label: string;
+}
+
 export interface Reservation {
   id: number;
   event_id: number;
-  seat_id: number;
-  seat_label: string;
+  seats: SeatSummary[];
   status: ReservationStatus;
   total: number;
   expires_at: string;
@@ -185,11 +191,11 @@ export function getSeatMap(eventId: number) {
   return request<SeatState[]>(`/events/${eventId}/seats`);
 }
 
-export function createReservation(token: string, eventId: number, seatId: number) {
+export function createReservation(token: string, eventId: number, seatIds: number[]) {
   return request<Reservation>(`/events/${eventId}/reservations`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ seat_id: seatId }),
+    body: JSON.stringify({ seat_ids: seatIds }),
   });
 }
 
