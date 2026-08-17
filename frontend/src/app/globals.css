@@ -147,6 +147,18 @@
   --color-red-hover: var(--color-red-hover);
   --color-on-red: var(--color-on-red);
 
+  --color-bg-success: var(--color-bg-success);
+  --color-text-success: var(--color-text-success);
+  --color-border-success: var(--color-border-success);
+
+  --color-bg-warning: var(--color-bg-warning);
+  --color-text-warning: var(--color-text-warning);
+  --color-border-warning: var(--color-border-warning);
+
+  --color-bg-danger: var(--color-bg-danger);
+  --color-text-danger: var(--color-text-danger);
+  --color-border-danger: var(--color-border-danger);
+
   --font-display: var(--font-display);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);

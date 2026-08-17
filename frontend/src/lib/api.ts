@@ -207,6 +207,24 @@ export function getSharedTicket(token: string) {
   return request<Ticket>(`/tickets/shared/${token}`);
 }
 
+export type ValidationOutcome = "valid" | "invalid" | "already_used" | "wrong_event";
+
+export interface ValidationResult {
+  result: ValidationOutcome;
+  message: string;
+  seat_label: string | null;
+  event_title: string | null;
+  used_at: string | null;
+}
+
+export function validateTicket(token: string, eventId: number, code: string) {
+  return request<ValidationResult>(`/events/${eventId}/validate`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ code }),
+  });
+}
+
 export function listPublicEvents(filters: EventFilters = {}) {
   const params = new URLSearchParams();
   if (filters.q) params.set("q", filters.q);
