@@ -26,6 +26,9 @@ class EventRead(SQLModel):
     title: str
     poster_path: str | None
     backdrop_path: str | None
+    overview: str | None
+    genres: str | None
+    runtime_minutes: int | None
     local: str
     starts_at: datetime
     price: float

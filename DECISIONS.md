@@ -12,3 +12,18 @@ faria sentido alguém se autopromover a validador de ingresso).
 O PDF do desafio não especifica como cada papel é provisionado, só que os 3
 papéis existem e que o seed precisa ter 1 organizador, 2 clientes e 1 usuário
 de portaria.
+
+## 2026-08-17 — Nome da plataforma
+
+O cinema/plataforma se chama **Cine Verzel**. Usado na logo, no header e no
+rodapé.
+
+## 2026-08-17 — Fluxo de compra em duas etapas
+
+A página do evento vira uma página "sobre o filme" (sinopse, gênero,
+duração, pôster, backdrop) pública, sem mapa de assentos. Só depois que o
+cliente clica em comprar — e está logado como cliente — é que o mapa de
+assentos aparece, numa rota separada (`/eventos/[id]/reservar`). Antes, o
+mapa aparecia direto na página do filme, mesmo para visitantes deslogados,
+o que não fazia sentido: primeiro se decide pelo filme, depois se loga,
+depois se escolhe o lugar.

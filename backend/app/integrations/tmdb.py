@@ -14,12 +14,18 @@ class TMDbMovie:
         poster_path: str | None,
         backdrop_path: str | None,
         release_date: str | None,
+        overview: str | None = None,
+        genres: list[str] | None = None,
+        runtime: int | None = None,
     ):
         self.id = id
         self.title = title
         self.poster_path = poster_path
         self.backdrop_path = backdrop_path
         self.release_date = release_date
+        self.overview = overview
+        self.genres = genres or []
+        self.runtime = runtime
 
 
 def _get(path: str, params: dict) -> dict:
@@ -50,6 +56,7 @@ def search_movies(query: str) -> list[TMDbMovie]:
             poster_path=item.get("poster_path"),
             backdrop_path=item.get("backdrop_path"),
             release_date=item.get("release_date") or None,
+            overview=item.get("overview") or None,
         )
         for item in data.get("results", [])
     ]
@@ -63,4 +70,7 @@ def get_movie(movie_id: int) -> TMDbMovie:
         poster_path=data.get("poster_path"),
         backdrop_path=data.get("backdrop_path"),
         release_date=data.get("release_date") or None,
+        overview=data.get("overview") or None,
+        genres=[g["name"] for g in data.get("genres", [])],
+        runtime=data.get("runtime") or None,
     )

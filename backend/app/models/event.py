@@ -17,6 +17,9 @@ class Event(SQLModel, table=True):
     title: str
     poster_path: str | None = None
     backdrop_path: str | None = None
+    overview: str | None = None
+    genres: str | None = None
+    runtime_minutes: int | None = None
 
     local: str
     starts_at: datetime
