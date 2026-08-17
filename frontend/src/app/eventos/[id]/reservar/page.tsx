@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 import { SeatMap } from "@/components/seat-map";
+import { PaymentPanel } from "@/components/payment-panel";
 import {
   ApiError,
   confirmPayment,
@@ -139,32 +140,14 @@ export default function ReservarPage() {
       )}
 
       {step === "payment" && reservation && (
-        <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-4 rounded-lg border border-border bg-surface-1 p-6">
-          <h2 className="text-lg font-medium">Pagamento simulado</h2>
-          <p className="label">
-            Assento {reservation.seat_label} — {formatPrice(reservation.total)}
-          </p>
-          <p className="caption">
-            Nenhuma cobrança real é feita. Escolha um dos caminhos para simular o resultado.
-          </p>
-          {error && <p className="text-sm text-red">{error}</p>}
-          <div className="flex gap-3">
-            <button
-              onClick={() => handlePayment(true)}
-              disabled={busy}
-              className="rounded bg-accent px-4 py-2 font-medium text-on-accent hover:bg-accent-hover disabled:opacity-60"
-            >
-              Aprovar pagamento
-            </button>
-            <button
-              onClick={() => handlePayment(false)}
-              disabled={busy}
-              className="rounded border border-red px-4 py-2 text-red hover:bg-bg-danger disabled:opacity-60"
-            >
-              Recusar pagamento
-            </button>
-          </div>
-        </div>
+        <PaymentPanel
+          total={reservation.total}
+          seatLabel={reservation.seat_label}
+          busy={busy}
+          error={error}
+          onApprove={() => handlePayment(true)}
+          onDecline={() => handlePayment(false)}
+        />
       )}
 
       {step === "success" && reservation && (

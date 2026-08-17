@@ -73,3 +73,42 @@ export function GridIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function CreditCardIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="2.5" y="5" width="19" height="14" rx="2" />
+      <path d="M2.5 10h19" />
+      <path d="M6 15h4" />
+    </svg>
+  );
+}
+
+export function PixIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M8.3 3.8a3 3 0 0 1 2.1.9l1.1 1.1a1 1 0 0 0 1.4 0l1.1-1.1a3 3 0 0 1 2.1-.9h1" />
+      <path d="M8.3 20.2a3 3 0 0 0 2.1-.9l1.1-1.1a1 1 0 0 1 1.4 0l1.1 1.1a3 3 0 0 0 2.1.9h1" />
+      <path d="M3.8 8.3a3 3 0 0 0-.9 2.1v3.2a3 3 0 0 0 .9 2.1" />
+      <path d="M20.2 8.3a3 3 0 0 1 .9 2.1v3.2a3 3 0 0 1-.9 2.1" />
+      <rect x="10" y="10" width="4" height="4" rx="0.8" transform="rotate(45 12 12)" />
+    </svg>
+  );
+}
+
+export function BarcodeIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M3 5v14M6 5v14M8 5v14M11 5v14M14 5v14M16 5v14M19 5v14M21 5v14" />
+    </svg>
+  );
+}
+
+export function ClockIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
+    </svg>
+  );
+}
