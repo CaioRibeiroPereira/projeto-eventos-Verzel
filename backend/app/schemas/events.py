@@ -25,6 +25,7 @@ class EventRead(SQLModel):
     tmdb_movie_id: int
     title: str
     poster_path: str | None
+    backdrop_path: str | None
     local: str
     starts_at: datetime
     price: float

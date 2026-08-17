@@ -16,6 +16,7 @@ class Event(SQLModel, table=True):
     tmdb_movie_id: int
     title: str
     poster_path: str | None = None
+    backdrop_path: str | None = None
 
     local: str
     starts_at: datetime
