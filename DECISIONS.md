@@ -18,6 +18,13 @@ de portaria.
 O cinema/plataforma se chama **Cine Verzel**. Usado na logo, no header e no
 rodapé.
 
+## 2026-08-17 — Escopo fica só em cinema por enquanto
+
+Cogitamos expandir para teatro, dança e concertos via Ticketmaster
+Discovery API (o PDF permite isso). Decidimos adiar: o prazo é curto
+(entrega 21/08) e ainda faltava fechar a Fase 6 (seed, README, deploy).
+Fica como possível próximo passo, não como parte do escopo atual.
+
 ## 2026-08-17 — Fluxo de compra em duas etapas
 
 A página do evento vira uma página "sobre o filme" (sinopse, gênero,

@@ -10,18 +10,37 @@ const ROLE_HOME: Record<string, string> = {
   gate: "/portaria",
 };
 
+const NAV_LINKS = [
+  { href: "/sobre", label: "Sobre" },
+  { href: "/para-empresas", label: "Para empresas" },
+  { href: "/parcerias", label: "Parcerias" },
+  { href: "/contato", label: "Contato" },
+];
+
 export function SiteHeader() {
   const { user, logout, loading } = useAuth();
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-bg/85 px-6 py-3 backdrop-blur-md">
-      <Link href="/" className="transition-opacity hover:opacity-80">
+    <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-border bg-bg/85 px-6 py-3 backdrop-blur-md">
+      <Link href="/" className="shrink-0 transition-opacity hover:opacity-80">
         <Logo />
       </Link>
 
+      <nav className="hidden flex-1 items-center justify-center gap-6 md:flex">
+        {NAV_LINKS.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="caption text-text-secondary hover:text-accent"
+          >
+            {link.label}
+          </Link>
+        ))}
+      </nav>
+
       {!loading &&
         (user ? (
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             <Link href={ROLE_HOME[user.role]} className="label text-text hover:text-accent">
               {user.name}
             </Link>
@@ -30,7 +49,7 @@ export function SiteHeader() {
             </button>
           </div>
         ) : (
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2">
             <Link
               href="/login"
               className="rounded px-3 py-1.5 text-sm text-text-secondary hover:text-accent"
