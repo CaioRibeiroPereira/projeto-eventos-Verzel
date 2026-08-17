@@ -25,6 +25,18 @@ Discovery API (o PDF permite isso). Decidimos adiar: o prazo é curto
 (entrega 21/08) e ainda faltava fechar a Fase 6 (seed, README, deploy).
 Fica como possível próximo passo, não como parte do escopo atual.
 
+## 2026-08-17 — Checkout com 4 formas de pagamento simuladas
+
+O pagamento simulado tinha só dois botões crus ("aprovar"/"recusar"), o que o
+usuário achou pouco profissional. Trocado por uma tela de checkout com
+seleção entre cartão de crédito, PIX, boleto e "pagar na hora do filme" —
+cada um com a interface que teria de verdade (formulário de cartão com
+máscara, QR code de PIX, código de barras de boleto). Continua 100%
+simulado, sem gateway de pagamento real (exigência do PDF do desafio):
+cartão/PIX/boleto guardam um link discreto "simular recusado" pra cobrir o
+caminho de recusa; "pagar na hora" só confirma, já que não há pagamento
+para recusar nesse caminho.
+
 ## 2026-08-17 — Fluxo de compra em duas etapas
 
 A página do evento vira uma página "sobre o filme" (sinopse, gênero,
