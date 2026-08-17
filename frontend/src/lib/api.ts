@@ -88,6 +88,9 @@ export interface Event {
   title: string;
   poster_path: string | null;
   backdrop_path: string | null;
+  overview: string | null;
+  genres: string | null;
+  runtime_minutes: number | null;
   local: string;
   starts_at: string;
   price: number;

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Hanken_Grotesk, Space_Mono } from "next/font/google";
 import { AuthProvider } from "@/context/auth-context";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
 const display = Fraunces({
@@ -23,7 +24,7 @@ const mono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Plataforma de Eventos e Ingressos",
+  title: "Cine Verzel",
   description: "Reserve ingressos e valide na portaria com QR code.",
 };
 
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AuthProvider>
           <SiteHeader />
           {children}
+          <SiteFooter />
         </AuthProvider>
       </body>
     </html>

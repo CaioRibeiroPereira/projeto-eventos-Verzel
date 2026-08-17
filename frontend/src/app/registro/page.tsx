@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { ApiError, register } from "@/lib/api";
 
@@ -12,8 +12,24 @@ const ROLE_HOME: Record<string, string> = {
 };
 
 export default function RegistroPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex flex-1 items-center justify-center">
+          <p className="label">Carregando...</p>
+        </main>
+      }
+    >
+      <RegistroForm />
+    </Suspense>
+  );
+}
+
+function RegistroForm() {
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +44,7 @@ export default function RegistroPage() {
     try {
       await register({ name, email, password, role });
       const user = await login(email, password);
-      router.push(ROLE_HOME[user.role] ?? "/");
+      router.push(next || ROLE_HOME[user.role] || "/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível criar a conta.");
     } finally {
@@ -119,7 +135,7 @@ export default function RegistroPage() {
 
         <p className="caption mt-4 text-center">
           Já tem conta?{" "}
-          <Link href="/login" className="text-accent">
+          <Link href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="text-accent">
             Entrar
           </Link>
         </p>

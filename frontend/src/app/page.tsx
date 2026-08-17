@@ -58,7 +58,7 @@ export default function Home() {
               href={`/eventos/${featured.id}`}
               className="mt-2 w-fit rounded bg-accent px-5 py-2 font-medium text-on-accent hover:bg-accent-hover"
             >
-              Ver assentos
+              Ver detalhes
             </Link>
           </div>
         </section>

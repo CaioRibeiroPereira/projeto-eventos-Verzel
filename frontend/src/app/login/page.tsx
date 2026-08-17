@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { ApiError } from "@/lib/api";
 
@@ -13,8 +13,24 @@ const ROLE_HOME: Record<string, string> = {
 };
 
 export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex flex-1 items-center justify-center">
+          <p className="label">Carregando...</p>
+        </main>
+      }
+    >
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +42,7 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       const user = await login(email, password);
-      router.push(ROLE_HOME[user.role] ?? "/");
+      router.push(next || ROLE_HOME[user.role] || "/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível entrar.");
     } finally {
@@ -80,7 +96,7 @@ export default function LoginPage() {
 
         <p className="caption mt-4 text-center">
           Não tem conta?{" "}
-          <Link href="/registro" className="text-accent">
+          <Link href={next ? `/registro?next=${encodeURIComponent(next)}` : "/registro"} className="text-accent">
             Cadastre-se
           </Link>
         </p>
