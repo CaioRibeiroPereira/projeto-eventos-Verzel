@@ -181,6 +181,32 @@ export function declinePayment(token: string, reservationId: number) {
   });
 }
 
+export type TicketStatus = "valid" | "used" | "cancelled";
+
+export interface Ticket {
+  id: number;
+  event_id: number;
+  event_title: string;
+  event_poster_path: string | null;
+  event_local: string;
+  event_starts_at: string;
+  seat_label: string;
+  status: TicketStatus;
+  qr_payload: string;
+  share_token: string;
+  used_at: string | null;
+}
+
+export function listMyTickets(token: string) {
+  return request<Ticket[]>("/tickets/mine", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function getSharedTicket(token: string) {
+  return request<Ticket>(`/tickets/shared/${token}`);
+}
+
 export function listPublicEvents(filters: EventFilters = {}) {
   const params = new URLSearchParams();
   if (filters.q) params.set("q", filters.q);
