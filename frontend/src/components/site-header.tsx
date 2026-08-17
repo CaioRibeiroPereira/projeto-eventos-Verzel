@@ -44,6 +44,9 @@ export function SiteHeader() {
             <Link href={ROLE_HOME[user.role]} className="text-base text-text hover:text-accent">
               {user.name}
             </Link>
+            <Link href="/perfil" className="text-base text-text-secondary hover:text-accent">
+              Perfil
+            </Link>
             <button onClick={logout} className="text-base text-text-secondary hover:text-accent">
               Sair
             </button>

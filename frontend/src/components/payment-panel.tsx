@@ -8,7 +8,7 @@ import {
   CreditCardIcon,
   PixIcon,
 } from "@/components/icons";
-import { formatPrice } from "@/lib/format";
+import { formatCardNumber, formatExpiry, formatPrice } from "@/lib/format";
 
 type Method = "card" | "pix" | "boleto" | "counter";
 
@@ -18,19 +18,6 @@ const METHODS: { id: Method; label: string; icon: (p: { className?: string }) =>
   { id: "boleto", label: "Boleto", icon: BarcodeIcon },
   { id: "counter", label: "Pagar na hora do filme", icon: ClockIcon },
 ];
-
-function formatCardNumber(value: string) {
-  return value
-    .replace(/\D/g, "")
-    .slice(0, 16)
-    .replace(/(.{4})/g, "$1 ")
-    .trim();
-}
-
-function formatExpiry(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 4);
-  return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
-}
 
 export function PaymentPanel({
   total,

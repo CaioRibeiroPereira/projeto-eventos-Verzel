@@ -30,6 +30,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     throw new ApiError(body?.detail ?? "Algo deu errado. Tente novamente.");
   }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
   return response.json();
 }
 
@@ -54,6 +57,65 @@ export function register(data: {
 
 export function me(token: string) {
   return request<User>("/auth/me", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function updateProfile(token: string, data: { name: string; email: string }) {
+  return request<User>("/me", {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export function changePassword(
+  token: string,
+  data: { current_password: string; new_password: string },
+) {
+  return request<void>("/me/password", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteAccount(token: string) {
+  return request<void>("/me", {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export interface Card {
+  id: number;
+  brand: string;
+  last4: string;
+  holder_name: string;
+  expiry: string;
+  created_at: string;
+}
+
+export function listCards(token: string) {
+  return request<Card[]>("/me/cards", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function addCard(
+  token: string,
+  data: { number: string; holder_name: string; expiry: string },
+) {
+  return request<Card>("/me/cards", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export function removeCard(token: string, cardId: number) {
+  return request<void>(`/me/cards/${cardId}`, {
+    method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
 }
