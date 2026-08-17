@@ -31,7 +31,7 @@ class AuthService:
 
     def login(self, data: LoginRequest) -> Token:
         user = self.repository.get_by_email(data.email)
-        if not user or not verify_password(data.password, user.password_hash):
+        if not user or not user.is_active or not verify_password(data.password, user.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Email ou senha inválidos",
