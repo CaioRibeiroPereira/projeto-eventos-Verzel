@@ -52,7 +52,7 @@ ROOMS = ["Sala 1", "Sala 2", "Sala IMAX", "Sala VIP"]
 
 
 def build_layout(rows: int, seats_per_row: int, aisle_after: int) -> list[dict]:
-    """Gera fileiras com um corredor no meio e os dois assentos das pontas
+    """Gera fileiras com um corredor no meio e os quatro assentos das pontas
     da última fileira (a de baixo no mapa) marcados como acessíveis."""
     layout = []
     for i in range(rows):
@@ -61,6 +61,8 @@ def build_layout(rows: int, seats_per_row: int, aisle_after: int) -> list[dict]:
         slots.insert(aisle_after, "gap")
         if i == rows - 1:
             slots[0] = "accessible"
+            slots[1] = "accessible"
+            slots[-2] = "accessible"
             slots[-1] = "accessible"
         layout.append({"label": label, "slots": slots})
     return layout
