@@ -12,7 +12,6 @@ const ROLE_HOME: Record<string, string> = {
 
 const NAV_LINKS = [
   { href: "/sobre", label: "Sobre" },
-  { href: "/para-empresas", label: "Para empresas" },
   { href: "/parcerias", label: "Parcerias" },
   { href: "/contato", label: "Contato" },
 ];
@@ -36,6 +35,21 @@ export function SiteHeader() {
             {link.label}
           </Link>
         ))}
+
+        <div className="flex items-center gap-2">
+          <Link
+            href="/para-empresas"
+            className="rounded-full border border-accent/40 bg-accent/10 px-3.5 py-1 text-base font-medium text-accent hover:bg-accent/20"
+          >
+            Para empresas
+          </Link>
+          <Link
+            href="/registro"
+            className="rounded-full border border-accent/40 bg-accent/10 px-3.5 py-1 text-base font-medium text-accent hover:bg-accent/20"
+          >
+            Organizador
+          </Link>
+        </div>
       </nav>
 
       {!loading &&
