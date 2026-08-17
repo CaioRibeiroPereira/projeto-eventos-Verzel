@@ -27,14 +27,25 @@ USERS = [
 ]
 
 MOVIES = [
+    "Matrix",
+    "Interestelar",
     "Duna: Parte Dois",
+    "Duna",
     "Oppenheimer",
     "Barbie",
     "John Wick 4: Baba Yaga",
     "Homem-Aranha: Através do Aranhaverso",
+    "Homem-Aranha: Sem Volta Para Casa",
     "Divertida Mente 2",
     "Coringa: Delírio a Dois",
     "Wicked",
+    "Vingadores: Ultimato",
+    "Toy Story 4",
+    "Frozen 2",
+    "Deadpool e Wolverine",
+    "Coco",
+    "O Rei Leão",
+    "Pantera Negra",
 ]
 
 ROOMS = ["Sala 1", "Sala 2", "Sala IMAX", "Sala VIP"]
