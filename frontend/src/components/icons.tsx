@@ -44,3 +44,24 @@ export function TagIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function BuildingIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="4" y="3" width="10" height="18" />
+      <rect x="14" y="9" width="6" height="12" />
+      <path d="M7 7h1M7 11h1M7 15h1M10 7h1M10 11h1M10 15h1M17 13h1M17 17h1" />
+    </svg>
+  );
+}
+
+export function GridIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  );
+}
