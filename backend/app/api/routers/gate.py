@@ -1,0 +1,28 @@
+from fastapi import APIRouter, Depends
+from sqlmodel import Session
+
+from app.core.database import get_session
+from app.core.security import require_role
+from app.models.user import User, UserRole
+from app.repositories.gate_repository import GateRepository
+from app.schemas.gate import ValidateRequest, ValidationResult
+from app.services.gate_service import GateService
+
+router = APIRouter(tags=["gate"])
+
+
+def get_gate_service(session: Session = Depends(get_session)) -> GateService:
+    return GateService(GateRepository(session))
+
+
+require_gate = require_role(UserRole.gate)
+
+
+@router.post("/events/{event_id}/validate", response_model=ValidationResult)
+def validate_ticket(
+    event_id: int,
+    data: ValidateRequest,
+    service: GateService = Depends(get_gate_service),
+    user: User = Depends(require_gate),
+):
+    return service.validate(event_id, data, user.id)
