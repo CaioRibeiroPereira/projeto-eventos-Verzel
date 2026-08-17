@@ -31,7 +31,7 @@ export function SiteHeader() {
           <Link
             key={link.href}
             href={link.href}
-            className="caption text-text-secondary hover:text-accent"
+            className="text-base text-text-secondary hover:text-accent"
           >
             {link.label}
           </Link>
@@ -40,11 +40,11 @@ export function SiteHeader() {
 
       {!loading &&
         (user ? (
-          <div className="flex shrink-0 items-center gap-3">
-            <Link href={ROLE_HOME[user.role]} className="label text-text hover:text-accent">
+          <div className="flex shrink-0 items-center gap-4">
+            <Link href={ROLE_HOME[user.role]} className="text-base text-text hover:text-accent">
               {user.name}
             </Link>
-            <button onClick={logout} className="caption text-text-secondary hover:text-accent">
+            <button onClick={logout} className="text-base text-text-secondary hover:text-accent">
               Sair
             </button>
           </div>
@@ -52,13 +52,13 @@ export function SiteHeader() {
           <div className="flex shrink-0 gap-2">
             <Link
               href="/login"
-              className="rounded px-3 py-1.5 text-sm text-text-secondary hover:text-accent"
+              className="rounded px-3 py-1.5 text-base text-text-secondary hover:text-accent"
             >
               Entrar
             </Link>
             <Link
               href="/registro"
-              className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-on-accent hover:bg-accent-hover"
+              className="rounded bg-accent px-3 py-1.5 text-base font-medium text-on-accent hover:bg-accent-hover"
             >
               Criar conta
             </Link>

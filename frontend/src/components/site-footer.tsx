@@ -31,10 +31,10 @@ export function SiteFooter() {
 
         <div className="flex flex-wrap gap-12">
           {COLUMNS.map((column) => (
-            <div key={column.title} className="flex flex-col gap-2">
-              <h3 className="label text-text-secondary">{column.title}</h3>
+            <div key={column.title} className="flex flex-col gap-3">
+              <h3 className="text-base font-medium text-text-secondary">{column.title}</h3>
               {column.links.map((link) => (
-                <Link key={link.href} href={link.href} className="caption text-text-secondary hover:text-accent">
+                <Link key={link.href} href={link.href} className="text-base text-text-secondary hover:text-accent">
                   {link.label}
                 </Link>
               ))}
