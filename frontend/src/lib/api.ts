@@ -62,6 +62,7 @@ export interface Movie {
   id: number;
   title: string;
   poster_path: string | null;
+  backdrop_path: string | null;
   release_date: string | null;
 }
 
@@ -86,6 +87,7 @@ export interface Event {
   tmdb_movie_id: number;
   title: string;
   poster_path: string | null;
+  backdrop_path: string | null;
   local: string;
   starts_at: string;
   price: number;
@@ -101,6 +103,10 @@ export interface EventFilters {
 }
 
 export function posterUrl(path: string | null, size: "w185" | "w342" = "w342") {
+  return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
+}
+
+export function backdropUrl(path: string | null, size: "w780" | "w1280" = "w1280") {
   return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
 }
 

@@ -12,7 +12,7 @@ export default function OrganizadorPage() {
 }
 
 function Dashboard() {
-  const { user, logout } = useRoleGuard("organizer");
+  const { user } = useRoleGuard("organizer");
   const [events, setEvents] = useState<Event[] | null>(null);
   const [publishingId, setPublishingId] = useState<number | null>(null);
 
@@ -45,38 +45,45 @@ function Dashboard() {
           <h1 className="movie-title !text-2xl">Meus eventos</h1>
           <p className="label">Olá, {user!.name}</p>
         </div>
-        <div className="flex gap-2">
-          <Link
-            href="/organizador/eventos/novo"
-            className="rounded bg-accent px-4 py-2 font-medium text-on-accent hover:bg-accent-hover"
-          >
-            Criar evento
-          </Link>
-          <button
-            onClick={logout}
-            className="rounded border border-border px-4 py-2 text-sm text-text-secondary hover:border-accent hover:text-accent"
-          >
-            Sair
-          </button>
-        </div>
+        <Link
+          href="/organizador/eventos/novo"
+          className="rounded bg-accent px-4 py-2 font-medium text-on-accent hover:bg-accent-hover"
+        >
+          Criar evento
+        </Link>
       </div>
 
-      {events === null && <p className="label">Carregando...</p>}
+      {events === null && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {[0, 1].map((i) => (
+            <div key={i} className="h-40 animate-pulse rounded-lg border border-border bg-surface-1" />
+          ))}
+        </div>
+      )}
+
       {events?.length === 0 && (
-        <p className="label">Nenhum evento ainda. Crie o primeiro.</p>
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
+          <p className="label">Nenhum evento ainda.</p>
+          <Link
+            href="/organizador/eventos/novo"
+            className="rounded bg-accent px-4 py-2 text-sm font-medium text-on-accent hover:bg-accent-hover"
+          >
+            Criar o primeiro
+          </Link>
+        </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {events?.map((event) => (
           <div
             key={event.id}
-            className="flex gap-4 rounded-lg border border-border bg-surface-1 p-4"
+            className="flex gap-4 overflow-hidden rounded-lg border border-border bg-surface-1 p-4 transition-colors hover:border-border-strong"
           >
             {posterUrl(event.poster_path, "w185") && (
               <img
                 src={posterUrl(event.poster_path, "w185")!}
                 alt={event.title}
-                className="h-32 w-24 rounded object-cover"
+                className="h-32 w-24 shrink-0 rounded object-cover"
               />
             )}
             <div className="flex flex-1 flex-col gap-1">
@@ -98,7 +105,7 @@ function Dashboard() {
                 <button
                   onClick={() => handlePublish(event.id)}
                   disabled={publishingId === event.id}
-                  className="mt-2 w-fit rounded border border-accent px-3 py-1 text-sm text-accent hover:bg-accent hover:text-on-accent disabled:opacity-60"
+                  className="mt-2 w-fit rounded border border-accent px-3 py-1 text-sm text-accent transition-colors hover:bg-accent hover:text-on-accent disabled:opacity-60"
                 >
                   {publishingId === event.id ? "Publicando..." : "Publicar"}
                 </button>

@@ -32,7 +32,7 @@ const RESULT_TITLE: Record<ValidationResult["result"], string> = {
 };
 
 function Portaria() {
-  const { user, logout } = useRoleGuard("gate");
+  const { user } = useRoleGuard("gate");
   const [events, setEvents] = useState<Event[] | null>(null);
   const [eventId, setEventId] = useState<number | null>(null);
   const [mode, setMode] = useState<"camera" | "manual">("manual");
@@ -81,27 +81,24 @@ function Portaria() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
-      <div className="flex items-center justify-between">
+      <div>
         <h1 className="movie-title !text-2xl">Portaria</h1>
-        <button
-          onClick={logout}
-          className="rounded border border-border px-4 py-2 text-sm text-text-secondary hover:border-accent hover:text-accent"
-        >
-          Sair
-        </button>
+        <p className="label">Olá, {user!.name}</p>
       </div>
-      <p className="label">Olá, {user!.name}</p>
 
       {!selectedEvent && (
         <div className="flex flex-col gap-2">
           <p className="label">Selecione o evento que está validando:</p>
-          {events === null && <p className="label">Carregando eventos...</p>}
+          {events === null &&
+            [0, 1, 2].map((i) => (
+              <div key={i} className="h-14 animate-pulse rounded border border-border bg-surface-1" />
+            ))}
           {events?.length === 0 && <p className="label">Nenhum evento publicado.</p>}
           {events?.map((event) => (
             <button
               key={event.id}
               onClick={() => setEventId(event.id)}
-              className="rounded border border-border bg-surface-1 px-4 py-3 text-left hover:border-accent"
+              className="rounded border border-border bg-surface-1 px-4 py-3 text-left transition-colors hover:border-accent"
             >
               <p className="text-text">{event.title}</p>
               <p className="caption">
