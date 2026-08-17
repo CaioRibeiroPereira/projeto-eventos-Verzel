@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { CalendarIcon, PinIcon, SearchIcon, TagIcon } from "@/components/icons";
 import {
   backdropUrl,
   listPublicEvents,
@@ -29,6 +30,13 @@ export default function Home() {
     e.preventDefault();
     setFilters(draft);
   }
+
+  function handleClear() {
+    setDraft({});
+    setFilters({});
+  }
+
+  const hasFilters = Object.values(filters).some((v) => v !== undefined);
 
   return (
     <main className="flex flex-1 flex-col">
@@ -70,42 +78,67 @@ export default function Home() {
 
           <form
             onSubmit={handleSearch}
-            className="flex flex-wrap gap-2 rounded-lg border border-border bg-surface-1 p-3"
+            className="flex flex-col gap-4 rounded-xl border border-border bg-surface-1 p-5"
           >
-            <input
-              placeholder="Buscar por título..."
-              value={draft.q ?? ""}
-              onChange={(e) => setDraft({ ...draft, q: e.target.value || undefined })}
-              className="flex-1 rounded border border-border bg-surface-2 px-3 py-2 text-sm text-text outline-none focus:border-accent"
-            />
-            <input
-              placeholder="Local"
-              value={draft.local ?? ""}
-              onChange={(e) => setDraft({ ...draft, local: e.target.value || undefined })}
-              className="w-40 rounded border border-border bg-surface-2 px-3 py-2 text-sm text-text outline-none focus:border-accent"
-            />
-            <input
-              type="date"
-              value={draft.date ?? ""}
-              onChange={(e) => setDraft({ ...draft, date: e.target.value || undefined })}
-              className="rounded border border-border bg-surface-2 px-3 py-2 text-sm text-text outline-none focus:border-accent"
-            />
-            <input
-              type="number"
-              min={0}
-              placeholder="Preço máx."
-              value={draft.price_max ?? ""}
-              onChange={(e) =>
-                setDraft({ ...draft, price_max: e.target.value ? Number(e.target.value) : undefined })
-              }
-              className="w-28 rounded border border-border bg-surface-2 px-3 py-2 text-sm text-text outline-none focus:border-accent"
-            />
-            <button
-              type="submit"
-              className="rounded bg-accent px-4 py-2 text-sm font-medium text-on-accent hover:bg-accent-hover"
-            >
-              Buscar
-            </button>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <SearchField label="Título" icon={SearchIcon}>
+                <input
+                  placeholder="Buscar por título..."
+                  value={draft.q ?? ""}
+                  onChange={(e) => setDraft({ ...draft, q: e.target.value || undefined })}
+                  className="w-full bg-transparent text-sm text-text outline-none placeholder:text-text-muted"
+                />
+              </SearchField>
+
+              <SearchField label="Local" icon={PinIcon}>
+                <input
+                  placeholder="Onde?"
+                  value={draft.local ?? ""}
+                  onChange={(e) => setDraft({ ...draft, local: e.target.value || undefined })}
+                  className="w-full bg-transparent text-sm text-text outline-none placeholder:text-text-muted"
+                />
+              </SearchField>
+
+              <SearchField label="Data" icon={CalendarIcon}>
+                <input
+                  type="date"
+                  value={draft.date ?? ""}
+                  onChange={(e) => setDraft({ ...draft, date: e.target.value || undefined })}
+                  className="w-full bg-transparent text-sm text-text outline-none [color-scheme:dark]"
+                />
+              </SearchField>
+
+              <SearchField label="Preço máximo" icon={TagIcon}>
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="R$"
+                  value={draft.price_max ?? ""}
+                  onChange={(e) =>
+                    setDraft({ ...draft, price_max: e.target.value ? Number(e.target.value) : undefined })
+                  }
+                  className="w-full bg-transparent text-sm text-text outline-none placeholder:text-text-muted"
+                />
+              </SearchField>
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="text-sm text-text-secondary hover:text-accent"
+                >
+                  Limpar filtros
+                </button>
+              )}
+              <button
+                type="submit"
+                className="rounded-lg bg-accent px-6 py-2 text-sm font-medium text-on-accent hover:bg-accent-hover"
+              >
+                Buscar
+              </button>
+            </div>
           </form>
 
           {events === null && (
@@ -150,5 +183,25 @@ export default function Home() {
         </div>
       </div>
     </main>
+  );
+}
+
+function SearchField({
+  label,
+  icon: Icon,
+  children,
+}: {
+  label: string;
+  icon: (props: { className?: string }) => React.ReactElement;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="caption text-text-secondary">{label}</span>
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 transition-colors focus-within:border-accent">
+        <Icon className="h-4 w-4 shrink-0 text-text-muted" />
+        {children}
+      </div>
+    </label>
   );
 }
