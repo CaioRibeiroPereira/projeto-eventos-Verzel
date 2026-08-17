@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Hanken_Grotesk, Space_Mono } from "next/font/google";
 import { AuthProvider } from "@/context/auth-context";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
-import { CinemaBackdrop } from "@/components/cinema-backdrop";
+import { AppShell } from "@/components/app-shell";
 import "./globals.css";
 
 const display = Fraunces({
@@ -37,12 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          <div className="relative flex min-h-full flex-1 flex-col">
-            <CinemaBackdrop />
-            <SiteHeader />
-            {children}
-            <SiteFooter />
-          </div>
+          <AppShell>{children}</AppShell>
         </AuthProvider>
       </body>
     </html>

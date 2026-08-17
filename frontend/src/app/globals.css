@@ -176,6 +176,50 @@
   --font-mono: var(--font-mono);
 }
 
+/* ============================================================
+   Paleta B — Administrativo (organizador e portaria)
+   Tema claro e neutro, sem âmbar: separa visualmente a área de
+   trabalho da vitrine do cliente. Escopado via .theme-admin —
+   redefine os mesmos tokens de propósito, então nenhuma tela
+   precisa trocar de classe, só ficar dentro do escopo.
+   ============================================================ */
+.theme-admin {
+  --color-bg: #f4f5f7;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #eef0f3;
+  --color-surface-3: #e2e5ea;
+
+  --color-border: #dde1e7;
+  --color-border-strong: #c3c9d1;
+
+  --color-text: #1c2029;
+  --color-text-secondary: #565d6b;
+  --color-text-muted: #8991a0;
+
+  --color-accent: #35415a;
+  --color-accent-hover: #48567a;
+  --color-on-accent: #ffffff;
+
+  --color-red: #b3261e;
+  --color-red-hover: #96201a;
+  --color-on-red: #ffffff;
+
+  --color-bg-success: #e6f4ea;
+  --color-text-success: #1e7d32;
+  --color-border-success: #a8d5b5;
+
+  --color-bg-warning: #fdf3e0;
+  --color-text-warning: #8a5a00;
+  --color-border-warning: #f0d28a;
+
+  --color-bg-danger: #fceceb;
+  --color-text-danger: #b3261e;
+  --color-border-danger: #f2c2bd;
+
+  --seat-available-border: #b9c0cb;
+  --seat-available-text: #4b5563;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-text);
