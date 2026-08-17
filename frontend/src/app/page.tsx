@@ -12,15 +12,28 @@ import {
 } from "@/lib/api";
 import { formatDateTime, formatPrice } from "@/lib/format";
 
+const HERO_INTERVAL_MS = 6000;
+
 export default function Home() {
-  const [featured, setFeatured] = useState<Event | null>(null);
+  const [heroEvents, setHeroEvents] = useState<Event[] | null>(null);
+  const [heroIndex, setHeroIndex] = useState(0);
   const [filters, setFilters] = useState<EventFilters>({});
   const [draft, setDraft] = useState<EventFilters>({});
   const [events, setEvents] = useState<Event[] | null>(null);
 
   useEffect(() => {
-    listPublicEvents().then((all) => setFeatured(all[0] ?? null));
+    listPublicEvents().then((all) => setHeroEvents(all.slice(0, 8)));
   }, []);
+
+  useEffect(() => {
+    if (!heroEvents || heroEvents.length <= 1) return;
+    const timer = setInterval(() => {
+      setHeroIndex((i) => (i + 1) % heroEvents.length);
+    }, HERO_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [heroEvents]);
+
+  const featured = heroEvents?.[heroIndex] ?? null;
 
   useEffect(() => {
     listPublicEvents(filters).then(setEvents);
@@ -44,9 +57,10 @@ export default function Home() {
         <section className="relative flex min-h-[360px] items-end overflow-hidden">
           {backdropUrl(featured.backdrop_path) && (
             <img
+              key={`img-${featured.id}`}
               src={backdropUrl(featured.backdrop_path)!}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover"
+              className="hero-fade absolute inset-0 h-full w-full object-cover"
             />
           )}
           <div
@@ -56,7 +70,7 @@ export default function Home() {
                 "linear-gradient(180deg, rgba(18,16,14,0.35) 0%, var(--color-bg) 95%), linear-gradient(90deg, var(--color-bg) 0%, rgba(18,16,14,0.15) 55%)",
             }}
           />
-          <div className="relative flex w-full max-w-4xl mx-auto flex-col gap-2 px-6 py-8">
+          <div key={`info-${featured.id}`} className="hero-fade relative flex w-full max-w-4xl mx-auto flex-col gap-2 px-6 py-8">
             <span className="label text-accent">Em cartaz</span>
             <h1 className="movie-title">{featured.title}</h1>
             <p className="label">
@@ -69,6 +83,21 @@ export default function Home() {
               Ver detalhes
             </Link>
           </div>
+
+          {heroEvents && heroEvents.length > 1 && (
+            <div className="relative mb-4 flex w-full max-w-4xl mx-auto gap-2 px-6">
+              {heroEvents.map((event, i) => (
+                <button
+                  key={event.id}
+                  onClick={() => setHeroIndex(i)}
+                  aria-label={`Mostrar ${event.title}`}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === heroIndex ? "w-6 bg-accent" : "w-1.5 bg-white/30 hover:bg-white/50"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </section>
       )}
 
