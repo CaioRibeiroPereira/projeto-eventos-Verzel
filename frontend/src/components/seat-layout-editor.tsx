@@ -1,6 +1,7 @@
 "use client";
 
-import type { SeatRow } from "@/lib/api";
+import { WheelchairIcon } from "@/components/icons";
+import type { SeatRow, SlotKind } from "@/lib/api";
 
 function nextLabel(existing: string[]): string {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -10,6 +11,18 @@ function nextLabel(existing: string[]): string {
   return `R${existing.length + 1}`;
 }
 
+const NEXT_KIND: Record<SlotKind, SlotKind> = {
+  seat: "accessible",
+  accessible: "gap",
+  gap: "seat",
+};
+
+const SLOT_TITLE: Record<SlotKind, string> = {
+  seat: "Assento (clique para virar acessível)",
+  accessible: "Assento acessível para cadeirante (clique para virar corredor)",
+  gap: "Corredor (clique para virar assento)",
+};
+
 export function SeatLayoutEditor({
   rows,
   onChange,
@@ -18,13 +31,17 @@ export function SeatLayoutEditor({
   onChange: (rows: SeatRow[]) => void;
 }) {
   const seatCount = rows.reduce(
-    (sum, row) => sum + row.slots.filter(Boolean).length,
+    (sum, row) => sum + row.slots.filter((s) => s !== "gap").length,
+    0,
+  );
+  const accessibleCount = rows.reduce(
+    (sum, row) => sum + row.slots.filter((s) => s === "accessible").length,
     0,
   );
 
   function addRow() {
     const label = nextLabel(rows.map((r) => r.label));
-    onChange([...rows, { label, slots: Array(8).fill(true) }]);
+    onChange([...rows, { label, slots: Array(8).fill("seat") }]);
   }
 
   function removeRow(index: number) {
@@ -40,19 +57,19 @@ export function SeatLayoutEditor({
       rows.map((r, i) => {
         if (i !== index) return r;
         const slots = r.slots.slice(0, width);
-        while (slots.length < width) slots.push(true);
+        while (slots.length < width) slots.push("seat");
         return { ...r, slots };
       }),
     );
   }
 
-  function toggleSlot(rowIndex: number, slotIndex: number) {
+  function cycleSlot(rowIndex: number, slotIndex: number) {
     onChange(
       rows.map((r, i) =>
         i === rowIndex
           ? {
               ...r,
-              slots: r.slots.map((s, j) => (j === slotIndex ? !s : s)),
+              slots: r.slots.map((s, j) => (j === slotIndex ? NEXT_KIND[s] : s)),
             }
           : r,
       ),
@@ -81,30 +98,42 @@ export function SeatLayoutEditor({
             className="w-16 rounded border border-border bg-surface-1 px-2 py-1 text-center text-sm text-text"
           />
           <div className="flex flex-1 flex-wrap gap-1">
-            {row.slots.map((isSeat, slotIndex) => (
+            {row.slots.map((kind, slotIndex) => (
               <button
                 key={slotIndex}
                 type="button"
-                onClick={() => toggleSlot(rowIndex, slotIndex)}
-                title={isSeat ? "Assento (clique para virar corredor)" : "Corredor (clique para virar assento)"}
+                onClick={() => cycleSlot(rowIndex, slotIndex)}
+                title={SLOT_TITLE[kind]}
                 className={
-                  isSeat
-                    ? "h-7 w-7 rounded border text-xs"
-                    : "h-7 w-7 rounded border border-dashed opacity-40"
+                  kind === "gap"
+                    ? "flex h-7 w-7 items-center justify-center rounded border border-dashed opacity-40"
+                    : "flex h-7 w-7 items-center justify-center rounded border text-xs"
                 }
                 style={
-                  isSeat
+                  kind === "seat"
                     ? {
                         background: "var(--seat-available-bg)",
                         borderColor: "var(--seat-available-border)",
                         color: "var(--seat-available-text)",
                       }
-                    : {
-                        borderColor: "var(--color-border)",
-                      }
+                    : kind === "accessible"
+                      ? {
+                          background: "var(--color-accent)",
+                          borderColor: "var(--color-accent)",
+                          color: "var(--color-on-accent)",
+                        }
+                      : {
+                          borderColor: "var(--color-border)",
+                        }
                 }
               >
-                {isSeat ? slotIndex + 1 : ""}
+                {kind === "accessible" ? (
+                  <WheelchairIcon className="h-4 w-4" />
+                ) : kind === "seat" ? (
+                  slotIndex + 1
+                ) : (
+                  ""
+                )}
               </button>
             ))}
           </div>
@@ -126,7 +155,10 @@ export function SeatLayoutEditor({
         >
           + Adicionar fileira
         </button>
-        <p className="caption">{seatCount} assentos no total</p>
+        <p className="caption">
+          {seatCount} assentos no total
+          {accessibleCount > 0 && ` — ${accessibleCount} acessíveis`}
+        </p>
       </div>
     </div>
   );

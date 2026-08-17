@@ -104,6 +104,17 @@ export function BarcodeIcon({ className }: IconProps) {
   );
 }
 
+export function WheelchairIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="4" r="1.6" fill="currentColor" stroke="none" />
+      <path d="M11 7v5l5 3" />
+      <path d="M8 10h6" />
+      <path d="M11 12l-2 3a5 5 0 1 0 7 5" />
+    </svg>
+  );
+}
+
 export function ClockIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>

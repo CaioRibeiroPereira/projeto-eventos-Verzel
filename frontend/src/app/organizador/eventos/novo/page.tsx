@@ -19,12 +19,12 @@ function Wizard() {
   const [startsAt, setStartsAt] = useState("");
   const [price, setPrice] = useState("");
   const [rows, setRows] = useState<SeatRow[]>([
-    { label: "A", slots: Array(8).fill(true) },
+    { label: "A", slots: Array(8).fill("seat") },
   ]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const seatCount = rows.reduce((sum, r) => sum + r.slots.filter(Boolean).length, 0);
+  const seatCount = rows.reduce((sum, r) => sum + r.slots.filter((s) => s !== "gap").length, 0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

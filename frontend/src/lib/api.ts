@@ -66,9 +66,11 @@ export interface Movie {
   release_date: string | null;
 }
 
+export type SlotKind = "seat" | "accessible" | "gap";
+
 export interface SeatRow {
   label: string;
-  slots: boolean[];
+  slots: SlotKind[];
 }
 
 export interface EventCreateInput {
@@ -163,6 +165,7 @@ export interface SeatState {
   label: string;
   row_label: string;
   col: number;
+  accessible: boolean;
   occupied: boolean;
 }
 
