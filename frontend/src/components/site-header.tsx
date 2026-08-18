@@ -31,7 +31,7 @@ const NAV_LINKS = [
 ];
 
 export function SiteHeader() {
-  const { user, logout, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-border bg-bg/85 px-6 py-3 backdrop-blur-md">
@@ -71,9 +71,6 @@ export function SiteHeader() {
               <UserIcon className="h-4 w-4" />
               Meu perfil
             </Link>
-            <button onClick={logout} className="text-base text-text-secondary hover:text-accent">
-              Sair
-            </button>
           </div>
         ) : (
           <div className="flex shrink-0 gap-2">

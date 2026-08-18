@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { Logo } from "@/components/logo";
-import { GridIcon, LogoutIcon, ScanIcon, UserIcon } from "@/components/icons";
+import { GridIcon, ScanIcon, UserIcon } from "@/components/icons";
 
 type IconComponent = (props: { className?: string }) => React.ReactElement;
 
@@ -19,7 +19,7 @@ const ROLE_LABEL: Record<"organizer" | "gate", string> = {
 };
 
 export function AdminSidebar() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const pathname = usePathname();
 
   if (!user || (user.role !== "organizer" && user.role !== "gate")) return null;
@@ -55,13 +55,6 @@ export function AdminSidebar() {
 
       <div className="border-t border-border pt-3">
         <p className="label truncate px-2">{user.name}</p>
-        <button
-          onClick={logout}
-          className="mt-1 flex w-full items-center gap-3 rounded px-3 py-2 text-sm text-text-secondary hover:bg-surface-2 hover:text-text"
-        >
-          <LogoutIcon className="h-5 w-5" />
-          Sair
-        </button>
       </div>
     </aside>
   );

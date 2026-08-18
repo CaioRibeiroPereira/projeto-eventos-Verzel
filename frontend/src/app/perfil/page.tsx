@@ -14,7 +14,7 @@ import {
   type Card,
 } from "@/lib/api";
 import { formatCardNumber, formatExpiry } from "@/lib/format";
-import { CreditCardIcon, TrashIcon, UserIcon } from "@/components/icons";
+import { CreditCardIcon, LogoutIcon, TrashIcon, UserIcon } from "@/components/icons";
 
 export default function PerfilPage() {
   const { user, token, loading, logout, setUser } = useAuth();
@@ -146,12 +146,21 @@ export default function PerfilPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-6 py-14">
-      <div className="flex items-center gap-3">
-        <UserIcon className="h-8 w-8 text-accent" />
-        <div>
-          <h1 className="movie-title !text-2xl">Meu perfil</h1>
-          <p className="label">{user.name}</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <UserIcon className="h-8 w-8 text-accent" />
+          <div>
+            <h1 className="movie-title !text-2xl">Meu perfil</h1>
+            <p className="label">{user.name}</p>
+          </div>
         </div>
+        <button
+          onClick={logout}
+          className="flex items-center gap-1.5 rounded border border-border px-3 py-1.5 text-sm text-text-secondary hover:border-accent hover:text-accent"
+        >
+          <LogoutIcon className="h-4 w-4" />
+          Sair
+        </button>
       </div>
 
       <section className="flex flex-col gap-3 rounded-lg border border-border bg-surface-1 p-6">
