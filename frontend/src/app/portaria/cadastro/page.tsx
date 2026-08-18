@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { ApiError, registerGate } from "@/lib/api";
 
 export default function CadastroPortariaPage() {
-  const { login } = useAuth();
+  const { user, loading, login } = useAuth();
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -15,6 +15,18 @@ export default function CadastroPortariaPage() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!loading && user?.role === "gate") router.replace("/portaria");
+  }, [loading, user, router]);
+
+  if (loading || user?.role === "gate") {
+    return (
+      <main className="flex flex-1 items-center justify-center">
+        <p className="label">Carregando...</p>
+      </main>
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
