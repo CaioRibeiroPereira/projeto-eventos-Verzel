@@ -17,6 +17,7 @@ from app.models.credential import StaffCredential
 from app.models.event import Event, EventFormat, EventLanguage, EventStatus
 from app.models.seat import Seat
 from app.models.user import User, UserRole
+from app.services.seat_layouts import ROOM_LAYOUTS
 
 SEED_PASSWORD = "senha123"
 
@@ -67,23 +68,6 @@ ROOMS = ["Sala A", "Sala B", "Sala C", "Sala D", "Sala E", "Sala F"]
 
 FORMATS = [EventFormat.format_2d, EventFormat.format_2d, EventFormat.format_3d]
 LANGUAGES = [EventLanguage.dubbed, EventLanguage.subtitled]
-
-
-def build_layout(rows: int, seats_per_row: int, aisle_after: int) -> list[dict]:
-    """Gera fileiras com um corredor no meio e os quatro assentos das pontas
-    da última fileira (a de baixo no mapa) marcados como acessíveis."""
-    layout = []
-    for i in range(rows):
-        label = chr(ord("A") + i)
-        slots = ["seat"] * seats_per_row
-        slots.insert(aisle_after, "gap")
-        if i == rows - 1:
-            slots[0] = "accessible"
-            slots[1] = "accessible"
-            slots[-2] = "accessible"
-            slots[-1] = "accessible"
-        layout.append({"label": label, "slots": slots})
-    return layout
 
 
 def seed_users(session: Session) -> dict[UserRole, User]:
@@ -149,20 +133,20 @@ def _build_event(
     )
 
 
-def _create_seats(session: Session, event_id: int) -> int:
-    layout = build_layout(rows=6, seats_per_row=10, aisle_after=5)
+def _create_seats(session: Session, event_id: int, local: str) -> int:
+    layout = ROOM_LAYOUTS[local]
     seats = []
     for row in layout:
         seat_number = 0
-        for col, kind in enumerate(row["slots"]):
+        for col, kind in enumerate(row.slots):
             if kind == "gap":
                 continue
             seat_number += 1
             seats.append(
                 Seat(
                     event_id=event_id,
-                    label=f"{row['label']}{seat_number}",
-                    row_label=row["label"],
+                    label=f"{row.label}{seat_number}",
+                    row_label=row.label,
                     col=col,
                     accessible=kind == "accessible",
                 )
@@ -198,7 +182,7 @@ def seed_events(session: Session, organizer: User) -> None:
         session.add(event)
         session.commit()
         session.refresh(event)
-        seat_count = _create_seats(session, event.id)
+        seat_count = _create_seats(session, event.id, local)
         print(
             f"Criado evento publicado: {movie.title} {format.value} {language.value} "
             f"{starts_at:%d/%m %H:%M} ({seat_count} assentos)"

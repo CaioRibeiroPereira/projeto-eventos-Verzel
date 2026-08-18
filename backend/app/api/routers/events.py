@@ -5,7 +5,7 @@ from app.core.database import get_session
 from app.core.security import require_role
 from app.models.user import User, UserRole
 from app.repositories.event_repository import EventRepository
-from app.schemas.events import EventCreate, EventFilters, EventRead
+from app.schemas.events import EventCreate, EventFilters, EventRead, SeatRowInput
 from app.schemas.movies import MovieResult
 from app.services.event_service import EventService
 
@@ -26,6 +26,14 @@ def search_movies(
     _: User = Depends(require_organizer),
 ):
     return service.search_movies(query)
+
+
+@router.get("/rooms", response_model=dict[str, list[SeatRowInput]])
+def list_rooms(
+    service: EventService = Depends(get_event_service),
+    _: User = Depends(require_organizer),
+):
+    return service.get_room_layouts()
 
 
 @router.post("/events", response_model=EventRead, status_code=201)

@@ -22,7 +22,6 @@ class EventCreate(SQLModel):
     price: float
     format: EventFormat
     language: EventLanguage
-    seat_layout: list[SeatRowInput]
 
 
 class CastMember(SQLModel):

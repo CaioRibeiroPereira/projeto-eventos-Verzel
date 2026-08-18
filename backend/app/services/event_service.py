@@ -4,7 +4,8 @@ from app.integrations import tmdb
 from app.models.event import Event
 from app.models.seat import Seat
 from app.repositories.event_repository import EventRepository
-from app.schemas.events import EventCreate, EventFilters, EventRead
+from app.schemas.events import EventCreate, EventFilters, EventRead, SeatRowInput
+from app.services.seat_layouts import ROOM_LAYOUTS
 
 
 def _to_read(event: Event, seat_count: int) -> EventRead:
@@ -33,7 +34,7 @@ def _to_read(event: Event, seat_count: int) -> EventRead:
     )
 
 
-def _build_seats(event_id: int, layout: list) -> list[Seat]:
+def _build_seats(event_id: int, layout: list[SeatRowInput]) -> list[Seat]:
     seats: list[Seat] = []
     for row in layout:
         seat_number = 0
@@ -65,7 +66,14 @@ class EventService:
     def search_movies(self, query: str):
         return tmdb.search_movies(query)
 
+    def get_room_layouts(self) -> dict[str, list[SeatRowInput]]:
+        return ROOM_LAYOUTS
+
     def create_event(self, organizer_id: int, data: EventCreate) -> EventRead:
+        layout = ROOM_LAYOUTS.get(data.local)
+        if not layout:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Sala inválida")
+
         movie = tmdb.get_movie(data.tmdb_movie_id)
         event = self.repository.create(
             Event(
@@ -93,7 +101,7 @@ class EventService:
                 language=data.language,
             )
         )
-        seats = _build_seats(event.id, data.seat_layout)
+        seats = _build_seats(event.id, layout)
         self.repository.add_seats(seats)
         return _to_read(event, len(seats))
 
