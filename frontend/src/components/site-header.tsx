@@ -3,25 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 import { Logo } from "@/components/logo";
-import { GridIcon, ScanIcon, TicketIcon, UserIcon } from "@/components/icons";
-
-const ROLE_HOME_ICON: Record<string, (props: { className?: string }) => React.ReactElement> = {
-  organizer: GridIcon,
-  customer: TicketIcon,
-  gate: ScanIcon,
-};
-
-const ROLE_HOME: Record<string, string> = {
-  organizer: "/organizador",
-  customer: "/cliente",
-  gate: "/portaria",
-};
-
-const ROLE_HOME_LABEL: Record<string, string> = {
-  organizer: "Gerencie eventos",
-  customer: "Meus ingressos",
-  gate: "Portaria",
-};
+import { TicketIcon, UserIcon } from "@/components/icons";
 
 const NAV_LINKS = [
   { href: "/sobre", label: "Sobre" },
@@ -31,7 +13,10 @@ const NAV_LINKS = [
 ];
 
 export function SiteHeader() {
-  const { user, loading } = useAuth();
+  const { user: sessionUser, loading } = useAuth();
+  // Sessão de organizador/portaria não vale nada aqui — a área do cliente
+  // não reflete login das outras duas, mesmo estando no mesmo navegador.
+  const user = sessionUser?.role === "customer" ? sessionUser : null;
 
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-border bg-bg/85 px-6 py-3 backdrop-blur-md">
@@ -55,14 +40,11 @@ export function SiteHeader() {
         (user ? (
           <div className="flex shrink-0 items-center gap-4">
             <Link
-              href={ROLE_HOME[user.role]}
+              href="/cliente"
               className="flex items-center gap-1.5 text-base text-text hover:text-accent"
             >
-              {(() => {
-                const Icon = ROLE_HOME_ICON[user.role];
-                return <Icon className="h-4 w-4" />;
-              })()}
-              {ROLE_HOME_LABEL[user.role]}
+              <TicketIcon className="h-4 w-4" />
+              Meus ingressos
             </Link>
             <Link
               href="/perfil"
