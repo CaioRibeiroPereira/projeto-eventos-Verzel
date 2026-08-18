@@ -63,7 +63,7 @@ MOVIES = [
     "Pantera Negra",
 ]
 
-ROOMS = ["Sala 1", "Sala 2", "Sala IMAX", "Sala VIP"]
+ROOMS = ["Sala A", "Sala B", "Sala C", "Sala D", "Sala E", "Sala F"]
 
 FORMATS = [EventFormat.format_2d, EventFormat.format_2d, EventFormat.format_3d]
 LANGUAGES = [EventLanguage.dubbed, EventLanguage.subtitled]
@@ -185,7 +185,7 @@ def seed_events(session: Session, organizer: User) -> None:
             continue
         movie = tmdb.get_movie(results[0].id)
 
-        local = f"Cine Verzel - {ROOMS[i % len(ROOMS)]}"
+        local = ROOMS[i % len(ROOMS)]
         format = FORMATS[i % len(FORMATS)]
         language = LANGUAGES[i % len(LANGUAGES)]
         price = round(28 + (i % 5) * 6.5, 2)

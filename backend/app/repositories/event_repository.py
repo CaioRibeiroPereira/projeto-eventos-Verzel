@@ -57,12 +57,15 @@ class EventRepository:
         return list(self.session.exec(query))
 
     def list_sessions(self, event: Event) -> list[Event]:
-        """Outras sessões do mesmo filme, na mesma sala, formato e idioma —
-        usado pra agrupar horários na página do filme."""
+        """Outras sessões do mesmo organizador, filme, sala, formato e
+        idioma — usado pra agrupar horários na página do filme. Trava por
+        organizador pra sessões de organizadores diferentes não se
+        misturarem só por usarem o nome de sala."""
         return list(
             self.session.exec(
                 select(Event)
                 .where(
+                    Event.organizer_id == event.organizer_id,
                     Event.tmdb_movie_id == event.tmdb_movie_id,
                     Event.local == event.local,
                     Event.format == event.format,

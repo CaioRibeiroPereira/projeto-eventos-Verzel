@@ -17,6 +17,7 @@ import {
 
 const FORMATS: EventFormat[] = ["2D", "3D"];
 const LANGUAGES: EventLanguage[] = ["Dublado", "Legendado"];
+const SALAS = ["Sala A", "Sala B", "Sala C", "Sala D", "Sala E", "Sala F"];
 
 export default function NovoEventoPage() {
   const { ready } = useRoleGuard("organizer");
@@ -26,7 +27,7 @@ export default function NovoEventoPage() {
 function Wizard() {
   const router = useRouter();
   const [movie, setMovie] = useState<Movie | null>(null);
-  const [local, setLocal] = useState("");
+  const [local, setLocal] = useState(SALAS[0]);
   const [startsAt, setStartsAt] = useState("");
   const [price, setPrice] = useState("");
   const [format, setFormat] = useState<EventFormat>("2D");
@@ -100,15 +101,21 @@ function Wizard() {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="flex flex-col gap-1">
                 <label className="label" htmlFor="local">
-                  Local
+                  Sala
                 </label>
-                <input
+                <select
                   id="local"
                   required
                   value={local}
                   onChange={(e) => setLocal(e.target.value)}
                   className="rounded border border-border bg-surface-2 px-3 py-2 text-text outline-none focus:border-accent"
-                />
+                >
+                  {SALAS.map((sala) => (
+                    <option key={sala} value={sala}>
+                      {sala}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="flex flex-col gap-1">
                 <label className="label" htmlFor="price">
