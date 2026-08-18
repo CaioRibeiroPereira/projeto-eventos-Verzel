@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
-import { ScanIcon } from "@/components/icons";
+import { BuildingIcon, ScanIcon } from "@/components/icons";
 
 const COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
   {
@@ -45,13 +45,20 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="flex justify-end border-t border-border pt-6">
+        <div className="flex flex-col items-end gap-2 border-t border-border pt-6">
           <Link
             href="/login?next=/portaria"
             className="flex items-center gap-1.5 rounded border border-border px-3 py-1.5 text-sm text-text-secondary hover:border-accent hover:text-accent"
           >
             <ScanIcon className="h-4 w-4" />
             Acesso da portaria
+          </Link>
+          <Link
+            href="/login?next=/organizador"
+            className="flex items-center gap-1.5 rounded border border-border px-3 py-1.5 text-sm text-text-secondary hover:border-accent hover:text-accent"
+          >
+            <BuildingIcon className="h-4 w-4" />
+            Acesso da organização
           </Link>
         </div>
       </div>
