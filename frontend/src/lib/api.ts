@@ -151,11 +151,16 @@ export interface SeatRow {
   slots: SlotKind[];
 }
 
+export type EventFormat = "2D" | "3D";
+export type EventLanguage = "Dublado" | "Legendado";
+
 export interface EventCreateInput {
   tmdb_movie_id: number;
   local: string;
   starts_at: string;
   price: number;
+  format: EventFormat;
+  language: EventLanguage;
   seat_layout: SeatRow[];
 }
 
@@ -185,6 +190,8 @@ export interface Event {
   local: string;
   starts_at: string;
   price: number;
+  format: EventFormat;
+  language: EventLanguage;
   status: EventStatus;
   seat_count: number;
 }
@@ -237,6 +244,10 @@ export function listMyEvents(token: string) {
 
 export function getPublicEvent(id: number) {
   return request<Event>(`/events/${id}`);
+}
+
+export function getEventSessions(id: number) {
+  return request<Event[]>(`/events/${id}/sessions`);
 }
 
 export interface SeatState {

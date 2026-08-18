@@ -5,7 +5,18 @@ import { useRouter } from "next/navigation";
 import { useRoleGuard } from "@/hooks/use-role-guard";
 import { MovieSearch } from "@/components/movie-search";
 import { SeatLayoutEditor } from "@/components/seat-layout-editor";
-import { createEvent, posterUrl, ApiError, type Movie, type SeatRow } from "@/lib/api";
+import {
+  createEvent,
+  posterUrl,
+  ApiError,
+  type EventFormat,
+  type EventLanguage,
+  type Movie,
+  type SeatRow,
+} from "@/lib/api";
+
+const FORMATS: EventFormat[] = ["2D", "3D"];
+const LANGUAGES: EventLanguage[] = ["Dublado", "Legendado"];
 
 export default function NovoEventoPage() {
   const { ready } = useRoleGuard("organizer");
@@ -18,6 +29,8 @@ function Wizard() {
   const [local, setLocal] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [price, setPrice] = useState("");
+  const [format, setFormat] = useState<EventFormat>("2D");
+  const [language, setLanguage] = useState<EventLanguage>("Dublado");
   const [rows, setRows] = useState<SeatRow[]>([
     { label: "A", slots: Array(8).fill("seat") },
   ]);
@@ -39,6 +52,8 @@ function Wizard() {
         local,
         starts_at: new Date(startsAt).toISOString(),
         price: Number(price),
+        format,
+        language,
         seat_layout: rows,
       });
       router.push("/organizador");
@@ -122,6 +137,46 @@ function Wizard() {
                   onChange={(e) => setStartsAt(e.target.value)}
                   className="rounded border border-border bg-surface-2 px-3 py-2 text-text outline-none focus:border-accent"
                 />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="label">Formato</span>
+                <div className="flex gap-2">
+                  {FORMATS.map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => setFormat(f)}
+                      className={`flex-1 rounded border px-3 py-2 text-sm transition-colors ${
+                        format === f
+                          ? "border-accent bg-accent text-on-accent"
+                          : "border-border bg-surface-2 text-text-secondary"
+                      }`}
+                    >
+                      {f}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="label">Idioma</span>
+                <div className="flex gap-2">
+                  {LANGUAGES.map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => setLanguage(l)}
+                      className={`flex-1 rounded border px-3 py-2 text-sm transition-colors ${
+                        language === l
+                          ? "border-accent bg-accent text-on-accent"
+                          : "border-border bg-surface-2 text-text-secondary"
+                      }`}
+                    >
+                      {l}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </section>

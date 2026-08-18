@@ -1,24 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 import { StarIcon } from "@/components/icons";
-import { backdropUrl, getPublicEvent, posterUrl, profileUrl, type Event } from "@/lib/api";
-import { formatDateTime, formatPrice } from "@/lib/format";
+import {
+  backdropUrl,
+  getEventSessions,
+  getPublicEvent,
+  posterUrl,
+  profileUrl,
+  type Event,
+} from "@/lib/api";
+import { dayKey, formatDayLabel, formatPrice, formatTime } from "@/lib/format";
 
 export default function EventoPage() {
   const { id } = useParams<{ id: string }>();
   const eventId = Number(id);
   const { user, loading } = useAuth();
   const [event, setEvent] = useState<Event | null>(null);
+  const [sessions, setSessions] = useState<Event[] | null>(null);
+  const [activeId, setActiveId] = useState(eventId);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
   useEffect(() => {
-    getPublicEvent(eventId).then(setEvent);
+    setSessions(null);
+    setActiveId(eventId);
+    getPublicEvent(eventId).then((e) => {
+      setEvent(e);
+      setSelectedDay(dayKey(e.starts_at));
+    });
+    getEventSessions(eventId).then(setSessions);
   }, [eventId]);
 
-  if (!event) {
+  const allSessions = sessions ?? (event ? [event] : []);
+
+  const dayGroups = useMemo(() => {
+    const map = new Map<string, Event[]>();
+    for (const s of allSessions) {
+      const key = dayKey(s.starts_at);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(s);
+    }
+    return [...map.entries()]
+      .map(([key, items]) => ({
+        key,
+        items: [...items].sort((a, b) => a.starts_at.localeCompare(b.starts_at)),
+      }))
+      .sort((a, b) => a.items[0].starts_at.localeCompare(b.items[0].starts_at));
+  }, [allSessions]);
+
+  const activeEvent = allSessions.find((s) => s.id === activeId) ?? event;
+
+  if (!event || !activeEvent) {
     return (
       <main className="flex flex-1 items-center justify-center">
         <p className="label">Carregando...</p>
@@ -26,8 +61,9 @@ export default function EventoPage() {
     );
   }
 
-  const reservarHref = `/eventos/${eventId}/reservar`;
-  const soldOut = event.seat_count === 0;
+  const currentGroup = dayGroups.find((g) => g.key === selectedDay) ?? dayGroups[0];
+  const reservarHref = `/eventos/${activeEvent.id}/reservar`;
+  const soldOut = activeEvent.seat_count === 0;
 
   return (
     <main className="flex flex-1 flex-col">
@@ -67,15 +103,78 @@ export default function EventoPage() {
               )}
             </div>
             {event.director && <p className="label">Direção: {event.director}</p>}
-            <p className="label">
-              {event.local} — {formatDateTime(event.starts_at)}
-            </p>
-            <p className="label">{formatPrice(event.price)}</p>
           </div>
         </div>
       </section>
 
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
+        <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface-1 p-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="ticket-code rounded bg-surface-2 px-2 py-1 text-xs">{activeEvent.format}</span>
+            <span className="ticket-code rounded bg-surface-2 px-2 py-1 text-xs">{activeEvent.language}</span>
+            <span className="label">{activeEvent.local}</span>
+          </div>
+
+          {dayGroups.length > 1 && (
+            <div className="flex flex-wrap gap-2">
+              {dayGroups.map((group) => (
+                <button
+                  key={group.key}
+                  onClick={() => {
+                    setSelectedDay(group.key);
+                    setActiveId(group.items[0].id);
+                  }}
+                  className={`rounded border px-3 py-1.5 text-sm transition-colors ${
+                    group.key === currentGroup?.key
+                      ? "border-accent bg-accent text-on-accent"
+                      : "border-border text-text-secondary hover:border-accent hover:text-accent"
+                  }`}
+                >
+                  {formatDayLabel(group.items[0].starts_at)}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            {currentGroup?.items.map((session) => (
+              <button
+                key={session.id}
+                onClick={() => setActiveId(session.id)}
+                className={`ticket-code rounded border px-4 py-2 text-sm transition-colors ${
+                  session.id === activeEvent.id
+                    ? "border-accent bg-accent !text-on-accent"
+                    : "border-border text-text-secondary hover:border-accent hover:text-accent"
+                }`}
+              >
+                {formatTime(session.starts_at)}
+              </button>
+            ))}
+          </div>
+
+          <p className="label">{formatPrice(activeEvent.price)}</p>
+
+          {soldOut ? (
+            <span className="w-fit rounded bg-surface-3 px-5 py-2 text-text-muted">Esgotado</span>
+          ) : loading ? null : !user ? (
+            <Link
+              href={`/login?next=${encodeURIComponent(reservarHref)}`}
+              className="w-fit rounded bg-accent px-5 py-2 font-medium text-on-accent hover:bg-accent-hover"
+            >
+              Entrar para comprar
+            </Link>
+          ) : user.role !== "customer" ? (
+            <p className="caption">Disponível apenas para contas de cliente.</p>
+          ) : (
+            <Link
+              href={reservarHref}
+              className="w-fit rounded bg-accent px-5 py-2 font-medium text-on-accent hover:bg-accent-hover"
+            >
+              Comprar ingresso
+            </Link>
+          )}
+        </div>
+
         {event.youtube_key && (
           <div className="flex flex-col gap-2">
             <h2 className="text-lg font-medium">Trailer</h2>
@@ -120,32 +219,6 @@ export default function EventoPage() {
             </div>
           </div>
         )}
-
-        <div className="flex flex-col items-start gap-2 rounded-lg border border-border bg-surface-1 p-5">
-          <p className="label">
-            {soldOut ? "Sem assentos disponíveis." : `${event.seat_count} assentos disponíveis.`}
-          </p>
-
-          {soldOut ? (
-            <span className="rounded bg-surface-3 px-5 py-2 text-text-muted">Esgotado</span>
-          ) : loading ? null : !user ? (
-            <Link
-              href={`/login?next=${encodeURIComponent(reservarHref)}`}
-              className="rounded bg-accent px-5 py-2 font-medium text-on-accent hover:bg-accent-hover"
-            >
-              Entrar para comprar
-            </Link>
-          ) : user.role !== "customer" ? (
-            <p className="caption">Disponível apenas para contas de cliente.</p>
-          ) : (
-            <Link
-              href={reservarHref}
-              className="rounded bg-accent px-5 py-2 font-medium text-on-accent hover:bg-accent-hover"
-            >
-              Comprar ingresso
-            </Link>
-          )}
-        </div>
       </div>
     </main>
   );
