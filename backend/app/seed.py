@@ -190,29 +190,19 @@ def seed_events(session: Session, organizer: User) -> None:
         language = LANGUAGES[i % len(LANGUAGES)]
         price = round(28 + (i % 5) * 6.5, 2)
 
-        first_session = (datetime.utcnow() + timedelta(days=(i % 7) + 1)).replace(
+        starts_at = (datetime.utcnow() + timedelta(days=(i % 7) + 1)).replace(
             hour=14 + (i % 4) * 2, minute=0, second=0, microsecond=0
         )
-        # os 3 primeiros filmes ganham horários extras no mesmo dia (e um no
-        # dia seguinte), pra já nascer com sessões pra agrupar/trocar de data.
-        session_times = [first_session]
-        if i < 3:
-            session_times += [
-                first_session + timedelta(hours=3),
-                first_session + timedelta(hours=6),
-                first_session + timedelta(days=1),
-            ]
 
-        for starts_at in session_times:
-            event = _build_event(organizer, movie, local, starts_at, price, format, language)
-            session.add(event)
-            session.commit()
-            session.refresh(event)
-            seat_count = _create_seats(session, event.id)
-            print(
-                f"Criado evento publicado: {movie.title} {format.value} {language.value} "
-                f"{starts_at:%d/%m %H:%M} ({seat_count} assentos)"
-            )
+        event = _build_event(organizer, movie, local, starts_at, price, format, language)
+        session.add(event)
+        session.commit()
+        session.refresh(event)
+        seat_count = _create_seats(session, event.id)
+        print(
+            f"Criado evento publicado: {movie.title} {format.value} {language.value} "
+            f"{starts_at:%d/%m %H:%M} ({seat_count} assentos)"
+        )
 
 
 def seed() -> None:
