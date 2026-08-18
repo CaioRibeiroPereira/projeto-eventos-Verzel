@@ -3,7 +3,7 @@ from typing import Literal
 
 from sqlmodel import SQLModel
 
-from app.models.event import EventStatus
+from app.models.event import EventFormat, EventLanguage, EventStatus
 
 SlotKind = Literal["seat", "accessible", "gap"]
 
@@ -20,6 +20,8 @@ class EventCreate(SQLModel):
     local: str
     starts_at: datetime
     price: float
+    format: EventFormat
+    language: EventLanguage
     seat_layout: list[SeatRowInput]
 
 
@@ -47,6 +49,8 @@ class EventRead(SQLModel):
     local: str
     starts_at: datetime
     price: float
+    format: EventFormat
+    language: EventLanguage
     status: EventStatus
     seat_count: int
 

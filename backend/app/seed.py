@@ -14,7 +14,7 @@ from app.core.database import engine
 from app.core.security import hash_password
 from app.integrations import tmdb
 from app.models.credential import StaffCredential
-from app.models.event import Event, EventStatus
+from app.models.event import Event, EventFormat, EventLanguage, EventStatus
 from app.models.seat import Seat
 from app.models.user import User, UserRole
 
@@ -65,6 +65,9 @@ MOVIES = [
 
 ROOMS = ["Sala 1", "Sala 2", "Sala IMAX", "Sala VIP"]
 
+FORMATS = [EventFormat.format_2d, EventFormat.format_2d, EventFormat.format_3d]
+LANGUAGES = [EventLanguage.dubbed, EventLanguage.subtitled]
+
 
 def build_layout(rows: int, seats_per_row: int, aisle_after: int) -> list[dict]:
     """Gera fileiras com um corredor no meio e os quatro assentos das pontas
@@ -111,6 +114,64 @@ def seed_credentials(session: Session) -> None:
         print(f"Criada credencial {role.value}: {code} ({holder_name})")
 
 
+def _build_event(
+    organizer: User,
+    movie,
+    local: str,
+    starts_at: datetime,
+    price: float,
+    format: EventFormat,
+    language: EventLanguage,
+) -> Event:
+    return Event(
+        organizer_id=organizer.id,
+        tmdb_movie_id=movie.id,
+        title=movie.title,
+        poster_path=movie.poster_path,
+        backdrop_path=movie.backdrop_path,
+        overview=movie.overview,
+        genres=", ".join(movie.genres) or None,
+        runtime_minutes=movie.runtime,
+        director=movie.director,
+        cast=[
+            {"name": c.name, "character": c.character, "profile_path": c.profile_path}
+            for c in movie.cast
+        ]
+        or None,
+        tagline=movie.tagline,
+        vote_average=movie.vote_average,
+        local=local,
+        starts_at=starts_at,
+        price=price,
+        format=format,
+        language=language,
+        status=EventStatus.published,
+    )
+
+
+def _create_seats(session: Session, event_id: int) -> int:
+    layout = build_layout(rows=6, seats_per_row=10, aisle_after=5)
+    seats = []
+    for row in layout:
+        seat_number = 0
+        for col, kind in enumerate(row["slots"]):
+            if kind == "gap":
+                continue
+            seat_number += 1
+            seats.append(
+                Seat(
+                    event_id=event_id,
+                    label=f"{row['label']}{seat_number}",
+                    row_label=row["label"],
+                    col=col,
+                    accessible=kind == "accessible",
+                )
+            )
+    session.add_all(seats)
+    session.commit()
+    return len(seats)
+
+
 def seed_events(session: Session, organizer: User) -> None:
     already = session.exec(select(Event).where(Event.organizer_id == organizer.id)).first()
     if already:
@@ -124,52 +185,34 @@ def seed_events(session: Session, organizer: User) -> None:
             continue
         movie = tmdb.get_movie(results[0].id)
 
-        event = Event(
-            organizer_id=organizer.id,
-            tmdb_movie_id=movie.id,
-            title=movie.title,
-            poster_path=movie.poster_path,
-            backdrop_path=movie.backdrop_path,
-            overview=movie.overview,
-            genres=", ".join(movie.genres) or None,
-            runtime_minutes=movie.runtime,
-            director=movie.director,
-            cast=[
-                {"name": c.name, "character": c.character, "profile_path": c.profile_path}
-                for c in movie.cast
-            ]
-            or None,
-            tagline=movie.tagline,
-            vote_average=movie.vote_average,
-            local=f"Cine Verzel - {ROOMS[i % len(ROOMS)]}",
-            starts_at=datetime.utcnow() + timedelta(days=(i % 7) + 1, hours=(i % 4) * 2),
-            price=round(28 + (i % 5) * 6.5, 2),
-            status=EventStatus.published,
-        )
-        session.add(event)
-        session.commit()
-        session.refresh(event)
+        local = f"Cine Verzel - {ROOMS[i % len(ROOMS)]}"
+        format = FORMATS[i % len(FORMATS)]
+        language = LANGUAGES[i % len(LANGUAGES)]
+        price = round(28 + (i % 5) * 6.5, 2)
 
-        layout = build_layout(rows=6, seats_per_row=10, aisle_after=5)
-        seats = []
-        for row in layout:
-            seat_number = 0
-            for col, kind in enumerate(row["slots"]):
-                if kind == "gap":
-                    continue
-                seat_number += 1
-                seats.append(
-                    Seat(
-                        event_id=event.id,
-                        label=f"{row['label']}{seat_number}",
-                        row_label=row["label"],
-                        col=col,
-                        accessible=kind == "accessible",
-                    )
-                )
-        session.add_all(seats)
-        session.commit()
-        print(f"Criado evento publicado: {movie.title} ({len(seats)} assentos)")
+        first_session = (datetime.utcnow() + timedelta(days=(i % 7) + 1)).replace(
+            hour=14 + (i % 4) * 2, minute=0, second=0, microsecond=0
+        )
+        # os 3 primeiros filmes ganham horários extras no mesmo dia (e um no
+        # dia seguinte), pra já nascer com sessões pra agrupar/trocar de data.
+        session_times = [first_session]
+        if i < 3:
+            session_times += [
+                first_session + timedelta(hours=3),
+                first_session + timedelta(hours=6),
+                first_session + timedelta(days=1),
+            ]
+
+        for starts_at in session_times:
+            event = _build_event(organizer, movie, local, starts_at, price, format, language)
+            session.add(event)
+            session.commit()
+            session.refresh(event)
+            seat_count = _create_seats(session, event.id)
+            print(
+                f"Criado evento publicado: {movie.title} {format.value} {language.value} "
+                f"{starts_at:%d/%m %H:%M} ({seat_count} assentos)"
+            )
 
 
 def seed() -> None:

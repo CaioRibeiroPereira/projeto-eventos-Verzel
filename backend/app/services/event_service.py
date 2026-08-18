@@ -26,6 +26,8 @@ def _to_read(event: Event, seat_count: int) -> EventRead:
         local=event.local,
         starts_at=event.starts_at,
         price=event.price,
+        format=event.format,
+        language=event.language,
         status=event.status,
         seat_count=seat_count,
     )
@@ -87,6 +89,8 @@ class EventService:
                 local=data.local,
                 starts_at=data.starts_at,
                 price=data.price,
+                format=data.format,
+                language=data.language,
             )
         )
         seats = _build_seats(event.id, data.seat_layout)
@@ -113,3 +117,10 @@ class EventService:
         if not event or event.status.value != "published":
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
         return _to_read(event, self.repository.seat_count(event.id))
+
+    def get_event_sessions(self, event_id: int) -> list[EventRead]:
+        event = self.repository.get(event_id)
+        if not event or event.status.value != "published":
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
+        sessions = self.repository.list_sessions(event)
+        return [_to_read(e, self.repository.seat_count(e.id)) for e in sessions]

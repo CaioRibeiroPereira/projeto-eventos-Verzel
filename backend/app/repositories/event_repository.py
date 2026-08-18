@@ -56,6 +56,23 @@ class EventRepository:
         query = query.order_by(Event.starts_at)
         return list(self.session.exec(query))
 
+    def list_sessions(self, event: Event) -> list[Event]:
+        """Outras sessões do mesmo filme, na mesma sala, formato e idioma —
+        usado pra agrupar horários na página do filme."""
+        return list(
+            self.session.exec(
+                select(Event)
+                .where(
+                    Event.tmdb_movie_id == event.tmdb_movie_id,
+                    Event.local == event.local,
+                    Event.format == event.format,
+                    Event.language == event.language,
+                    Event.status == EventStatus.published,
+                )
+                .order_by(Event.starts_at)
+            )
+        )
+
     def publish(self, event: Event) -> Event:
         event.status = EventStatus.published
         self.session.add(event)

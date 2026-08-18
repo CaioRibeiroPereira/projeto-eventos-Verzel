@@ -72,3 +72,11 @@ def get_public_event(
     service: EventService = Depends(get_event_service),
 ):
     return service.get_public_event(event_id)
+
+
+@router.get("/events/{event_id}/sessions", response_model=list[EventRead])
+def get_event_sessions(
+    event_id: int,
+    service: EventService = Depends(get_event_service),
+):
+    return service.get_event_sessions(event_id)

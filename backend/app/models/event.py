@@ -2,12 +2,23 @@ from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import JSON, Column
+from sqlalchemy import Enum as SAEnum
 from sqlmodel import Field, SQLModel
 
 
 class EventStatus(str, Enum):
     draft = "draft"
     published = "published"
+
+
+class EventFormat(str, Enum):
+    format_2d = "2D"
+    format_3d = "3D"
+
+
+class EventLanguage(str, Enum):
+    dubbed = "Dublado"
+    subtitled = "Legendado"
 
 
 class Event(SQLModel, table=True):
@@ -30,5 +41,13 @@ class Event(SQLModel, table=True):
     local: str
     starts_at: datetime
     price: float
+    format: EventFormat = Field(
+        default=EventFormat.format_2d,
+        sa_column=Column(SAEnum(EventFormat, values_callable=lambda enum: [e.value for e in enum])),
+    )
+    language: EventLanguage = Field(
+        default=EventLanguage.dubbed,
+        sa_column=Column(SAEnum(EventLanguage, values_callable=lambda enum: [e.value for e in enum])),
+    )
 
     status: EventStatus = EventStatus.draft
