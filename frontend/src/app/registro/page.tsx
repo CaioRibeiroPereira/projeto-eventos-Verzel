@@ -108,17 +108,6 @@ function RegistroForm() {
           </Link>
         </p>
       </form>
-
-      <p className="caption mt-6 text-center">
-        É organizador ou faz parte da portaria?{" "}
-        <Link href="/organizador/cadastro" className="text-accent">
-          Cadastro de organizador
-        </Link>{" "}
-        ·{" "}
-        <Link href="/portaria/cadastro" className="text-accent">
-          Cadastro da portaria
-        </Link>
-      </p>
     </main>
   );
 }

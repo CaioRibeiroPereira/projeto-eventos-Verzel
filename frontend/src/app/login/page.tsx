@@ -6,17 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { ApiError } from "@/lib/api";
 
-const ROLE_HOME: Record<string, string> = {
-  organizer: "/organizador",
-  customer: "/cliente",
-  gate: "/portaria",
-};
-
-const CADASTRO_HREF: Record<string, string> = {
-  "/organizador": "/organizador/cadastro",
-  "/portaria": "/portaria/cadastro",
-};
-
 export default function LoginPage() {
   return (
     <Suspense
@@ -46,8 +35,8 @@ function LoginForm() {
     setError(null);
     setSubmitting(true);
     try {
-      const user = await login(email, password);
-      router.push(next || ROLE_HOME[user.role] || "/");
+      await login(email, password);
+      router.push(next || "/cliente");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível entrar.");
     } finally {
@@ -102,10 +91,7 @@ function LoginForm() {
         <p className="caption mt-4 text-center">
           Não tem conta?{" "}
           <Link
-            href={
-              (next && CADASTRO_HREF[next]) ??
-              (next ? `/registro?next=${encodeURIComponent(next)}` : "/registro")
-            }
+            href={next ? `/registro?next=${encodeURIComponent(next)}` : "/registro"}
             className="text-accent"
           >
             Cadastre-se

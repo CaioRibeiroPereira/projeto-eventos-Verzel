@@ -102,7 +102,7 @@ export default function CadastroPortariaPage() {
 
         <p className="caption mt-4 text-center">
           Já tem conta?{" "}
-          <Link href="/login?next=/portaria" className="text-accent">
+          <Link href="/portaria/login" className="text-accent">
             Entrar
           </Link>
         </p>

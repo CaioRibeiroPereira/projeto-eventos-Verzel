@@ -4,15 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { ApiError, registerOrganizer } from "@/lib/api";
+import { ApiError } from "@/lib/api";
 
-export default function CadastroOrganizadorPage() {
+export default function LoginOrganizadorPage() {
   const { login } = useAuth();
   const router = useRouter();
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -21,11 +19,10 @@ export default function CadastroOrganizadorPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await registerOrganizer({ name, email, password, code });
       await login(email, password);
       router.push("/organizador");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Não foi possível criar a conta.");
+      setError(err instanceof ApiError ? err.message : "Não foi possível entrar.");
     } finally {
       setSubmitting(false);
     }
@@ -37,20 +34,7 @@ export default function CadastroOrganizadorPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-sm rounded-lg border border-border bg-surface-1 p-8"
       >
-        <h1 className="movie-title mb-1 !text-2xl">Cadastro de organizador</h1>
-        <p className="label mb-6">Use a credencial do seu crachá para criar sua conta.</p>
-
-        <label className="label mb-1 block" htmlFor="name">
-          Nome
-        </label>
-        <input
-          id="name"
-          type="text"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="mb-4 w-full rounded border border-border bg-surface-2 px-3 py-2 text-text outline-none focus:border-accent"
-        />
+        <h1 className="movie-title mb-6 !text-2xl">Entrar — Organizador</h1>
 
         <label className="label mb-1 block" htmlFor="email">
           Email
@@ -71,23 +55,9 @@ export default function CadastroOrganizadorPage() {
           id="password"
           type="password"
           required
-          minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="mb-4 w-full rounded border border-border bg-surface-2 px-3 py-2 text-text outline-none focus:border-accent"
-        />
-
-        <label className="label mb-1 block" htmlFor="code">
-          Código do crachá
-        </label>
-        <input
-          id="code"
-          type="text"
-          required
-          placeholder="ORG-001"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          className="ticket-code mb-4 w-full rounded border border-border bg-surface-2 px-3 py-2 outline-none focus:border-accent"
         />
 
         {error && <p className="mb-4 text-sm text-red">{error}</p>}
@@ -97,13 +67,13 @@ export default function CadastroOrganizadorPage() {
           disabled={submitting}
           className="w-full rounded bg-accent px-4 py-2 font-medium text-on-accent transition-colors hover:bg-accent-hover disabled:opacity-60"
         >
-          {submitting ? "Criando conta..." : "Criar conta"}
+          {submitting ? "Entrando..." : "Entrar"}
         </button>
 
         <p className="caption mt-4 text-center">
-          Já tem conta?{" "}
-          <Link href="/organizador/login" className="text-accent">
-            Entrar
+          Ainda não tem conta?{" "}
+          <Link href="/organizador/cadastro" className="text-accent">
+            Cadastre-se com sua credencial
           </Link>
         </p>
       </form>
