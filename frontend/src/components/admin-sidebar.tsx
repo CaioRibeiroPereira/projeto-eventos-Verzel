@@ -9,8 +9,8 @@ import { GridIcon, LogoutIcon, ScanIcon, UserIcon } from "@/components/icons";
 type IconComponent = (props: { className?: string }) => React.ReactElement;
 
 const NAV_ITEMS: Record<"organizer" | "gate", { href: string; label: string; icon: IconComponent }[]> = {
-  organizer: [{ href: "/organizador", label: "Eventos", icon: GridIcon }],
-  gate: [{ href: "/portaria", label: "Validar", icon: ScanIcon }],
+  organizer: [{ href: "/organizador", label: "Gerencie eventos", icon: GridIcon }],
+  gate: [{ href: "/portaria", label: "Portaria", icon: ScanIcon }],
 };
 
 const ROLE_LABEL: Record<"organizer" | "gate", string> = {
@@ -24,7 +24,7 @@ export function AdminSidebar() {
 
   if (!user || (user.role !== "organizer" && user.role !== "gate")) return null;
 
-  const items = [...NAV_ITEMS[user.role], { href: "/perfil", label: "Perfil", icon: UserIcon }];
+  const items = [...NAV_ITEMS[user.role], { href: "/perfil", label: "Meu perfil", icon: UserIcon }];
 
   return (
     <aside className="flex w-56 shrink-0 flex-col border-r border-border bg-surface-1 px-3 py-5">

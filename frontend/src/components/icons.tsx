@@ -165,3 +165,12 @@ export function ScanIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function TicketIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M3 8h18a2 2 0 0 1 0 4 2 2 0 0 0 0 4 2 2 0 0 1 0 4H3a2 2 0 0 1 0-4 2 2 0 0 0 0-4 2 2 0 0 1 0-4Z" />
+      <path d="M12 8v8" strokeDasharray="2 2" />
+    </svg>
+  );
+}

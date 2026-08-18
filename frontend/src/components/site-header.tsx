@@ -3,11 +3,24 @@
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 import { Logo } from "@/components/logo";
+import { GridIcon, ScanIcon, TicketIcon, UserIcon } from "@/components/icons";
+
+const ROLE_HOME_ICON: Record<string, (props: { className?: string }) => React.ReactElement> = {
+  organizer: GridIcon,
+  customer: TicketIcon,
+  gate: ScanIcon,
+};
 
 const ROLE_HOME: Record<string, string> = {
   organizer: "/organizador",
   customer: "/cliente",
   gate: "/portaria",
+};
+
+const ROLE_HOME_LABEL: Record<string, string> = {
+  organizer: "Gerencie eventos",
+  customer: "Meus ingressos",
+  gate: "Portaria",
 };
 
 const NAV_LINKS = [
@@ -41,11 +54,22 @@ export function SiteHeader() {
       {!loading &&
         (user ? (
           <div className="flex shrink-0 items-center gap-4">
-            <Link href={ROLE_HOME[user.role]} className="text-base text-text hover:text-accent">
-              {user.name}
+            <Link
+              href={ROLE_HOME[user.role]}
+              className="flex items-center gap-1.5 text-base text-text hover:text-accent"
+            >
+              {(() => {
+                const Icon = ROLE_HOME_ICON[user.role];
+                return <Icon className="h-4 w-4" />;
+              })()}
+              {ROLE_HOME_LABEL[user.role]}
             </Link>
-            <Link href="/perfil" className="text-base text-text-secondary hover:text-accent">
-              Perfil
+            <Link
+              href="/perfil"
+              className="flex items-center gap-1.5 text-base text-text-secondary hover:text-accent"
+            >
+              <UserIcon className="h-4 w-4" />
+              Meu perfil
             </Link>
             <button onClick={logout} className="text-base text-text-secondary hover:text-accent">
               Sair
