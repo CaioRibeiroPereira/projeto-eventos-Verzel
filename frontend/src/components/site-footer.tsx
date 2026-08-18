@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useAuth } from "@/context/auth-context";
 import { Logo } from "@/components/logo";
 import { BuildingIcon, ScanIcon } from "@/components/icons";
 
@@ -23,6 +26,8 @@ const COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
 ];
 
 export function SiteFooter() {
+  const { user } = useAuth();
+
   return (
     <footer className="border-t border-border px-6 py-10">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
@@ -45,22 +50,24 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-2 border-t border-border pt-6">
-          <Link
-            href="/login?next=/portaria"
-            className="flex items-center gap-1.5 rounded border border-border px-3 py-1.5 text-sm text-text-secondary hover:border-accent hover:text-accent"
-          >
-            <ScanIcon className="h-4 w-4" />
-            Acesso da portaria
-          </Link>
-          <Link
-            href="/login?next=/organizador"
-            className="flex items-center gap-1.5 rounded border border-border px-3 py-1.5 text-sm text-text-secondary hover:border-accent hover:text-accent"
-          >
-            <BuildingIcon className="h-4 w-4" />
-            Acesso da organização
-          </Link>
-        </div>
+        {!user && (
+          <div className="flex flex-col items-end gap-2 border-t border-border pt-6">
+            <Link
+              href="/login?next=/portaria"
+              className="flex items-center gap-1.5 rounded border border-border px-3 py-1.5 text-sm text-text-secondary hover:border-accent hover:text-accent"
+            >
+              <ScanIcon className="h-4 w-4" />
+              Acesso da portaria
+            </Link>
+            <Link
+              href="/login?next=/organizador"
+              className="flex items-center gap-1.5 rounded border border-border px-3 py-1.5 text-sm text-text-secondary hover:border-accent hover:text-accent"
+            >
+              <BuildingIcon className="h-4 w-4" />
+              Acesso da organização
+            </Link>
+          </div>
+        )}
       </div>
     </footer>
   );
