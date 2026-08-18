@@ -76,6 +76,21 @@ export default function EventoPage() {
       </section>
 
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
+        {event.youtube_key && (
+          <div className="flex flex-col gap-2">
+            <h2 className="text-lg font-medium">Trailer</h2>
+            <div className="aspect-video w-full overflow-hidden rounded-lg border border-border">
+              <iframe
+                src={`https://www.youtube.com/embed/${event.youtube_key}`}
+                title={`Trailer de ${event.title}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="h-full w-full"
+              />
+            </div>
+          </div>
+        )}
+
         {event.overview && (
           <div className="flex flex-col gap-2">
             <h2 className="text-lg font-medium">Sobre o filme</h2>

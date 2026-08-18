@@ -181,6 +181,7 @@ export interface Event {
   cast: CastMember[] | null;
   tagline: string | null;
   vote_average: number | null;
+  youtube_key: string | null;
   local: string;
   starts_at: string;
   price: number;
