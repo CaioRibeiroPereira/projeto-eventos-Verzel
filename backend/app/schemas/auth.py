@@ -7,7 +7,13 @@ class UserCreate(SQLModel):
     name: str
     email: str
     password: str
-    role: UserRole
+
+
+class CredentialRegisterRequest(SQLModel):
+    name: str
+    email: str
+    password: str
+    code: str
 
 
 class UserRead(SQLModel):

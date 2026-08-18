@@ -13,6 +13,7 @@ from sqlmodel import Session, select
 from app.core.database import engine
 from app.core.security import hash_password
 from app.integrations import tmdb
+from app.models.credential import StaffCredential
 from app.models.event import Event, EventStatus
 from app.models.seat import Seat
 from app.models.user import User, UserRole
@@ -24,6 +25,20 @@ USERS = [
     ("Cliente Um", "cliente1@teste.com", UserRole.customer),
     ("Cliente Dois", "cliente2@teste.com", UserRole.customer),
     ("Portaria Teste", "portaria@teste.com", UserRole.gate),
+]
+
+# Credenciais de crachá ainda não reivindicadas — usadas para testar o
+# autocadastro de organizador/portaria (o papel vem do código, não de uma
+# escolha na tela). Cada uma só pode virar uma conta uma vez.
+CREDENTIALS = [
+    ("ORG-001", UserRole.organizer, "João"),
+    ("ORG-002", UserRole.organizer, "Maria"),
+    ("ORG-003", UserRole.organizer, "Julio"),
+    ("GATE-001", UserRole.gate, "Ana"),
+    ("GATE-002", UserRole.gate, "Bruno"),
+    ("GATE-003", UserRole.gate, "Carla"),
+    ("GATE-004", UserRole.gate, "Diego"),
+    ("GATE-005", UserRole.gate, "Elisa"),
 ]
 
 MOVIES = [
@@ -82,6 +97,18 @@ def seed_users(session: Session) -> dict[UserRole, User]:
         users[role] = user
         print(f"Criado usuário {role.value}: {email}")
     return users
+
+
+def seed_credentials(session: Session) -> None:
+    for code, role, holder_name in CREDENTIALS:
+        existing = session.exec(
+            select(StaffCredential).where(StaffCredential.code == code)
+        ).first()
+        if existing:
+            continue
+        session.add(StaffCredential(code=code, role=role, holder_name=holder_name))
+        session.commit()
+        print(f"Criada credencial {role.value}: {code} ({holder_name})")
 
 
 def seed_events(session: Session, organizer: User) -> None:
@@ -148,11 +175,16 @@ def seed_events(session: Session, organizer: User) -> None:
 def seed() -> None:
     with Session(engine) as session:
         users = seed_users(session)
+        seed_credentials(session)
         seed_events(session, users[UserRole.organizer])
 
-    print("\nSeed concluído. Credenciais de teste:")
+    print("\nSeed concluído. Contas de teste (login direto):")
     for name, email, role in USERS:
         print(f"  {role.value}: {email} / {SEED_PASSWORD}")
+
+    print("\nCrachás disponíveis pra autocadastro (organizador/portaria):")
+    for code, role, holder_name in CREDENTIALS:
+        print(f"  {role.value}: {code} ({holder_name})")
 
 
 if __name__ == "__main__":
