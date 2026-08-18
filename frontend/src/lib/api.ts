@@ -43,13 +43,29 @@ export function login(email: string, password: string) {
   });
 }
 
-export function register(data: {
+export function register(data: { name: string; email: string; password: string }) {
+  return request<User>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export interface CredentialRegisterInput {
   name: string;
   email: string;
   password: string;
-  role: "organizer" | "customer";
-}) {
-  return request<User>("/auth/register", {
+  code: string;
+}
+
+export function registerOrganizer(data: CredentialRegisterInput) {
+  return request<User>("/auth/register/organizador", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function registerGate(data: CredentialRegisterInput) {
+  return request<User>("/auth/register/portaria", {
     method: "POST",
     body: JSON.stringify(data),
   });

@@ -1,33 +1,18 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { ApiError, register } from "@/lib/api";
+import { ApiError, registerOrganizer } from "@/lib/api";
 
-export default function RegistroPage() {
-  return (
-    <Suspense
-      fallback={
-        <main className="flex flex-1 items-center justify-center">
-          <p className="label">Carregando...</p>
-        </main>
-      }
-    >
-      <RegistroForm />
-    </Suspense>
-  );
-}
-
-function RegistroForm() {
+export default function CadastroOrganizadorPage() {
   const { login } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const next = searchParams.get("next");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -36,9 +21,9 @@ function RegistroForm() {
     setError(null);
     setSubmitting(true);
     try {
-      await register({ name, email, password });
+      await registerOrganizer({ name, email, password, code });
       await login(email, password);
-      router.push(next || "/cliente");
+      router.push("/organizador");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível criar a conta.");
     } finally {
@@ -47,12 +32,13 @@ function RegistroForm() {
   }
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-6">
+    <main className="flex flex-1 flex-col items-center justify-center px-6 py-16">
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-sm rounded-lg border border-border bg-surface-1 p-8"
       >
-        <h1 className="movie-title mb-6 !text-2xl">Criar conta</h1>
+        <h1 className="movie-title mb-1 !text-2xl">Cadastro de organizador</h1>
+        <p className="label mb-6">Use a credencial do seu crachá para criar sua conta.</p>
 
         <label className="label mb-1 block" htmlFor="name">
           Nome
@@ -91,6 +77,19 @@ function RegistroForm() {
           className="mb-4 w-full rounded border border-border bg-surface-2 px-3 py-2 text-text outline-none focus:border-accent"
         />
 
+        <label className="label mb-1 block" htmlFor="code">
+          Código do crachá
+        </label>
+        <input
+          id="code"
+          type="text"
+          required
+          placeholder="ORG-001"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          className="ticket-code mb-4 w-full rounded border border-border bg-surface-2 px-3 py-2 outline-none focus:border-accent"
+        />
+
         {error && <p className="mb-4 text-sm text-red">{error}</p>}
 
         <button
@@ -103,7 +102,7 @@ function RegistroForm() {
 
         <p className="caption mt-4 text-center">
           Já tem conta?{" "}
-          <Link href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="text-accent">
+          <Link href="/login?next=/organizador" className="text-accent">
             Entrar
           </Link>
         </p>

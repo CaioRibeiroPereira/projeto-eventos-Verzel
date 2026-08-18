@@ -12,6 +12,11 @@ const ROLE_HOME: Record<string, string> = {
   gate: "/portaria",
 };
 
+const CADASTRO_HREF: Record<string, string> = {
+  "/organizador": "/organizador/cadastro",
+  "/portaria": "/portaria/cadastro",
+};
+
 export default function LoginPage() {
   return (
     <Suspense
@@ -96,7 +101,13 @@ function LoginForm() {
 
         <p className="caption mt-4 text-center">
           Não tem conta?{" "}
-          <Link href={next ? `/registro?next=${encodeURIComponent(next)}` : "/registro"} className="text-accent">
+          <Link
+            href={
+              (next && CADASTRO_HREF[next]) ??
+              (next ? `/registro?next=${encodeURIComponent(next)}` : "/registro")
+            }
+            className="text-accent"
+          >
             Cadastre-se
           </Link>
         </p>
