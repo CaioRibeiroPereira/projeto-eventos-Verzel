@@ -25,6 +25,7 @@ class Event(SQLModel, table=True):
     cast: list[dict] | None = Field(default=None, sa_column=Column(JSON))
     tagline: str | None = None
     vote_average: float | None = None
+    youtube_key: str | None = None
 
     local: str
     starts_at: datetime

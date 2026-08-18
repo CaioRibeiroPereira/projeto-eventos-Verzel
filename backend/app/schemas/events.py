@@ -43,6 +43,7 @@ class EventRead(SQLModel):
     cast: list[CastMember] | None
     tagline: str | None
     vote_average: float | None
+    youtube_key: str | None
     local: str
     starts_at: datetime
     price: float

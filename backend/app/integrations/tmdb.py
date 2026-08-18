@@ -28,6 +28,7 @@ class TMDbMovie:
         cast: list[CastMember] | None = None,
         tagline: str | None = None,
         vote_average: float | None = None,
+        youtube_key: str | None = None,
     ):
         self.id = id
         self.title = title
@@ -41,6 +42,7 @@ class TMDbMovie:
         self.cast = cast or []
         self.tagline = tagline
         self.vote_average = vote_average
+        self.youtube_key = youtube_key
 
 
 def _get(path: str, params: dict) -> dict:
@@ -77,8 +79,22 @@ def search_movies(query: str) -> list[TMDbMovie]:
     ]
 
 
+def _best_trailer_key(data: dict) -> str | None:
+    """Escolhe o melhor trailer do YouTube: prioriza trailer oficial,
+    depois qualquer trailer, depois qualquer vídeo do YouTube."""
+    videos = [v for v in data.get("videos", {}).get("results", []) if v.get("site") == "YouTube"]
+    if not videos:
+        return None
+
+    def score(video: dict) -> tuple[bool, bool]:
+        return (video.get("type") == "Trailer", video.get("official", False))
+
+    best = max(videos, key=score)
+    return best["key"]
+
+
 def get_movie(movie_id: int) -> TMDbMovie:
-    data = _get(f"/movie/{movie_id}", {"append_to_response": "credits"})
+    data = _get(f"/movie/{movie_id}", {"append_to_response": "credits,videos"})
 
     credits = data.get("credits", {})
     director = next(
@@ -107,4 +123,5 @@ def get_movie(movie_id: int) -> TMDbMovie:
         cast=cast,
         tagline=data.get("tagline") or None,
         vote_average=data.get("vote_average") or None,
+        youtube_key=_best_trailer_key(data),
     )
