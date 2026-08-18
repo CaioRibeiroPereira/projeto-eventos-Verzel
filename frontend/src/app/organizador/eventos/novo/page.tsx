@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRoleGuard } from "@/hooks/use-role-guard";
 import { MovieSearch } from "@/components/movie-search";
-import { SeatLayoutEditor } from "@/components/seat-layout-editor";
+import { RoomLayoutPreview } from "@/components/room-layout-preview";
 import {
   createEvent,
+  getRoomLayouts,
   posterUrl,
   ApiError,
   type EventFormat,
@@ -17,7 +18,6 @@ import {
 
 const FORMATS: EventFormat[] = ["2D", "3D"];
 const LANGUAGES: EventLanguage[] = ["Dublado", "Legendado"];
-const SALAS = ["Sala A", "Sala B", "Sala C", "Sala D", "Sala E", "Sala F"];
 
 export default function NovoEventoPage() {
   const { ready } = useRoleGuard("organizer");
@@ -27,18 +27,29 @@ export default function NovoEventoPage() {
 function Wizard() {
   const router = useRouter();
   const [movie, setMovie] = useState<Movie | null>(null);
-  const [local, setLocal] = useState(SALAS[0]);
+  const [rooms, setRooms] = useState<Record<string, SeatRow[]> | null>(null);
+  const [local, setLocal] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [price, setPrice] = useState("");
   const [format, setFormat] = useState<EventFormat>("2D");
   const [language, setLanguage] = useState<EventLanguage>("Dublado");
-  const [rows, setRows] = useState<SeatRow[]>([
-    { label: "A", slots: Array(8).fill("seat") },
-  ]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const seatCount = rows.reduce((sum, r) => sum + r.slots.filter((s) => s !== "gap").length, 0);
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) return;
+    getRoomLayouts(token).then((data) => {
+      setRooms(data);
+      const first = Object.keys(data)[0];
+      if (first) setLocal(first);
+    });
+  }, []);
+
+  const currentLayout = rooms && local ? rooms[local] : null;
+  const seatCount = currentLayout
+    ? currentLayout.reduce((sum, r) => sum + r.slots.filter((s) => s !== "gap").length, 0)
+    : 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -55,7 +66,6 @@ function Wizard() {
         price: Number(price),
         format,
         language,
-        seat_layout: rows,
       });
       router.push("/organizador");
     } catch (err) {
@@ -94,7 +104,7 @@ function Wizard() {
         )}
       </section>
 
-      {movie && (
+      {movie && rooms && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
           <section className="flex flex-col gap-3">
             <h2 className="label">2. Detalhes</h2>
@@ -110,7 +120,7 @@ function Wizard() {
                   onChange={(e) => setLocal(e.target.value)}
                   className="rounded border border-border bg-surface-2 px-3 py-2 text-text outline-none focus:border-accent"
                 >
-                  {SALAS.map((sala) => (
+                  {Object.keys(rooms).map((sala) => (
                     <option key={sala} value={sala}>
                       {sala}
                     </option>
@@ -189,8 +199,8 @@ function Wizard() {
           </section>
 
           <section className="flex flex-col gap-3">
-            <h2 className="label">3. Mapa de assentos</h2>
-            <SeatLayoutEditor rows={rows} onChange={setRows} />
+            <h2 className="label">3. Planta da sala</h2>
+            {currentLayout && <RoomLayoutPreview rows={currentLayout} />}
           </section>
 
           {error && <p className="text-sm text-red">{error}</p>}

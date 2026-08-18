@@ -161,7 +161,6 @@ export interface EventCreateInput {
   price: number;
   format: EventFormat;
   language: EventLanguage;
-  seat_layout: SeatRow[];
 }
 
 export type EventStatus = "draft" | "published";
@@ -217,6 +216,12 @@ export function profileUrl(path: string | null, size: "w185" = "w185") {
 
 export function searchMovies(token: string, query: string) {
   return request<Movie[]>(`/movies/search?query=${encodeURIComponent(query)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function getRoomLayouts(token: string) {
+  return request<Record<string, SeatRow[]>>("/rooms", {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
