@@ -16,6 +16,17 @@ import {
 import { formatCardNumber, formatExpiry } from "@/lib/format";
 import { CreditCardIcon, LogoutIcon, TrashIcon, UserIcon } from "@/components/icons";
 
+const LOGIN_HREF: Record<string, string> = {
+  organizer: "/organizador/login",
+  gate: "/portaria/login",
+  customer: "/login?next=/perfil",
+};
+
+// Fora do componente de propósito: quando o logout zera `user`, o AppShell
+// troca de shell (admin -> cliente) e isso remonta a página, perdendo
+// qualquer state local. Um módulo-level sobrevive ao remount.
+let pendingLogoutRedirect: string | null = null;
+
 export default function PerfilPage() {
   const { user, token, loading, logout, setUser } = useAuth();
   const router = useRouter();
@@ -23,8 +34,21 @@ export default function PerfilPage() {
 
   useEffect(() => {
     if (loading || accountDeleted) return;
-    if (!user) router.replace("/login?next=/perfil");
+    if (!user) {
+      const destination = pendingLogoutRedirect ?? "/login?next=/perfil";
+      router.replace(destination);
+      // limpa depois do tick atual — em dev o StrictMode roda esse efeito
+      // duas vezes seguidas, e limpar na hora derrubaria a segunda leitura.
+      setTimeout(() => {
+        pendingLogoutRedirect = null;
+      }, 0);
+    }
   }, [loading, user, accountDeleted, router]);
+
+  function handleLogout() {
+    if (user) pendingLogoutRedirect = LOGIN_HREF[user.role];
+    logout();
+  }
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -155,7 +179,7 @@ export default function PerfilPage() {
           </div>
         </div>
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="flex items-center gap-1.5 rounded border border-border px-3 py-1.5 text-sm text-text-secondary hover:border-accent hover:text-accent"
         >
           <LogoutIcon className="h-4 w-4" />
