@@ -8,6 +8,7 @@ ValidationOutcome = Literal["valid", "invalid", "already_used", "wrong_event"]
 
 class ValidateRequest(SQLModel):
     code: str
+    event_ids: list[int]
 
 
 class ValidationResult(SQLModel):

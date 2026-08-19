@@ -27,14 +27,15 @@ const RESULT_STYLE: Record<ValidationResult["result"], string> = {
 const RESULT_TITLE: Record<ValidationResult["result"], string> = {
   valid: "Válido",
   already_used: "Já utilizado",
-  wrong_event: "Evento errado",
+  wrong_event: "Sessão errada",
   invalid: "Inválido",
 };
 
 function Portaria() {
   const { user, token } = useRoleGuard("gate");
   const [events, setEvents] = useState<Event[] | null>(null);
-  const [eventId, setEventId] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [picking, setPicking] = useState(true);
   const [mode, setMode] = useState<"camera" | "manual">("manual");
   const [code, setCode] = useState("");
   const [result, setResult] = useState<ValidationResult | null>(null);
@@ -44,12 +45,16 @@ function Portaria() {
     listPublicEvents().then(setEvents);
   }, []);
 
+  function toggleEvent(id: number) {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
   const handleValidate = useCallback(
     async (submittedCode: string) => {
-      if (!token || !eventId || !submittedCode.trim() || busy) return;
+      if (!token || selectedIds.length === 0 || !submittedCode.trim() || busy) return;
       setBusy(true);
       try {
-        const res = await validateTicket(token, eventId, submittedCode.trim());
+        const res = await validateTicket(token, selectedIds, submittedCode.trim());
         setResult(res);
       } catch (err) {
         setResult({
@@ -63,7 +68,7 @@ function Portaria() {
         setBusy(false);
       }
     },
-    [eventId, busy, token],
+    [selectedIds, busy, token],
   );
 
   function handleManualSubmit(e: React.FormEvent) {
@@ -76,7 +81,7 @@ function Portaria() {
     setCode("");
   }
 
-  const selectedEvent = events?.find((e) => e.id === eventId) ?? null;
+  const selectedEvents = events?.filter((e) => selectedIds.includes(e.id)) ?? [];
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
@@ -85,43 +90,71 @@ function Portaria() {
         <p className="label">Olá, {user!.name}</p>
       </div>
 
-      {!selectedEvent && (
-        <div className="flex flex-col gap-2">
-          <p className="label">Selecione o evento que está validando:</p>
-          {events === null &&
-            [0, 1, 2].map((i) => (
-              <div key={i} className="h-14 animate-pulse rounded border border-border bg-surface-1" />
-            ))}
-          {events?.length === 0 && <p className="label">Nenhum evento publicado.</p>}
-          {events?.map((event) => (
-            <button
-              key={event.id}
-              onClick={() => setEventId(event.id)}
-              className="rounded border border-border bg-surface-1 px-4 py-3 text-left transition-colors hover:border-accent"
-            >
-              <p className="text-text">{event.title}</p>
-              <p className="caption">
-                {event.local} — {formatDateTime(event.starts_at)}
-              </p>
-            </button>
-          ))}
+      {picking && (
+        <div className="flex flex-col gap-3">
+          <p className="label">Marque as sessões que você está cobrindo agora:</p>
+          <div className="flex flex-col gap-2">
+            {events === null &&
+              [0, 1, 2].map((i) => (
+                <div key={i} className="h-14 animate-pulse rounded border border-border bg-surface-1" />
+              ))}
+            {events?.length === 0 && <p className="label">Nenhum evento publicado.</p>}
+            {events?.map((event) => {
+              const checked = selectedIds.includes(event.id);
+              return (
+                <button
+                  key={event.id}
+                  type="button"
+                  onClick={() => toggleEvent(event.id)}
+                  className={`flex items-start gap-3 rounded border px-4 py-3 text-left transition-colors ${
+                    checked ? "border-accent bg-accent/10" : "border-border bg-surface-1 hover:border-border-strong"
+                  }`}
+                >
+                  <span
+                    className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                      checked ? "border-accent bg-accent" : "border-border"
+                    }`}
+                  >
+                    {checked && <span className="h-2 w-2 rounded-sm bg-on-accent" />}
+                  </span>
+                  <span>
+                    <p className="text-text">{event.title}</p>
+                    <p className="caption">
+                      {event.local} — {formatDateTime(event.starts_at)}
+                    </p>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            disabled={selectedIds.length === 0}
+            onClick={() => setPicking(false)}
+            className="w-fit rounded bg-accent px-4 py-2 font-medium text-on-accent hover:bg-accent-hover disabled:opacity-60"
+          >
+            {selectedIds.length === 0
+              ? "Selecione ao menos uma sessão"
+              : `Começar a validar (${selectedIds.length} sessão${selectedIds.length > 1 ? "ões" : ""})`}
+          </button>
         </div>
       )}
 
-      {selectedEvent && (
+      {!picking && (
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between rounded border border-border bg-surface-1 px-4 py-2">
-            <p className="label">
-              Validando: <span className="text-text">{selectedEvent.title}</span>
-            </p>
+          <div className="flex items-start justify-between gap-3 rounded border border-border bg-surface-1 px-4 py-2">
+            <div>
+              <p className="label">Validando:</p>
+              <p className="text-text">{selectedEvents.map((e) => e.title).join(", ")}</p>
+            </div>
             <button
               onClick={() => {
-                setEventId(null);
+                setPicking(true);
                 setResult(null);
               }}
-              className="caption text-accent hover:underline"
+              className="shrink-0 caption text-accent hover:underline"
             >
-              Trocar evento
+              Trocar sessões
             </button>
           </div>
 
@@ -178,6 +211,7 @@ function Portaria() {
             <div className={`flex flex-col items-center gap-2 rounded-lg border p-6 text-center ${RESULT_STYLE[result.result]}`}>
               <h2 className="text-lg font-medium">{RESULT_TITLE[result.result]}</h2>
               <p>{result.message}</p>
+              {result.event_title && <p className="label">{result.event_title}</p>}
               {result.seat_label && <p className="ticket-code">Assento {result.seat_label}</p>}
               {result.used_at && (
                 <p className="caption">Usado em {formatDateTime(result.used_at)}</p>

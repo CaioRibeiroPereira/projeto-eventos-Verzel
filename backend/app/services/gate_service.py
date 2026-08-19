@@ -24,10 +24,9 @@ class GateService:
             return None
         return self.repository.get_by_manual_code(normalized)
 
-    def validate(self, event_id: int, data: ValidateRequest, gate_user_id: int) -> ValidationResult:
-        event = self.repository.get_event(event_id)
-        if not event:
-            return ValidationResult(result="invalid", message="Evento não encontrado")
+    def validate(self, data: ValidateRequest, gate_user_id: int) -> ValidationResult:
+        if not data.event_ids:
+            return ValidationResult(result="invalid", message="Selecione ao menos uma sessão pra validar")
 
         ticket = self._resolve_ticket(data.code)
         if not ticket:
@@ -35,12 +34,14 @@ class GateService:
 
         seat = self.repository.get_seat(ticket.seat_id)
         seat_label = seat.label if seat else None
+        event = self.repository.get_event(ticket.event_id)
 
-        if ticket.event_id != event_id:
+        if ticket.event_id not in data.event_ids:
             return ValidationResult(
                 result="wrong_event",
-                message="Esse ingresso é de outro evento",
+                message="Esse ingresso é de outra sessão",
                 seat_label=seat_label,
+                event_title=event.title if event else None,
             )
 
         if ticket.status == TicketStatus.cancelled:

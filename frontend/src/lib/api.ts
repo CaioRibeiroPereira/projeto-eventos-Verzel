@@ -347,11 +347,11 @@ export interface ValidationResult {
   used_at: string | null;
 }
 
-export function validateTicket(token: string, eventId: number, code: string) {
-  return request<ValidationResult>(`/events/${eventId}/validate`, {
+export function validateTicket(token: string, eventIds: number[], code: string) {
+  return request<ValidationResult>(`/gate/validate`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ code }),
+    body: JSON.stringify({ code, event_ids: eventIds }),
   });
 }
 

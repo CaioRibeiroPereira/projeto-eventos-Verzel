@@ -18,11 +18,10 @@ def get_gate_service(session: Session = Depends(get_session)) -> GateService:
 require_gate = require_role(UserRole.gate)
 
 
-@router.post("/events/{event_id}/validate", response_model=ValidationResult)
+@router.post("/gate/validate", response_model=ValidationResult)
 def validate_ticket(
-    event_id: int,
     data: ValidateRequest,
     service: GateService = Depends(get_gate_service),
     user: User = Depends(require_gate),
 ):
-    return service.validate(event_id, data, user.id)
+    return service.validate(data, user.id)
