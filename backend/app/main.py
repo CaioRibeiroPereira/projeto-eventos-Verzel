@@ -8,6 +8,9 @@ app = FastAPI(title="Plataforma de Eventos e Ingressos")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
+    # permite acessar pelo IP da rede local também (ex: testar no celular
+    # na mesma Wi-Fi) — só faixas privadas, não abre pra internet.
+    allow_origin_regex=r"http://(192\.168|10\.\d+)\.\d+\.\d+:3000",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
