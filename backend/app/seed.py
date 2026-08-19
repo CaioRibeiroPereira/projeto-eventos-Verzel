@@ -6,15 +6,19 @@ eventos se o organizador de seed já tiver algum.
 Uso: python -m app.seed
 """
 
+import random
 from datetime import datetime, timedelta
 
 from sqlmodel import Session, select
 
 from app.core.database import engine
+from app.core.qr import generate_manual_code, generate_share_token, sign_ticket
 from app.core.security import hash_password
 from app.integrations import tmdb
 from app.models.event import Event, EventFormat, EventLanguage, EventStatus
+from app.models.reservation import Reservation, ReservationStatus
 from app.models.seat import Seat
+from app.models.ticket import Ticket, TicketStatus
 from app.models.user import User, UserRole
 from app.services.seat_layouts import ROOM_LAYOUTS
 
@@ -62,6 +66,19 @@ MOVIES = [
 ]
 
 ROOMS = ["Sala A", "Sala B", "Sala C", "Sala D", "Sala E", "Sala F"]
+
+# Clientes só pra dar volume de vendas realista no dashboard — não são
+# contas documentadas no README, ninguém precisa logar nelas.
+SYNTHETIC_CUSTOMER_NAMES = [
+    "Ana Souza", "Bruno Lima", "Carla Dias", "Diego Alves", "Elisa Rocha",
+    "Fábio Nunes", "Gabriela Melo", "Heitor Costa", "Isabela Ramos", "João Pedro Silva",
+    "Karina Freitas", "Lucas Martins", "Mariana Teixeira", "Nicolas Barros", "Olívia Cardoso",
+    "Pedro Henrique Souza", "Queila Santos", "Rafael Gomes", "Sofia Pereira", "Thiago Araújo",
+    "Ursula Bento", "Victor Hugo Lima", "Wesley Moraes", "Yasmin Castro", "Zeca Fonseca",
+    "Amanda Rezende", "Bernardo Vieira", "Camila Duarte", "Danilo Correia", "Eduarda Lopes",
+    "Felipe Cunha", "Giovanna Farias", "Henrique Pires", "Ivana Brito", "José Ricardo",
+    "Larissa Moura", "Marcelo Tavares", "Natália Borges", "Otávio Guedes", "Patrícia Nogueira",
+]
 
 FORMATS = [EventFormat.format_2d, EventFormat.format_2d, EventFormat.format_3d]
 LANGUAGES = [EventLanguage.dubbed, EventLanguage.subtitled]
@@ -185,10 +202,126 @@ def seed_events(session: Session, organizer: User) -> None:
         )
 
 
+def _synthetic_customers(session: Session) -> list[User]:
+    return [
+        _get_or_create_user(session, name, f"cliente.sim{i:02d}@cineverzel.local", UserRole.customer)
+        for i, name in enumerate(SYNTHETIC_CUSTOMER_NAMES, start=1)
+    ]
+
+
+def _issue_tickets(session: Session, reservation: Reservation) -> None:
+    tickets = session.exec(select(Ticket).where(Ticket.reservation_id == reservation.id)).all()
+    for ticket in tickets:
+        ticket.qr_signature = sign_ticket(ticket.id)
+        ticket.share_token = generate_share_token()
+        ticket.manual_code = generate_manual_code()
+        session.add(ticket)
+    session.commit()
+
+
+def seed_sales(session: Session, organizer: User) -> None:
+    """Popula vendas com uma distribuição de ocupação variada (alguns
+    eventos quase esgotados, outros fracos) pra o dashboard do organizador
+    ter cara de cenário real. Só mexe em eventos que ainda não têm nenhuma
+    venda — não toca no que já foi vendido/testado manualmente antes."""
+    events = list(
+        session.exec(
+            select(Event).where(Event.organizer_id == organizer.id, Event.status == EventStatus.published)
+        )
+    )
+    if not events:
+        return
+
+    rng = random.Random(42)
+    customers = _synthetic_customers(session)
+
+    for event in events:
+        already_sold = session.exec(
+            select(Reservation).where(
+                Reservation.event_id == event.id, Reservation.status == ReservationStatus.paid
+            )
+        ).first()
+        if already_sold:
+            continue
+
+        seats = list(session.exec(select(Seat).where(Seat.event_id == event.id)))
+        if not seats:
+            continue
+
+        # Exclui assentos já ocupados por qualquer ticket não cancelado,
+        # mesmo de reserva pending/expirada esquecida por trás — é o que a
+        # constraint UNIQUE(event_id, seat_id) do banco também considera.
+        taken_seat_ids = {
+            t.seat_id
+            for t in session.exec(
+                select(Ticket).where(Ticket.event_id == event.id, Ticket.status != TicketStatus.cancelled)
+            )
+        }
+        sellable_seats = [s for s in seats if s.id not in taken_seat_ids]
+        if not sellable_seats:
+            continue
+
+        band = rng.random()
+        if band < 0.15:
+            occupancy = rng.uniform(0.80, 0.95)  # quase esgotado
+        elif band < 0.45:
+            occupancy = rng.uniform(0.45, 0.75)  # vendendo bem
+        elif band < 0.80:
+            occupancy = rng.uniform(0.15, 0.40)  # moderado
+        else:
+            occupancy = rng.uniform(0.0, 0.10)  # fraco
+
+        target = min(round(len(seats) * occupancy), len(sellable_seats))
+        if target == 0:
+            print(f"  {event.title} ({event.local}): 0/{len(seats)} assentos vendidos")
+            continue
+
+        available_seats = list(sellable_seats)
+        rng.shuffle(available_seats)
+        pool = list(customers)
+        rng.shuffle(pool)
+
+        sold = 0
+        for customer in pool:
+            if sold >= target or not available_seats:
+                break
+            n = min(1 if rng.random() < 0.5 else 2, target - sold, len(available_seats))
+            chosen = [available_seats.pop() for _ in range(n)]
+
+            reservation = Reservation(
+                customer_id=customer.id,
+                event_id=event.id,
+                status=ReservationStatus.paid,
+                total=event.price * len(chosen),
+                expires_at=datetime.utcnow(),
+            )
+            session.add(reservation)
+            session.commit()
+            session.refresh(reservation)
+
+            for seat in chosen:
+                session.add(
+                    Ticket(
+                        reservation_id=reservation.id,
+                        event_id=event.id,
+                        seat_id=seat.id,
+                        status=TicketStatus.valid,
+                    )
+                )
+            session.commit()
+            _issue_tickets(session, reservation)
+
+            sold += n
+
+        print(f"  {event.title} ({event.local}): {sold}/{len(seats)} assentos vendidos")
+
+
 def seed() -> None:
     with Session(engine) as session:
         organizers = seed_users(session)
         seed_events(session, organizers[0])
+        print("\nPopulando vendas simuladas:")
+        seed_sales(session, organizers[0])
 
     print("\nSeed concluído. Contas de teste (login direto):")
     for name, email in ORGANIZERS:
