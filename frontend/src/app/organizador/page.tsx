@@ -11,10 +11,14 @@ export default function OrganizadorPage() {
   return ready ? <Dashboard /> : null;
 }
 
+type SortBy = "starts_at" | "created_at";
+
 function Dashboard() {
   const { user, token } = useRoleGuard("organizer");
   const [events, setEvents] = useState<Event[] | null>(null);
   const [publishingId, setPublishingId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<SortBy>("starts_at");
 
   const load = useCallback(() => {
     if (!token) return;
@@ -36,6 +40,10 @@ function Dashboard() {
     }
   }
 
+  const visibleEvents = (events ?? [])
+    .filter((e) => e.title.toLowerCase().includes(search.trim().toLowerCase()))
+    .sort((a, b) => new Date(b[sortBy]).getTime() - new Date(a[sortBy]).getTime());
+
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-6 py-10">
       <div className="flex items-center justify-between">
@@ -50,6 +58,29 @@ function Dashboard() {
           Criar evento
         </Link>
       </div>
+
+      {events && events.length > 0 && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <input
+            type="search"
+            placeholder="Buscar por nome do filme..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded border border-border bg-surface-2 px-3 py-2 text-text outline-none focus:border-accent sm:max-w-xs"
+          />
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="label">Ordenar por</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortBy)}
+              className="rounded border border-border bg-surface-2 px-3 py-2 text-sm text-text outline-none focus:border-accent"
+            >
+              <option value="starts_at">Data de exibição</option>
+              <option value="created_at">Data de criação</option>
+            </select>
+          </div>
+        </div>
+      )}
 
       {events === null && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -71,8 +102,14 @@ function Dashboard() {
         </div>
       )}
 
+      {events && events.length > 0 && visibleEvents.length === 0 && (
+        <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border py-16 text-center">
+          <p className="label">Nenhum evento encontrado pra &quot;{search}&quot;.</p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {events?.map((event) => (
+        {visibleEvents.map((event) => (
           <div
             key={event.id}
             className="flex gap-4 overflow-hidden rounded-lg border border-border bg-surface-1 p-4 transition-colors hover:border-border-strong"

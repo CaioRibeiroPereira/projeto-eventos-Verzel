@@ -140,6 +140,7 @@ export interface EventCreateInput {
   price: number;
   format: EventFormat;
   language: EventLanguage;
+  publish_now: boolean;
 }
 
 export type EventStatus = "draft" | "published";
@@ -173,6 +174,7 @@ export interface Event {
   status: EventStatus;
   seat_count: number;
   seats_sold: number;
+  created_at: string;
 }
 
 export interface EventFilters {

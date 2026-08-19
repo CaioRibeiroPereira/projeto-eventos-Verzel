@@ -30,10 +30,12 @@ function Wizard() {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [rooms, setRooms] = useState<Record<string, SeatRow[]> | null>(null);
   const [local, setLocal] = useState("");
-  const [startsAt, setStartsAt] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
   const [price, setPrice] = useState("");
   const [format, setFormat] = useState<EventFormat>("2D");
   const [language, setLanguage] = useState<EventLanguage>("Dublado");
+  const [publishNow, setPublishNow] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -61,10 +63,11 @@ function Wizard() {
       await createEvent(token, {
         tmdb_movie_id: movie.id,
         local,
-        starts_at: new Date(startsAt).toISOString(),
+        starts_at: `${date}T${time}:00`,
         price: Number(price),
         format,
         language,
+        publish_now: publishNow,
       });
       router.push("/organizador");
     } catch (err) {
@@ -141,16 +144,29 @@ function Wizard() {
                   className="rounded border border-border bg-surface-2 px-3 py-2 text-text outline-none focus:border-accent"
                 />
               </div>
-              <div className="flex flex-col gap-1 sm:col-span-2">
-                <label className="label" htmlFor="starts_at">
-                  Data e hora
+              <div className="flex flex-col gap-1">
+                <label className="label" htmlFor="date">
+                  Data
                 </label>
                 <input
-                  id="starts_at"
-                  type="datetime-local"
+                  id="date"
+                  type="date"
                   required
-                  value={startsAt}
-                  onChange={(e) => setStartsAt(e.target.value)}
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="rounded border border-border bg-surface-2 px-3 py-2 text-text outline-none focus:border-accent"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="label" htmlFor="time">
+                  Hora
+                </label>
+                <input
+                  id="time"
+                  type="time"
+                  required
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
                   className="rounded border border-border bg-surface-2 px-3 py-2 text-text outline-none focus:border-accent"
                 />
               </div>
@@ -202,6 +218,16 @@ function Wizard() {
             {currentLayout && <RoomLayoutPreview rows={currentLayout} />}
           </section>
 
+          <label className="flex w-fit items-center gap-2 text-sm text-text">
+            <input
+              type="checkbox"
+              checked={publishNow}
+              onChange={(e) => setPublishNow(e.target.checked)}
+              className="h-4 w-4 rounded border-border accent-accent"
+            />
+            Publicar assim que criar (senão fica como rascunho)
+          </label>
+
           {error && <p className="text-sm text-red">{error}</p>}
 
           <button
@@ -209,7 +235,7 @@ function Wizard() {
             disabled={submitting || seatCount === 0}
             className="w-fit rounded bg-accent px-6 py-2 font-medium text-on-accent hover:bg-accent-hover disabled:opacity-60"
           >
-            {submitting ? "Criando..." : "Criar evento (rascunho)"}
+            {submitting ? "Criando..." : publishNow ? "Criar e publicar evento" : "Criar evento (rascunho)"}
           </button>
         </form>
       )}

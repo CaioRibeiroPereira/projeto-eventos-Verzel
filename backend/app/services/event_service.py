@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 
 from app.integrations import tmdb
-from app.models.event import Event
+from app.models.event import Event, EventStatus
 from app.models.seat import Seat
 from app.repositories.event_repository import EventRepository
 from app.schemas.events import EventCreate, EventFilters, EventRead, SeatRowInput
@@ -32,6 +32,7 @@ def _to_read(event: Event, seat_count: int, seats_sold: int) -> EventRead:
         status=event.status,
         seat_count=seat_count,
         seats_sold=seats_sold,
+        created_at=event.created_at,
     )
 
 
@@ -100,6 +101,7 @@ class EventService:
                 price=data.price,
                 format=data.format,
                 language=data.language,
+                status=EventStatus.published if data.publish_now else EventStatus.draft,
             )
         )
         seats = _build_seats(event.id, layout)

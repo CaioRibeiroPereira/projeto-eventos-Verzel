@@ -22,6 +22,7 @@ class EventCreate(SQLModel):
     price: float
     format: EventFormat
     language: EventLanguage
+    publish_now: bool = False
 
 
 class CastMember(SQLModel):
@@ -53,6 +54,7 @@ class EventRead(SQLModel):
     status: EventStatus
     seat_count: int
     seats_sold: int
+    created_at: datetime
 
 
 class EventFilters(SQLModel):

@@ -51,3 +51,4 @@ class Event(SQLModel, table=True):
     )
 
     status: EventStatus = EventStatus.draft
+    created_at: datetime = Field(default_factory=datetime.utcnow)
