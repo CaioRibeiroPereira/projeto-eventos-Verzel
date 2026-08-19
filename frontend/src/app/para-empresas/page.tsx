@@ -20,9 +20,8 @@ export default function ParaEmpresasPage() {
         <span className="label text-accent">Organizadores</span>
         <h1 className="movie-title !text-3xl">Para empresas</h1>
         <p className="leading-relaxed text-text-secondary">
-          Salas e produtoras de cinema podem usar o Cine Verzel pra publicar sessões e
-          vender ingressos online, sem depender de planilha ou balcão físico pra
-          controlar lugares.
+          Sua empresa pode usar o Cine Verzel pra publicar sessões e vender ingressos
+          online, sem depender de planilha ou balcão físico pra controlar lugares.
         </p>
         <p className="leading-relaxed text-text-secondary">Quer saber mais? Preencha o formulário abaixo.</p>
       </div>
