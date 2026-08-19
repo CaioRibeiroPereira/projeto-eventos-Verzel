@@ -1,4 +1,5 @@
 from app.core.qr import normalize_manual_code, parse_ticket_payload, verify_ticket
+from app.models.reservation import ReservationStatus
 from app.models.ticket import Ticket, TicketStatus
 from app.repositories.gate_repository import GateRepository
 from app.schemas.gate import ValidateRequest, ValidationResult
@@ -71,6 +72,16 @@ class GateService:
                 used_at=ticket.used_at,
             )
 
+        reservation = self.repository.get_reservation(ticket.reservation_id)
+        if reservation and reservation.status == ReservationStatus.awaiting_door_payment:
+            return ValidationResult(
+                result="payment_due",
+                message="Pagamento pendente — cobrar na entrada",
+                seat_label=seat_label,
+                event_title=event_title,
+                amount_due=reservation.total,
+            )
+
         if self.repository.try_mark_used(ticket.id, gate_user_id):
             return ValidationResult(
                 result="valid",
@@ -82,6 +93,51 @@ class GateService:
         return ValidationResult(
             result="already_used",
             message="Ingresso já foi utilizado",
+            seat_label=seat_label,
+            event_title=event_title,
+        )
+
+    def collect_door_payment(self, data: ValidateRequest, gate_user_id: int) -> ValidationResult:
+        """'Pagar na hora': cobra e libera a entrada numa ação só. Marca a
+        reserva inteira como paga e todos os tickets dela como usados —
+        se a reserva tem mais de um assento, o grupo inteiro entra junto."""
+        resolved = self._resolve_in_scope(data)
+        if isinstance(resolved, ValidationResult):
+            return resolved
+        ticket, seat_label, event_title = resolved
+
+        if ticket.status == TicketStatus.cancelled:
+            return ValidationResult(result="invalid", message="Ingresso cancelado", seat_label=seat_label)
+
+        if ticket.status == TicketStatus.used:
+            return ValidationResult(
+                result="already_used",
+                message="Ingresso já foi utilizado",
+                seat_label=seat_label,
+                event_title=event_title,
+                used_at=ticket.used_at,
+            )
+
+        reservation = self.repository.get_reservation(ticket.reservation_id)
+        if not reservation or reservation.status != ReservationStatus.awaiting_door_payment:
+            return ValidationResult(
+                result="invalid",
+                message="Esse ingresso não tem pagamento pendente na portaria",
+                seat_label=seat_label,
+                event_title=event_title,
+            )
+
+        if self.repository.collect_door_payment(reservation.id, gate_user_id):
+            return ValidationResult(
+                result="valid",
+                message=f"Pagamento de R$ {reservation.total:.2f} confirmado — entrada liberada",
+                seat_label=seat_label,
+                event_title=event_title,
+            )
+
+        return ValidationResult(
+            result="invalid",
+            message="Não foi possível cobrar, tente de novo",
             seat_label=seat_label,
             event_title=event_title,
         )

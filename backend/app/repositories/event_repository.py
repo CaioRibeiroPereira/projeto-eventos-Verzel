@@ -115,16 +115,19 @@ class EventRepository:
 
     def cancel_with_active_reservations(self, event: Event) -> int:
         """Cancela o evento e, na mesma transação, cancela toda reserva paga
-        (e seus tickets) desse evento — a sessão não vai mais acontecer, os
-        ingressos vendidos deixam de valer. Retorna quantas reservas foram
-        afetadas."""
+        ou aguardando pagamento na portaria (e seus tickets) desse evento —
+        a sessão não vai mais acontecer, os ingressos deixam de valer.
+        Retorna quantas reservas foram afetadas."""
         event.status = EventStatus.cancelled
         self.session.add(event)
 
         reservations = list(
             self.session.exec(
                 select(Reservation).where(
-                    Reservation.event_id == event.id, Reservation.status == ReservationStatus.paid
+                    Reservation.event_id == event.id,
+                    Reservation.status.in_(
+                        [ReservationStatus.paid, ReservationStatus.awaiting_door_payment]
+                    ),
                 )
             )
         )

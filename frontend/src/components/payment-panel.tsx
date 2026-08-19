@@ -26,6 +26,7 @@ export function PaymentPanel({
   error,
   onApprove,
   onDecline,
+  onPayAtDoor,
 }: {
   total: number;
   seatLabels: string[];
@@ -33,6 +34,7 @@ export function PaymentPanel({
   error: string | null;
   onApprove: () => void;
   onDecline: () => void;
+  onPayAtDoor: () => void;
 }) {
   const [method, setMethod] = useState<Method | null>(null);
   const [card, setCard] = useState({ number: "", name: "", expiry: "", cvv: "" });
@@ -159,10 +161,11 @@ export function PaymentPanel({
             <div className="flex flex-col items-center gap-3 text-center">
               <ClockIcon className="h-10 w-10 text-accent" />
               <p className="label">
-                Seu assento fica reservado e o pagamento é feito na bilheteria antes da sessão.
+                Seu assento fica reservado até a sessão. O ingresso já sai com QR — leve ele até a
+                portaria, o pagamento é cobrado na entrada.
               </p>
               <button
-                onClick={onApprove}
+                onClick={onPayAtDoor}
                 disabled={busy}
                 className="w-full rounded bg-accent px-4 py-2 font-medium text-on-accent hover:bg-accent-hover disabled:opacity-60"
               >

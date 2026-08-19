@@ -19,3 +19,4 @@ class TicketRead(SQLModel):
     share_token: str
     manual_code: str
     used_at: datetime | None
+    awaiting_door_payment: bool

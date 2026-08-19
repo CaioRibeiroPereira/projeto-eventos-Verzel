@@ -13,6 +13,7 @@ import {
   declinePayment,
   getPublicEvent,
   getSeatMap,
+  payAtDoor,
   MAX_SEATS_PER_RESERVATION,
   type Event,
   type Reservation,
@@ -20,7 +21,7 @@ import {
 } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
 
-type Step = "select" | "payment" | "success" | "declined";
+type Step = "select" | "payment" | "success" | "declined" | "door_payment";
 
 export default function ReservarPage() {
   const { id } = useParams<{ id: string }>();
@@ -104,6 +105,19 @@ export default function ReservarPage() {
     }
   }
 
+  async function handlePayAtDoor() {
+    if (!reservation || !token) return;
+    setBusy(true);
+    try {
+      await payAtDoor(token, reservation.id);
+      setStep("door_payment");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Não foi possível confirmar a reserva.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function handleTryAgain() {
     setStep("select");
     setSelected([]);
@@ -164,6 +178,7 @@ export default function ReservarPage() {
           error={error}
           onApprove={() => handlePayment(true)}
           onDecline={() => handlePayment(false)}
+          onPayAtDoor={handlePayAtDoor}
         />
       )}
 
@@ -177,6 +192,21 @@ export default function ReservarPage() {
           </p>
           <Link href="/cliente" className="text-accent">
             {reservation.seats.length > 1 ? "Ver meus ingressos com QR" : "Ver meu ingresso com QR"}
+          </Link>
+        </div>
+      )}
+
+      {step === "door_payment" && reservation && (
+        <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-3 rounded-lg border border-border-warning bg-bg-warning p-6 text-center">
+          <h2 className="text-lg font-medium text-text-warning">Reserva confirmada</h2>
+          <p className="label">
+            {reservation.seats.length > 1 ? "Assentos" : "Assento"}{" "}
+            {reservation.seats.map((s) => s.seat_label).join(", ")} reservado
+            {reservation.seats.length > 1 ? "s" : ""} — pagamento de {formatPrice(reservation.total)} é
+            feito na portaria, na entrada.
+          </p>
+          <Link href="/cliente" className="text-accent">
+            Ver meu ingresso com QR
           </Link>
         </div>
       )}

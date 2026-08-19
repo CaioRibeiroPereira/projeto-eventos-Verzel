@@ -302,6 +302,13 @@ export function declinePayment(token: string, reservationId: number) {
   });
 }
 
+export function payAtDoor(token: string, reservationId: number) {
+  return request<Reservation>(`/reservations/${reservationId}/pay-at-door`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function cancelReservation(token: string, reservationId: number) {
   return request<Reservation>(`/reservations/${reservationId}/cancel`, {
     method: "POST",
@@ -325,6 +332,7 @@ export interface Ticket {
   share_token: string;
   manual_code: string;
   used_at: string | null;
+  awaiting_door_payment: boolean;
 }
 
 export function listMyTickets(token: string) {
@@ -337,7 +345,7 @@ export function getSharedTicket(token: string) {
   return request<Ticket>(`/tickets/shared/${token}`);
 }
 
-export type ValidationOutcome = "valid" | "invalid" | "already_used" | "wrong_event";
+export type ValidationOutcome = "valid" | "invalid" | "already_used" | "wrong_event" | "payment_due";
 
 export interface ValidationResult {
   result: ValidationOutcome;
@@ -345,6 +353,7 @@ export interface ValidationResult {
   seat_label: string | null;
   event_title: string | null;
   used_at: string | null;
+  amount_due: number | null;
 }
 
 export function validateTicket(token: string, eventIds: number[], code: string) {
@@ -357,6 +366,14 @@ export function validateTicket(token: string, eventIds: number[], code: string) 
 
 export function undoValidation(token: string, eventIds: number[], code: string) {
   return request<ValidationResult>(`/gate/undo`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ code, event_ids: eventIds }),
+  });
+}
+
+export function collectDoorPayment(token: string, eventIds: number[], code: string) {
+  return request<ValidationResult>(`/gate/collect-payment`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify({ code, event_ids: eventIds }),

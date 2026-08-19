@@ -10,14 +10,15 @@ class TicketRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def list_for_customer(self, customer_id: int) -> list[tuple[Ticket, Event, Seat]]:
+    def list_for_customer(self, customer_id: int) -> list[tuple[Ticket, Event, Seat, Reservation]]:
         # qr_signature só existe em ingresso que chegou a ser emitido (pagamento
-        # confirmado). Reserva recusada/expirada também vira status=cancelled,
-        # mas nunca foi emitida — não deve aparecer aqui. Um ingresso que o
-        # próprio cliente cancelou DEPOIS de emitido continua aparecendo,
-        # agora com status=cancelled, pra manter o histórico visível.
+        # confirmado ou pagamento na hora reservado). Reserva recusada/expirada
+        # também vira status=cancelled, mas nunca foi emitida — não deve
+        # aparecer aqui. Um ingresso que o próprio cliente cancelou DEPOIS de
+        # emitido continua aparecendo, agora com status=cancelled, pra manter
+        # o histórico visível.
         rows = self.session.exec(
-            select(Ticket, Event, Seat)
+            select(Ticket, Event, Seat, Reservation)
             .join(Reservation, Ticket.reservation_id == Reservation.id)
             .join(Event, Ticket.event_id == Event.id)
             .join(Seat, Ticket.seat_id == Seat.id)
@@ -29,11 +30,12 @@ class TicketRepository:
         ).all()
         return list(rows)
 
-    def get_by_share_token(self, token: str) -> tuple[Ticket, Event, Seat] | None:
+    def get_by_share_token(self, token: str) -> tuple[Ticket, Event, Seat, Reservation] | None:
         return self.session.exec(
-            select(Ticket, Event, Seat)
+            select(Ticket, Event, Seat, Reservation)
             .join(Event, Ticket.event_id == Event.id)
             .join(Seat, Ticket.seat_id == Seat.id)
+            .join(Reservation, Ticket.reservation_id == Reservation.id)
             .where(Ticket.share_token == token)
         ).first()
 

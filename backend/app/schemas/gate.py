@@ -3,7 +3,7 @@ from typing import Literal
 
 from sqlmodel import SQLModel
 
-ValidationOutcome = Literal["valid", "invalid", "already_used", "wrong_event"]
+ValidationOutcome = Literal["valid", "invalid", "already_used", "wrong_event", "payment_due"]
 
 
 class ValidateRequest(SQLModel):
@@ -17,3 +17,4 @@ class ValidationResult(SQLModel):
     seat_label: str | None = None
     event_title: str | None = None
     used_at: datetime | None = None
+    amount_due: float | None = None

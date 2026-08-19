@@ -36,6 +36,15 @@ def create_reservation(
     return service.create_reservation(user.id, event_id, data)
 
 
+@router.post("/reservations/{reservation_id}/pay-at-door", response_model=ReservationRead)
+def pay_at_door(
+    reservation_id: int,
+    service: ReservationService = Depends(get_reservation_service),
+    user: User = Depends(require_customer),
+):
+    return service.pay_at_door(user.id, reservation_id)
+
+
 @router.post("/reservations/{reservation_id}/confirm", response_model=ReservationRead)
 def confirm_payment(
     reservation_id: int,

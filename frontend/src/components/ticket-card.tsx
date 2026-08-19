@@ -80,13 +80,17 @@ export function TicketCard({
           <span
             className={`caption mt-1 inline-block w-fit rounded px-2 py-0.5 ${
               ticket.status === "valid"
-                ? "bg-bg-success text-text-success"
+                ? ticket.awaiting_door_payment
+                  ? "bg-bg-warning text-text-warning"
+                  : "bg-bg-success text-text-success"
                 : ticket.status === "used"
                   ? "bg-surface-3 text-text-secondary"
                   : "bg-bg-danger text-text-danger"
             }`}
           >
-            {STATUS_LABEL[ticket.status]}
+            {ticket.status === "valid" && ticket.awaiting_door_payment
+              ? "Aguardando pagamento na entrada"
+              : STATUS_LABEL[ticket.status]}
           </span>
 
           {onCancel && ticket.status === "valid" && (

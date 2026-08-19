@@ -4,6 +4,7 @@ from sqlalchemy import update
 from sqlmodel import Session, select
 
 from app.models.event import Event
+from app.models.reservation import Reservation, ReservationStatus
 from app.models.seat import Seat
 from app.models.ticket import Ticket, TicketStatus
 
@@ -23,6 +24,36 @@ class GateRepository:
 
     def get_seat(self, seat_id: int) -> Seat | None:
         return self.session.get(Seat, seat_id)
+
+    def get_reservation(self, reservation_id: int) -> Reservation | None:
+        return self.session.get(Reservation, reservation_id)
+
+    def collect_door_payment(self, reservation_id: int, validated_by: int) -> bool:
+        """Cobra e libera a entrada numa ação só: só efetiva se a reserva
+        ainda estiver aguardando pagamento na portaria, e aí marca ela como
+        paga e todos os tickets 'valid' dela (mesma reserva = mesmo grupo
+        entrando junto) como usados."""
+        res_stmt = (
+            update(Reservation)
+            .where(
+                Reservation.id == reservation_id,
+                Reservation.status == ReservationStatus.awaiting_door_payment,
+            )
+            .values(status=ReservationStatus.paid)
+            .returning(Reservation.id)
+        )
+        result = self.session.execute(res_stmt)
+        if result.first() is None:
+            self.session.rollback()
+            return False
+
+        self.session.execute(
+            update(Ticket)
+            .where(Ticket.reservation_id == reservation_id, Ticket.status == TicketStatus.valid)
+            .values(status=TicketStatus.used, used_at=datetime.utcnow(), validated_by=validated_by)
+        )
+        self.session.commit()
+        return True
 
     def try_mark_used(self, ticket_id: int, validated_by: int) -> bool:
         """UPDATE atômico: só marca como usado se ainda estiver 'valid'.

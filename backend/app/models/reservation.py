@@ -9,6 +9,7 @@ class ReservationStatus(str, Enum):
     paid = "paid"
     failed = "failed"
     cancelled = "cancelled"
+    awaiting_door_payment = "awaiting_door_payment"
 
 
 class Reservation(SQLModel, table=True):

@@ -6,13 +6,14 @@ import { CameraScanner } from "@/components/camera-scanner";
 import {
   ApiError,
   backdropUrl,
+  collectDoorPayment,
   listPublicEvents,
   undoValidation,
   validateTicket,
   type Event,
   type ValidationResult,
 } from "@/lib/api";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, formatPrice } from "@/lib/format";
 
 function todayLocal(): string {
   const now = new Date();
@@ -32,6 +33,7 @@ const RESULT_STYLE: Record<ValidationResult["result"], string> = {
   already_used: "border-border-warning bg-bg-warning text-text-warning",
   wrong_event: "border-border-danger bg-bg-danger text-text-danger",
   invalid: "border-border-danger bg-bg-danger text-text-danger",
+  payment_due: "border-border-warning bg-bg-warning text-text-warning",
 };
 
 const RESULT_TITLE: Record<ValidationResult["result"], string> = {
@@ -39,6 +41,7 @@ const RESULT_TITLE: Record<ValidationResult["result"], string> = {
   already_used: "Já utilizado",
   wrong_event: "Sessão errada",
   invalid: "Inválido",
+  payment_due: "Pagamento pendente",
 };
 
 function Portaria() {
@@ -78,6 +81,7 @@ function Portaria() {
           seat_label: null,
           event_title: null,
           used_at: null,
+          amount_due: null,
         });
       } finally {
         setBusy(false);
@@ -85,6 +89,26 @@ function Portaria() {
     },
     [selectedIds, busy, token],
   );
+
+  async function handleCollectPayment() {
+    if (!token || !lastCode || busy) return;
+    setBusy(true);
+    try {
+      const res = await collectDoorPayment(token, selectedIds, lastCode);
+      setResult(res);
+    } catch (err) {
+      setResult({
+        result: "invalid",
+        message: err instanceof ApiError ? err.message : "Erro ao cobrar",
+        seat_label: null,
+        event_title: null,
+        used_at: null,
+        amount_due: null,
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function handleUndo() {
     if (!token || !lastCode || busy) return;
@@ -100,6 +124,7 @@ function Portaria() {
         seat_label: null,
         event_title: null,
         used_at: null,
+        amount_due: null,
       });
     } finally {
       setBusy(false);
@@ -269,16 +294,29 @@ function Portaria() {
               <p>{result.message}</p>
               {result.event_title && <p className="label">{result.event_title}</p>}
               {result.seat_label && <p className="ticket-code">Assento {result.seat_label}</p>}
+              {result.amount_due != null && (
+                <p className="text-lg font-medium">{formatPrice(result.amount_due)}</p>
+              )}
               {result.used_at && (
                 <p className="caption">Usado em {formatDateTime(result.used_at)}</p>
               )}
               <div className="mt-2 flex items-center gap-3">
-                <button
-                  onClick={handleScanAgain}
-                  className="rounded bg-accent px-4 py-2 font-medium text-on-accent hover:bg-accent-hover"
-                >
-                  Validar outro
-                </button>
+                {result.result === "payment_due" ? (
+                  <button
+                    onClick={handleCollectPayment}
+                    disabled={busy}
+                    className="rounded bg-accent px-4 py-2 font-medium text-on-accent hover:bg-accent-hover disabled:opacity-60"
+                  >
+                    {busy ? "Cobrando..." : "Cobrar e liberar entrada"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleScanAgain}
+                    className="rounded bg-accent px-4 py-2 font-medium text-on-accent hover:bg-accent-hover"
+                  >
+                    Validar outro
+                  </button>
+                )}
                 {result.result === "valid" && !undone && lastCode && (
                   <button
                     onClick={handleUndo}
@@ -289,6 +327,11 @@ function Portaria() {
                   </button>
                 )}
               </div>
+              {result.result === "payment_due" && (
+                <button onClick={handleScanAgain} className="caption text-text-secondary hover:text-text">
+                  Cancelar / validar outro
+                </button>
+              )}
             </div>
           )}
         </div>

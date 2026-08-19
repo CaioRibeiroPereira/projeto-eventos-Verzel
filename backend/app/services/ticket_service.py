@@ -8,6 +8,7 @@ from app.core.qr import (
     ticket_payload,
 )
 from app.models.event import Event
+from app.models.reservation import Reservation, ReservationStatus
 from app.models.seat import Seat
 from app.models.ticket import Ticket
 from app.repositories.ticket_repository import TicketRepository
@@ -23,7 +24,9 @@ def _ensure_issued(repository: TicketRepository, ticket: Ticket) -> Ticket:
     return repository.save(ticket)
 
 
-def _to_read(repository: TicketRepository, ticket: Ticket, event: Event, seat: Seat) -> TicketRead:
+def _to_read(
+    repository: TicketRepository, ticket: Ticket, event: Event, seat: Seat, reservation: Reservation
+) -> TicketRead:
     ticket = _ensure_issued(repository, ticket)
     return TicketRead(
         id=ticket.id,
@@ -39,6 +42,7 @@ def _to_read(repository: TicketRepository, ticket: Ticket, event: Event, seat: S
         share_token=ticket.share_token,
         manual_code=format_manual_code(ticket.manual_code),
         used_at=ticket.used_at,
+        awaiting_door_payment=reservation.status == ReservationStatus.awaiting_door_payment,
     )
 
 
@@ -48,11 +52,14 @@ class TicketService:
 
     def list_mine(self, customer_id: int) -> list[TicketRead]:
         rows = self.repository.list_for_customer(customer_id)
-        return [_to_read(self.repository, ticket, event, seat) for ticket, event, seat in rows]
+        return [
+            _to_read(self.repository, ticket, event, seat, reservation)
+            for ticket, event, seat, reservation in rows
+        ]
 
     def get_shared(self, token: str) -> TicketRead:
         row = self.repository.get_by_share_token(token)
         if not row:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingresso não encontrado")
-        ticket, event, seat = row
-        return _to_read(self.repository, ticket, event, seat)
+        ticket, event, seat, reservation = row
+        return _to_read(self.repository, ticket, event, seat, reservation)

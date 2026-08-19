@@ -27,6 +27,15 @@ def validate_ticket(
     return service.validate(data, user.id)
 
 
+@router.post("/gate/collect-payment", response_model=ValidationResult)
+def collect_door_payment(
+    data: ValidateRequest,
+    service: GateService = Depends(get_gate_service),
+    user: User = Depends(require_gate),
+):
+    return service.collect_door_payment(data, user.id)
+
+
 @router.post("/gate/undo", response_model=ValidationResult)
 def undo_validation(
     data: ValidateRequest,

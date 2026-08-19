@@ -120,6 +120,17 @@ class ReservationService:
 
         return reservation
 
+    def pay_at_door(self, customer_id: int, reservation_id: int) -> ReservationRead:
+        """'Pagar na hora do filme': em vez de confirmar o pagamento agora,
+        segura o assento até a sessão e já emite o ingresso — a portaria
+        cobra e valida numa ação só quando a pessoa chegar."""
+        reservation = self._get_owned_pending_reservation(customer_id, reservation_id)
+        event = self.repository.get_event(reservation.event_id)
+        tickets = self.repository.get_tickets_for_reservation(reservation.id)
+        reservation = self.repository.mark_awaiting_door_payment(reservation, event, tickets)
+        seats_by_id = {t.seat_id: self.repository.get_seat(t.seat_id) for t in tickets}
+        return _to_read(reservation, tickets, seats_by_id)
+
     def confirm_payment(self, customer_id: int, reservation_id: int) -> ReservationRead:
         reservation = self._get_owned_pending_reservation(customer_id, reservation_id)
         tickets = self.repository.get_tickets_for_reservation(reservation.id)
@@ -141,10 +152,10 @@ class ReservationService:
         if not reservation or reservation.customer_id != customer_id:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
 
-        if reservation.status != ReservationStatus.paid:
+        if reservation.status not in (ReservationStatus.paid, ReservationStatus.awaiting_door_payment):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Só é possível cancelar reservas pagas",
+                detail="Só é possível cancelar reservas pagas ou aguardando pagamento na portaria",
             )
 
         tickets = self.repository.get_tickets_for_reservation(reservation.id)
