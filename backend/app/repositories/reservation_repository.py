@@ -61,6 +61,26 @@ class ReservationRepository:
 
         return [(seat, seat.id in blocked_seat_ids) for seat in seats]
 
+    def count_active_tickets_for_customer(self, customer_id: int, event_id: int) -> int:
+        rows = self.session.exec(
+            select(Ticket, Reservation)
+            .join(Reservation, Ticket.reservation_id == Reservation.id)
+            .where(
+                Ticket.event_id == event_id,
+                Reservation.customer_id == customer_id,
+                Ticket.status != TicketStatus.cancelled,
+            )
+        ).all()
+
+        now = datetime.utcnow()
+        count = 0
+        for ticket, reservation in rows:
+            if reservation.status == ReservationStatus.paid:
+                count += 1
+            elif reservation.status == ReservationStatus.pending and reservation.expires_at > now:
+                count += 1
+        return count
+
     def create_reservation_with_tickets(
         self, customer_id: int, event: Event, seats: list[Seat]
     ) -> tuple[Reservation, list[Ticket]]:

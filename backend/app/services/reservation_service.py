@@ -70,6 +70,16 @@ class ReservationService:
         if not event or event.status != EventStatus.published:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
 
+        already_held = self.repository.count_active_tickets_for_customer(customer_id, event_id)
+        if already_held + len(data.seat_ids) > MAX_SEATS_PER_RESERVATION:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Você já tem {already_held} assento(s) reservado(s) para esse evento. "
+                    f"Máximo de {MAX_SEATS_PER_RESERVATION} por pessoa."
+                ),
+            )
+
         seats = [self.repository.get_seat(seat_id) for seat_id in data.seat_ids]
         for seat in seats:
             if not seat or seat.event_id != event_id:
