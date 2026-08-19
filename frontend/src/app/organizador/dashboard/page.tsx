@@ -81,6 +81,7 @@ function Dashboard() {
 function DashboardBody({ events }: { events: Event[] }) {
   const published = events.filter((e) => e.status === "published").length;
   const drafts = events.filter((e) => e.status === "draft").length;
+  const cancelled = events.filter((e) => e.status === "cancelled").length;
   const ticketsSold = events.reduce((sum, e) => sum + e.seats_sold, 0);
   const totalCapacity = events.reduce((sum, e) => sum + e.seat_count, 0);
   const revenue = events.reduce((sum, e) => sum + e.seats_sold * e.price, 0);
@@ -121,9 +122,10 @@ function DashboardBody({ events }: { events: Event[] }) {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <Kpi label="Publicados" value={String(published)} />
         <Kpi label="Rascunhos" value={String(drafts)} />
+        <Kpi label="Cancelados" value={String(cancelled)} />
         <Kpi label="Ingressos vendidos" value={String(ticketsSold)} />
         <Kpi label="Receita total" value={formatPrice(revenue)} />
         <Kpi label="Ocupação média" value={`${occupancyRate}%`} />

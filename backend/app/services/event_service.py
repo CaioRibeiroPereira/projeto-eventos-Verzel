@@ -1,11 +1,15 @@
+from datetime import datetime, timedelta
+
 from fastapi import HTTPException, status
 
 from app.integrations import tmdb
 from app.models.event import Event, EventStatus
 from app.models.seat import Seat
 from app.repositories.event_repository import EventRepository
-from app.schemas.events import EventCreate, EventFilters, EventRead, SeatRowInput
+from app.schemas.events import EventCancelResult, EventCreate, EventFilters, EventRead, SeatRowInput
 from app.services.seat_layouts import ROOM_LAYOUTS
+
+CANCEL_MIN_NOTICE = timedelta(days=1)
 
 
 def _to_read(event: Event, seat_count: int, seats_sold: int) -> EventRead:
@@ -112,8 +116,31 @@ class EventService:
         event = self.repository.get(event_id)
         if not event or event.organizer_id != organizer_id:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
+        if event.status == EventStatus.cancelled:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Evento cancelado não pode ser republicado",
+            )
         event = self.repository.publish(event)
         return _to_read(event, self.repository.seat_count(event.id), self.repository.seats_sold(event.id))
+
+    def cancel_event(self, organizer_id: int, event_id: int) -> EventCancelResult:
+        event = self.repository.get(event_id)
+        if not event or event.organizer_id != organizer_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
+        if event.status == EventStatus.cancelled:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Evento já está cancelado")
+        if event.starts_at - datetime.utcnow() < CANCEL_MIN_NOTICE:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Só é possível cancelar até 1 dia antes da sessão",
+            )
+
+        cancelled_reservations = self.repository.cancel_with_active_reservations(event)
+        event_read = _to_read(
+            event, self.repository.seat_count(event.id), self.repository.seats_sold(event.id)
+        )
+        return EventCancelResult(event=event_read, cancelled_reservations=cancelled_reservations)
 
     def list_my_events(self, organizer_id: int) -> list[EventRead]:
         events = self.repository.list_by_organizer(organizer_id)

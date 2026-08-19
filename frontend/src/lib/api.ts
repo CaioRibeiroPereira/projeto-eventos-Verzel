@@ -143,7 +143,7 @@ export interface EventCreateInput {
   publish_now: boolean;
 }
 
-export type EventStatus = "draft" | "published";
+export type EventStatus = "draft" | "published" | "cancelled";
 
 export interface CastMember {
   name: string;
@@ -218,6 +218,18 @@ export function createEvent(token: string, data: EventCreateInput) {
 
 export function publishEvent(token: string, id: number) {
   return request<Event>(`/events/${id}/publish`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export interface EventCancelResult {
+  event: Event;
+  cancelled_reservations: number;
+}
+
+export function cancelEvent(token: string, id: number) {
+  return request<EventCancelResult>(`/events/${id}/cancel`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
   });

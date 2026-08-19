@@ -5,7 +5,7 @@ from app.core.database import get_session
 from app.core.security import require_role
 from app.models.user import User, UserRole
 from app.repositories.event_repository import EventRepository
-from app.schemas.events import EventCreate, EventFilters, EventRead, SeatRowInput
+from app.schemas.events import EventCancelResult, EventCreate, EventFilters, EventRead, SeatRowInput
 from app.schemas.movies import MovieResult
 from app.services.event_service import EventService
 
@@ -52,6 +52,15 @@ def publish_event(
     user: User = Depends(require_organizer),
 ):
     return service.publish_event(user.id, event_id)
+
+
+@router.post("/events/{event_id}/cancel", response_model=EventCancelResult)
+def cancel_event(
+    event_id: int,
+    service: EventService = Depends(get_event_service),
+    user: User = Depends(require_organizer),
+):
+    return service.cancel_event(user.id, event_id)
 
 
 @router.get("/events/mine", response_model=list[EventRead])

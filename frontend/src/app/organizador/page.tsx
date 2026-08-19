@@ -3,8 +3,26 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRoleGuard } from "@/hooks/use-role-guard";
-import { listMyEvents, publishEvent, posterUrl, type Event } from "@/lib/api";
+import { ApiError, cancelEvent, listMyEvents, publishEvent, posterUrl, type Event } from "@/lib/api";
 import { formatDateTime, formatPrice } from "@/lib/format";
+
+const STATUS_LABEL: Record<Event["status"], string> = {
+  published: "Publicado",
+  draft: "Rascunho",
+  cancelled: "Cancelado",
+};
+
+const STATUS_CLASS: Record<Event["status"], string> = {
+  published: "bg-bg-success text-text-success",
+  draft: "bg-bg-warning text-text-warning",
+  cancelled: "bg-bg-danger text-text-danger",
+};
+
+const CANCEL_MIN_NOTICE_MS = 24 * 60 * 60 * 1000;
+
+function canCancel(event: Event): boolean {
+  return event.status !== "cancelled" && new Date(event.starts_at).getTime() - Date.now() >= CANCEL_MIN_NOTICE_MS;
+}
 
 export default function OrganizadorPage() {
   const { ready } = useRoleGuard("organizer");
@@ -19,6 +37,10 @@ function Dashboard() {
   const [publishingId, setPublishingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortBy>("starts_at");
+  const [confirmingCancelId, setConfirmingCancelId] = useState<number | null>(null);
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [cancelMessage, setCancelMessage] = useState<string | null>(null);
 
   const load = useCallback(() => {
     if (!token) return;
@@ -40,6 +62,26 @@ function Dashboard() {
     }
   }
 
+  async function handleCancel(id: number) {
+    if (!token) return;
+    setCancellingId(id);
+    setCancelError(null);
+    try {
+      const result = await cancelEvent(token, id);
+      setCancelMessage(
+        result.cancelled_reservations > 0
+          ? `Evento cancelado. ${result.cancelled_reservations} reserva(s) paga(s) foram canceladas.`
+          : "Evento cancelado.",
+      );
+      load();
+    } catch (err) {
+      setCancelError(err instanceof ApiError ? err.message : "Não foi possível cancelar o evento.");
+    } finally {
+      setCancellingId(null);
+      setConfirmingCancelId(null);
+    }
+  }
+
   const visibleEvents = (events ?? [])
     .filter((e) => e.title.toLowerCase().includes(search.trim().toLowerCase()))
     .sort((a, b) => new Date(b[sortBy]).getTime() - new Date(a[sortBy]).getTime());
@@ -58,6 +100,12 @@ function Dashboard() {
           Criar evento
         </Link>
       </div>
+
+      {cancelMessage && (
+        <p className="rounded border border-border-success bg-bg-success px-4 py-2 text-sm text-text-success">
+          {cancelMessage}
+        </p>
+      )}
 
       {events && events.length > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -129,23 +177,57 @@ function Dashboard() {
               <p className="caption">
                 {event.seats_sold}/{event.seat_count} assentos vendidos
               </p>
-              <span
-                className={`caption mt-1 inline-block w-fit rounded px-2 py-0.5 ${
-                  event.status === "published"
-                    ? "bg-bg-success text-text-success"
-                    : "bg-bg-warning text-text-warning"
-                }`}
-              >
-                {event.status === "published" ? "Publicado" : "Rascunho"}
+              <span className={`caption mt-1 inline-block w-fit rounded px-2 py-0.5 ${STATUS_CLASS[event.status]}`}>
+                {STATUS_LABEL[event.status]}
               </span>
-              {event.status === "draft" && (
-                <button
-                  onClick={() => handlePublish(event.id)}
-                  disabled={publishingId === event.id}
-                  className="mt-2 w-fit rounded border border-accent px-3 py-1 text-sm text-accent transition-colors hover:bg-accent hover:text-on-accent disabled:opacity-60"
-                >
-                  {publishingId === event.id ? "Publicando..." : "Publicar"}
-                </button>
+
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                {event.status === "draft" && (
+                  <button
+                    onClick={() => handlePublish(event.id)}
+                    disabled={publishingId === event.id}
+                    className="w-fit rounded border border-accent px-3 py-1 text-sm text-accent transition-colors hover:bg-accent hover:text-on-accent disabled:opacity-60"
+                  >
+                    {publishingId === event.id ? "Publicando..." : "Publicar"}
+                  </button>
+                )}
+
+                {event.status !== "cancelled" &&
+                  (confirmingCancelId === event.id ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleCancel(event.id)}
+                        disabled={cancellingId === event.id}
+                        className="rounded bg-red px-3 py-1 text-sm font-medium text-on-red hover:bg-red-hover disabled:opacity-60"
+                      >
+                        {cancellingId === event.id ? "Cancelando..." : "Confirmar cancelamento"}
+                      </button>
+                      <button
+                        onClick={() => setConfirmingCancelId(null)}
+                        className="text-sm text-text-secondary hover:text-text"
+                      >
+                        Voltar
+                      </button>
+                    </div>
+                  ) : canCancel(event) ? (
+                    <button
+                      onClick={() => setConfirmingCancelId(event.id)}
+                      className="w-fit rounded border border-red px-3 py-1 text-sm text-red transition-colors hover:bg-red hover:text-on-red"
+                    >
+                      Cancelar evento
+                    </button>
+                  ) : (
+                    <span className="caption">Faltam menos de 24h — não dá mais pra cancelar</span>
+                  ))}
+              </div>
+
+              {confirmingCancelId === event.id && event.seats_sold > 0 && (
+                <p className="caption text-text-secondary">
+                  {event.seats_sold} ingresso(s) já vendido(s) serão cancelados.
+                </p>
+              )}
+              {confirmingCancelId === event.id && cancelError && (
+                <p className="caption text-red">{cancelError}</p>
               )}
             </div>
           </div>

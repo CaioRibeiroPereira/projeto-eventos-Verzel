@@ -9,6 +9,7 @@ from sqlmodel import Field, SQLModel
 class EventStatus(str, Enum):
     draft = "draft"
     published = "published"
+    cancelled = "cancelled"
 
 
 class EventFormat(str, Enum):

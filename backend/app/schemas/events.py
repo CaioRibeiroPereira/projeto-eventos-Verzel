@@ -57,6 +57,11 @@ class EventRead(SQLModel):
     created_at: datetime
 
 
+class EventCancelResult(SQLModel):
+    event: EventRead
+    cancelled_reservations: int
+
+
 class EventFilters(SQLModel):
     q: str | None = None
     date: str | None = None
