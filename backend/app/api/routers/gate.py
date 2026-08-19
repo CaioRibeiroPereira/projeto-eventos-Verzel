@@ -25,3 +25,12 @@ def validate_ticket(
     user: User = Depends(require_gate),
 ):
     return service.validate(data, user.id)
+
+
+@router.post("/gate/undo", response_model=ValidationResult)
+def undo_validation(
+    data: ValidateRequest,
+    service: GateService = Depends(get_gate_service),
+    user: User = Depends(require_gate),
+):
+    return service.undo_validation(data)

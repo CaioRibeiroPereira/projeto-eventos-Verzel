@@ -38,3 +38,18 @@ class GateRepository:
         updated = result.first() is not None
         self.session.commit()
         return updated
+
+    def revert_to_valid(self, ticket_id: int) -> bool:
+        """UPDATE atômico inverso do try_mark_used: só desfaz se ainda
+        estiver 'used' — corrige validação por engano na hora, sem deixar
+        desfazer um ingresso que nunca foi validado ou já foi desfeito."""
+        stmt = (
+            update(Ticket)
+            .where(Ticket.id == ticket_id, Ticket.status == TicketStatus.used)
+            .values(status=TicketStatus.valid, used_at=None, validated_by=None)
+            .returning(Ticket.id)
+        )
+        result = self.session.execute(stmt)
+        updated = result.first() is not None
+        self.session.commit()
+        return updated

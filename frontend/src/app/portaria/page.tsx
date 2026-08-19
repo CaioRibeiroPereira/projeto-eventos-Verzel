@@ -7,6 +7,7 @@ import {
   ApiError,
   backdropUrl,
   listPublicEvents,
+  undoValidation,
   validateTicket,
   type Event,
   type ValidationResult,
@@ -49,7 +50,9 @@ function Portaria() {
   const [mode, setMode] = useState<"camera" | "manual">("manual");
   const [code, setCode] = useState("");
   const [result, setResult] = useState<ValidationResult | null>(null);
+  const [lastCode, setLastCode] = useState("");
   const [busy, setBusy] = useState(false);
+  const [undone, setUndone] = useState(false);
 
   useEffect(() => {
     listPublicEvents().then(setEvents);
@@ -63,9 +66,11 @@ function Portaria() {
     async (submittedCode: string) => {
       if (!token || selectedIds.length === 0 || !submittedCode.trim() || busy) return;
       setBusy(true);
+      setUndone(false);
       try {
         const res = await validateTicket(token, selectedIds, submittedCode.trim());
         setResult(res);
+        setLastCode(submittedCode.trim());
       } catch (err) {
         setResult({
           result: "invalid",
@@ -81,6 +86,26 @@ function Portaria() {
     [selectedIds, busy, token],
   );
 
+  async function handleUndo() {
+    if (!token || !lastCode || busy) return;
+    setBusy(true);
+    try {
+      const res = await undoValidation(token, selectedIds, lastCode);
+      setResult(res);
+      setUndone(true);
+    } catch (err) {
+      setResult({
+        result: "invalid",
+        message: err instanceof ApiError ? err.message : "Erro ao desfazer",
+        seat_label: null,
+        event_title: null,
+        used_at: null,
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function handleManualSubmit(e: React.FormEvent) {
     e.preventDefault();
     handleValidate(code);
@@ -89,6 +114,8 @@ function Portaria() {
   function handleScanAgain() {
     setResult(null);
     setCode("");
+    setLastCode("");
+    setUndone(false);
   }
 
   const selectedEvents = events?.filter((e) => selectedIds.includes(e.id)) ?? [];
@@ -245,12 +272,23 @@ function Portaria() {
               {result.used_at && (
                 <p className="caption">Usado em {formatDateTime(result.used_at)}</p>
               )}
-              <button
-                onClick={handleScanAgain}
-                className="mt-2 rounded bg-accent px-4 py-2 font-medium text-on-accent hover:bg-accent-hover"
-              >
-                Validar outro
-              </button>
+              <div className="mt-2 flex items-center gap-3">
+                <button
+                  onClick={handleScanAgain}
+                  className="rounded bg-accent px-4 py-2 font-medium text-on-accent hover:bg-accent-hover"
+                >
+                  Validar outro
+                </button>
+                {result.result === "valid" && !undone && lastCode && (
+                  <button
+                    onClick={handleUndo}
+                    disabled={busy}
+                    className="caption text-text-secondary underline hover:text-text disabled:opacity-60"
+                  >
+                    Validei errado, desfazer
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>

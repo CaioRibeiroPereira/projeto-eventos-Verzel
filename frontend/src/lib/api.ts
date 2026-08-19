@@ -355,6 +355,14 @@ export function validateTicket(token: string, eventIds: number[], code: string) 
   });
 }
 
+export function undoValidation(token: string, eventIds: number[], code: string) {
+  return request<ValidationResult>(`/gate/undo`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ code, event_ids: eventIds }),
+  });
+}
+
 export function listPublicEvents(filters: EventFilters = {}) {
   const params = new URLSearchParams();
   if (filters.q) params.set("q", filters.q);
