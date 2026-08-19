@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import update
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.models.event import Event
 from app.models.seat import Seat
@@ -17,6 +17,9 @@ class GateRepository:
 
     def get_ticket(self, ticket_id: int) -> Ticket | None:
         return self.session.get(Ticket, ticket_id)
+
+    def get_by_manual_code(self, code: str) -> Ticket | None:
+        return self.session.exec(select(Ticket).where(Ticket.manual_code == code)).first()
 
     def get_seat(self, seat_id: int) -> Seat | None:
         return self.session.get(Seat, seat_id)

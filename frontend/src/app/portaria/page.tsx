@@ -155,7 +155,7 @@ function Portaria() {
                   <input
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    placeholder="Código do ingresso"
+                    placeholder="Ex: 7K2P-9XQZ"
                     className="ticket-code flex-1 rounded border border-border bg-surface-2 px-3 py-2 outline-none focus:border-accent"
                   />
                   <button

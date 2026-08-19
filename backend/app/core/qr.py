@@ -19,6 +19,22 @@ def generate_share_token() -> str:
     return secrets.token_urlsafe(24)
 
 
+# Exclui caracteres ambíguos (0/O, 1/I/L) pra reduzir erro de digitação manual na portaria.
+MANUAL_CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
+
+
+def generate_manual_code() -> str:
+    return "".join(secrets.choice(MANUAL_CODE_ALPHABET) for _ in range(8))
+
+
+def format_manual_code(code: str) -> str:
+    return f"{code[:4]}-{code[4:]}"
+
+
+def normalize_manual_code(raw: str) -> str:
+    return raw.strip().upper().replace("-", "").replace(" ", "")
+
+
 def ticket_payload(ticket_id: int, signature: str) -> str:
     return f"{ticket_id}:{signature}"
 

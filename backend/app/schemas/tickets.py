@@ -16,4 +16,5 @@ class TicketRead(SQLModel):
     status: TicketStatus
     qr_payload: str
     share_token: str
+    manual_code: str
     used_at: datetime | None

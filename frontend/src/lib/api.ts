@@ -321,6 +321,7 @@ export interface Ticket {
   status: TicketStatus;
   qr_payload: string;
   share_token: string;
+  manual_code: string;
   used_at: string | null;
 }
 

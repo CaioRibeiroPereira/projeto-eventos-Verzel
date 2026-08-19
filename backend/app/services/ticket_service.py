@@ -1,6 +1,12 @@
 from fastapi import HTTPException, status
 
-from app.core.qr import generate_share_token, sign_ticket, ticket_payload
+from app.core.qr import (
+    format_manual_code,
+    generate_manual_code,
+    generate_share_token,
+    sign_ticket,
+    ticket_payload,
+)
 from app.models.event import Event
 from app.models.seat import Seat
 from app.models.ticket import Ticket
@@ -9,10 +15,11 @@ from app.schemas.tickets import TicketRead
 
 
 def _ensure_issued(repository: TicketRepository, ticket: Ticket) -> Ticket:
-    if ticket.qr_signature and ticket.share_token:
+    if ticket.qr_signature and ticket.share_token and ticket.manual_code:
         return ticket
     ticket.qr_signature = ticket.qr_signature or sign_ticket(ticket.id)
     ticket.share_token = ticket.share_token or generate_share_token()
+    ticket.manual_code = ticket.manual_code or generate_manual_code()
     return repository.save(ticket)
 
 
@@ -29,6 +36,7 @@ def _to_read(repository: TicketRepository, ticket: Ticket, event: Event, seat: S
         status=ticket.status,
         qr_payload=ticket_payload(ticket.id, ticket.qr_signature),
         share_token=ticket.share_token,
+        manual_code=format_manual_code(ticket.manual_code),
         used_at=ticket.used_at,
     )
 

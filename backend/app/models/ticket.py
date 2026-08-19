@@ -29,6 +29,7 @@ class Ticket(SQLModel, table=True):
 
     qr_signature: str | None = None
     share_token: str | None = None
+    manual_code: str | None = Field(default=None, unique=True, index=True)
     status: TicketStatus = TicketStatus.valid
     used_at: datetime | None = None
     validated_by: int | None = Field(default=None, foreign_key="user.id")
