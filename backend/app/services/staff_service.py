@@ -12,7 +12,7 @@ class StaffService:
     def __init__(self, repository: UserRepository):
         self.repository = repository
 
-    def create_gate_staff(self, organizer_id: int, data: GateStaffCreate) -> User:
+    def create_gate_staff(self, created_by_organizer_id: int, data: GateStaffCreate) -> User:
         if self.repository.get_by_email(data.email):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -23,16 +23,19 @@ class StaffService:
             email=data.email,
             password_hash=hash_password(data.password),
             role=UserRole.gate,
-            organizer_id=organizer_id,
+            # Guardado só como registro de quem cadastrou — não restringe
+            # quem enxerga ou gerencia o porteiro depois. A equipe de
+            # portaria é compartilhada entre todos os organizadores.
+            organizer_id=created_by_organizer_id,
         )
         return self.repository.create(user)
 
-    def list_gate_staff(self, organizer_id: int) -> list[User]:
-        return self.repository.list_gate_staff(organizer_id)
+    def list_gate_staff(self) -> list[User]:
+        return self.repository.list_gate_staff()
 
-    def delete_gate_staff(self, organizer_id: int, staff_id: int) -> None:
+    def delete_gate_staff(self, staff_id: int) -> None:
         staff = self.repository.get(staff_id)
-        if not staff or staff.role != UserRole.gate or staff.organizer_id != organizer_id:
+        if not staff or staff.role != UserRole.gate:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Porteiro não encontrado")
 
         # Desativa e anonimiza em vez de apagar a linha: ticket.validated_by

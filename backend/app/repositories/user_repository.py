@@ -25,12 +25,13 @@ class UserRepository:
         self.session.refresh(user)
         return user
 
-    def list_gate_staff(self, organizer_id: int) -> list[User]:
+    def list_gate_staff(self) -> list[User]:
+        """Equipe de portaria é compartilhada — todo organizador vê a
+        mesma lista, não só quem ele mesmo cadastrou."""
         return list(
             self.session.exec(
                 select(User).where(
                     User.role == UserRole.gate,
-                    User.organizer_id == organizer_id,
                     User.is_active == True,  # noqa: E712 — comparação de coluna SQLModel, não booleano Python
                 )
             )

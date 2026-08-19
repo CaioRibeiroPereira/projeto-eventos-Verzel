@@ -20,9 +20,9 @@ def get_staff_service(session: Session = Depends(get_session)) -> StaffService:
 @router.get("", response_model=list[GateStaffRead])
 def list_gate_staff(
     service: StaffService = Depends(get_staff_service),
-    user: User = Depends(require_organizer),
+    _: User = Depends(require_organizer),
 ):
-    return service.list_gate_staff(user.id)
+    return service.list_gate_staff()
 
 
 @router.post("", response_model=GateStaffRead, status_code=201)
@@ -38,6 +38,6 @@ def create_gate_staff(
 def delete_gate_staff(
     staff_id: int,
     service: StaffService = Depends(get_staff_service),
-    user: User = Depends(require_organizer),
+    _: User = Depends(require_organizer),
 ):
-    service.delete_gate_staff(user.id, staff_id)
+    service.delete_gate_staff(staff_id)
