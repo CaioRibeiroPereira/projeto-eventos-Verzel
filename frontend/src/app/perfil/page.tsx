@@ -27,6 +27,14 @@ const LOGIN_HREF: Record<string, string> = {
 // qualquer state local. Um módulo-level sobrevive ao remount.
 let pendingLogoutRedirect: string | null = null;
 
+function fallbackLoginHref(): string {
+  if (typeof window === "undefined") return "/login?next=/perfil";
+  const area = new URLSearchParams(window.location.search).get("area");
+  if (area === "organizer") return "/organizador/login";
+  if (area === "gate") return "/portaria/login";
+  return "/login?next=/perfil";
+}
+
 export default function PerfilPage() {
   const { user, token, loading, logout, setUser } = useAuth();
   const router = useRouter();
@@ -35,7 +43,7 @@ export default function PerfilPage() {
   useEffect(() => {
     if (loading || accountDeleted) return;
     if (!user) {
-      const destination = pendingLogoutRedirect ?? "/login?next=/perfil";
+      const destination = pendingLogoutRedirect ?? fallbackLoginHref();
       router.replace(destination);
       // limpa depois do tick atual — em dev o StrictMode roda esse efeito
       // duas vezes seguidas, e limpar na hora derrubaria a segunda leitura.

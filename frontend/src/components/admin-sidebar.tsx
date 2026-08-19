@@ -24,7 +24,10 @@ export function AdminSidebar() {
 
   if (!user || (user.role !== "organizer" && user.role !== "gate")) return null;
 
-  const items = [...NAV_ITEMS[user.role], { href: "/perfil", label: "Meu perfil", icon: UserIcon }];
+  const items = [
+    ...NAV_ITEMS[user.role],
+    { href: `/perfil?area=${user.role}`, label: "Meu perfil", icon: UserIcon },
+  ];
 
   return (
     <aside className="flex w-56 shrink-0 flex-col border-r border-border bg-surface-1 px-3 py-5">
@@ -35,7 +38,7 @@ export function AdminSidebar() {
 
       <nav className="flex flex-1 flex-col gap-1">
         {items.map((item) => {
-          const active = pathname === item.href;
+          const active = pathname === item.href.split("?")[0];
           return (
             <Link
               key={item.href}

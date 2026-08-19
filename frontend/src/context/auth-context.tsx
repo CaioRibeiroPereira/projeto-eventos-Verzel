@@ -1,9 +1,27 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import * as api from "@/lib/api";
 
-const TOKEN_KEY = "auth_token";
+type Area = "organizer" | "gate" | "customer";
+
+// Cada área guarda a própria sessão, em vez de compartilhar um único
+// token — assim dá pra estar logado como cliente, organizador e portaria
+// ao mesmo tempo (abas diferentes ou até na mesma aba).
+function resolveArea(pathname: string): Area {
+  if (pathname.startsWith("/organizador")) return "organizer";
+  if (pathname.startsWith("/portaria")) return "gate";
+  if (pathname === "/perfil" && typeof window !== "undefined") {
+    const area = new URLSearchParams(window.location.search).get("area");
+    if (area === "organizer" || area === "gate") return area;
+  }
+  return "customer";
+}
+
+function tokenKeyFor(area: Area) {
+  return `auth_token_${area}`;
+}
 
 interface AuthContextValue {
   user: api.User | null;
@@ -17,13 +35,18 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const area = resolveArea(pathname ?? "/");
   const [user, setUser] = useState<api.User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem(TOKEN_KEY);
+    setLoading(true);
+    const stored = localStorage.getItem(tokenKeyFor(area));
     if (!stored) {
+      setUser(null);
+      setToken(null);
       setLoading(false);
       return;
     }
@@ -33,13 +56,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(loggedUser);
         setToken(stored);
       })
-      .catch(() => localStorage.removeItem(TOKEN_KEY))
+      .catch(() => {
+        localStorage.removeItem(tokenKeyFor(area));
+        setUser(null);
+        setToken(null);
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [area]);
 
   async function login(email: string, password: string) {
     const { access_token } = await api.login(email, password);
-    localStorage.setItem(TOKEN_KEY, access_token);
+    localStorage.setItem(tokenKeyFor(area), access_token);
     const loggedUser = await api.me(access_token);
     setUser(loggedUser);
     setToken(access_token);
@@ -47,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   function logout() {
-    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(tokenKeyFor(area));
     setUser(null);
     setToken(null);
   }
