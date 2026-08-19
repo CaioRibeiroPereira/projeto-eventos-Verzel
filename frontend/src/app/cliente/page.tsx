@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRoleGuard } from "@/hooks/use-role-guard";
 import { TicketCard } from "@/components/ticket-card";
-import { listMyTickets, type Ticket } from "@/lib/api";
+import { ApiError, cancelReservation, listMyTickets, type Ticket } from "@/lib/api";
 
 export default function ClientePage() {
   const { ready } = useRoleGuard("customer");
@@ -15,10 +15,24 @@ function MeusIngressos() {
   const { user, token } = useRoleGuard("customer");
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
 
-  useEffect(() => {
+  const loadTickets = useCallback(() => {
     if (!token) return;
     listMyTickets(token).then(setTickets);
   }, [token]);
+
+  useEffect(() => {
+    loadTickets();
+  }, [loadTickets]);
+
+  async function handleCancel(reservationId: number) {
+    if (!token) return;
+    try {
+      await cancelReservation(token, reservationId);
+      loadTickets();
+    } catch (err) {
+      throw new Error(err instanceof ApiError ? err.message : "Não foi possível cancelar o ingresso.");
+    }
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
@@ -49,7 +63,7 @@ function MeusIngressos() {
 
       <div className="flex flex-col gap-4">
         {tickets?.map((ticket) => (
-          <TicketCard key={ticket.id} ticket={ticket} />
+          <TicketCard key={ticket.id} ticket={ticket} onCancel={handleCancel} />
         ))}
       </div>
     </main>

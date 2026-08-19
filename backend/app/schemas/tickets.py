@@ -7,6 +7,7 @@ from app.models.ticket import TicketStatus
 
 class TicketRead(SQLModel):
     id: int
+    reservation_id: int
     event_id: int
     event_title: str
     event_poster_path: str | None

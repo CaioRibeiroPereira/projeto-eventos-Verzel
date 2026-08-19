@@ -287,10 +287,18 @@ export function declinePayment(token: string, reservationId: number) {
   });
 }
 
+export function cancelReservation(token: string, reservationId: number) {
+  return request<Reservation>(`/reservations/${reservationId}/cancel`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export type TicketStatus = "valid" | "used" | "cancelled";
 
 export interface Ticket {
   id: number;
+  reservation_id: number;
   event_id: number;
   event_title: string;
   event_poster_path: string | null;

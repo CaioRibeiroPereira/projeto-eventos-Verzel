@@ -11,9 +11,18 @@ const STATUS_LABEL: Record<Ticket["status"], string> = {
   cancelled: "Cancelado",
 };
 
-export function TicketCard({ ticket }: { ticket: Ticket }) {
+export function TicketCard({
+  ticket,
+  onCancel,
+}: {
+  ticket: Ticket;
+  onCancel?: (reservationId: number) => Promise<void>;
+}) {
   const [copied, setCopied] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
   const shareUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/ingressos/${ticket.share_token}`
@@ -36,6 +45,20 @@ export function TicketCard({ ticket }: { ticket: Ticket }) {
       setTimeout(() => setCodeCopied(false), 2000);
     } catch {
       // clipboard indisponível — o código já aparece na tela para copiar manualmente
+    }
+  }
+
+  async function handleCancel() {
+    if (!onCancel) return;
+    setCancelling(true);
+    setCancelError(null);
+    try {
+      await onCancel(ticket.reservation_id);
+    } catch (err) {
+      setCancelError(err instanceof Error ? err.message : "Não foi possível cancelar o ingresso.");
+    } finally {
+      setCancelling(false);
+      setConfirmingCancel(false);
     }
   }
 
@@ -65,6 +88,41 @@ export function TicketCard({ ticket }: { ticket: Ticket }) {
           >
             {STATUS_LABEL[ticket.status]}
           </span>
+
+          {onCancel && ticket.status === "valid" && (
+            <div className="mt-2">
+              {!confirmingCancel ? (
+                <button
+                  onClick={() => setConfirmingCancel(true)}
+                  className="caption text-text-muted hover:text-red"
+                >
+                  Cancelar ingresso
+                </button>
+              ) : (
+                <div className="flex flex-col items-start gap-1.5">
+                  <p className="caption text-text-secondary">
+                    O assento volta a ficar disponível. Não dá pra desfazer.
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleCancel}
+                      disabled={cancelling}
+                      className="rounded bg-red px-3 py-1.5 text-xs font-medium text-on-red hover:bg-red-hover disabled:opacity-60"
+                    >
+                      {cancelling ? "Cancelando..." : "Confirmar cancelamento"}
+                    </button>
+                    <button
+                      onClick={() => setConfirmingCancel(false)}
+                      className="text-xs text-text-secondary hover:text-text"
+                    >
+                      Voltar
+                    </button>
+                  </div>
+                </div>
+              )}
+              {cancelError && <p className="caption mt-1 text-red">{cancelError}</p>}
+            </div>
+          )}
         </div>
       </div>
 

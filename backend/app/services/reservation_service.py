@@ -6,7 +6,7 @@ from app.core.qr import generate_share_token, sign_ticket
 from app.models.event import EventStatus
 from app.models.reservation import Reservation, ReservationStatus
 from app.models.seat import Seat
-from app.models.ticket import Ticket
+from app.models.ticket import Ticket, TicketStatus
 from app.repositories.reservation_repository import (
     ReservationRepository,
     SeatTakenError,
@@ -134,4 +134,26 @@ class ReservationService:
         tickets = self.repository.get_tickets_for_reservation(reservation.id)
         seats_by_id = {t.seat_id: self.repository.get_seat(t.seat_id) for t in tickets}
         reservation = self.repository.mark_failed(reservation, tickets)
+        return _to_read(reservation, tickets, seats_by_id)
+
+    def cancel_reservation(self, customer_id: int, reservation_id: int) -> ReservationRead:
+        reservation = self.repository.get_reservation(reservation_id)
+        if not reservation or reservation.customer_id != customer_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
+
+        if reservation.status != ReservationStatus.paid:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Só é possível cancelar reservas pagas",
+            )
+
+        tickets = self.repository.get_tickets_for_reservation(reservation.id)
+        if any(t.status == TicketStatus.used for t in tickets):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Não é possível cancelar: pelo menos um ingresso já foi validado na portaria",
+            )
+
+        seats_by_id = {t.seat_id: self.repository.get_seat(t.seat_id) for t in tickets}
+        reservation = self.repository.cancel(reservation, tickets)
         return _to_read(reservation, tickets, seats_by_id)

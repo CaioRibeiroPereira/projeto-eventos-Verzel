@@ -52,3 +52,12 @@ def decline_payment(
     user: User = Depends(require_customer),
 ):
     return service.decline_payment(user.id, reservation_id)
+
+
+@router.post("/reservations/{reservation_id}/cancel", response_model=ReservationRead)
+def cancel_reservation(
+    reservation_id: int,
+    service: ReservationService = Depends(get_reservation_service),
+    user: User = Depends(require_customer),
+):
+    return service.cancel_reservation(user.id, reservation_id)

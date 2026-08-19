@@ -134,3 +134,17 @@ class ReservationRepository:
         self.session.commit()
         self.session.refresh(reservation)
         return reservation
+
+    def cancel(self, reservation: Reservation, tickets: list[Ticket]) -> Reservation:
+        """Cancela a reserva e libera os assentos numa transação só: o
+        UNIQUE(event_id, seat_id) do Ticket só considera linhas com
+        status != cancelled, então marcar os tickets como cancelled aqui
+        já devolve o assento pro mapa (seat_map filtra por isso)."""
+        reservation.status = ReservationStatus.cancelled
+        for ticket in tickets:
+            ticket.status = TicketStatus.cancelled
+            self.session.add(ticket)
+        self.session.add(reservation)
+        self.session.commit()
+        self.session.refresh(reservation)
+        return reservation

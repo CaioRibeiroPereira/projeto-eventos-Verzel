@@ -27,6 +27,7 @@ def _to_read(repository: TicketRepository, ticket: Ticket, event: Event, seat: S
     ticket = _ensure_issued(repository, ticket)
     return TicketRead(
         id=ticket.id,
+        reservation_id=ticket.reservation_id,
         event_id=event.id,
         event_title=event.title,
         event_poster_path=event.poster_path,
