@@ -43,6 +43,19 @@ class EventRepository:
             )
         ).one()
 
+    def list_active_in_room(self, organizer_id: int, local: str) -> list[Event]:
+        """Eventos não cancelados do organizador nessa sala — usado pra
+        checar conflito de horário na criação de uma sessão nova."""
+        return list(
+            self.session.exec(
+                select(Event).where(
+                    Event.organizer_id == organizer_id,
+                    Event.local == local,
+                    Event.status != EventStatus.cancelled,
+                )
+            )
+        )
+
     def list_by_organizer(self, organizer_id: int) -> list[Event]:
         return list(
             self.session.exec(

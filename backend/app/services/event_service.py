@@ -10,6 +10,13 @@ from app.schemas.events import EventCancelResult, EventCreate, EventFilters, Eve
 from app.services.seat_layouts import ROOM_LAYOUTS
 
 CANCEL_MIN_NOTICE = timedelta(days=1)
+ROOM_TURNAROUND = timedelta(minutes=20)
+DEFAULT_RUNTIME = timedelta(minutes=120)  # quando o TMDb não informa a duração
+
+
+def _occupied_window(starts_at: datetime, runtime_minutes: int | None) -> tuple[datetime, datetime]:
+    duration = timedelta(minutes=runtime_minutes) if runtime_minutes else DEFAULT_RUNTIME
+    return starts_at, starts_at + duration + ROOM_TURNAROUND
 
 
 def _to_read(event: Event, seat_count: int, seats_sold: int) -> EventRead:
@@ -81,6 +88,20 @@ class EventService:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Sala inválida")
 
         movie = tmdb.get_movie(data.tmdb_movie_id)
+
+        new_start, new_end = _occupied_window(data.starts_at, movie.runtime)
+        for existing in self.repository.list_active_in_room(organizer_id, data.local):
+            existing_start, existing_end = _occupied_window(existing.starts_at, existing.runtime_minutes)
+            if new_start < existing_end and existing_start < new_end:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"Conflito de horário na {data.local}: \"{existing.title}\" ocupa a sala de "
+                        f"{existing_start:%d/%m %H:%M} até {existing_end:%d/%m %H:%M} "
+                        f"(duração + 20min pra trocar a sala)."
+                    ),
+                )
+
         event = self.repository.create(
             Event(
                 organizer_id=organizer_id,
