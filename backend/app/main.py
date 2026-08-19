@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routers import account, auth, contact, events, gate, reservations, tickets
+from app.api.routers import account, auth, contact, events, gate, reservations, staff, tickets
 
 app = FastAPI(title="Plataforma de Eventos e Ingressos")
 
@@ -20,6 +20,7 @@ app.include_router(tickets.router)
 app.include_router(gate.router)
 app.include_router(account.router)
 app.include_router(contact.router)
+app.include_router(staff.router)
 
 
 @app.get("/health")

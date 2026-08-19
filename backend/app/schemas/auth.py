@@ -9,13 +9,6 @@ class UserCreate(SQLModel):
     password: str
 
 
-class CredentialRegisterRequest(SQLModel):
-    name: str
-    email: str
-    password: str
-    code: str
-
-
 class UserRead(SQLModel):
     id: int
     name: str

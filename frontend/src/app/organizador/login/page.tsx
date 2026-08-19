@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { ApiError } from "@/lib/api";
@@ -89,10 +88,7 @@ export default function LoginOrganizadorPage() {
         </button>
 
         <p className="caption mt-4 text-center">
-          Ainda não tem conta?{" "}
-          <Link href="/organizador/cadastro" className="text-accent">
-            Cadastre-se com sua credencial
-          </Link>
+          Conta de organizador é provisionada pela equipe do Cine Verzel.
         </p>
       </form>
     </main>

@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
 
-from app.models.user import User
+from app.models.user import User, UserRole
 
 
 class UserRepository:
@@ -24,3 +24,10 @@ class UserRepository:
         self.session.commit()
         self.session.refresh(user)
         return user
+
+    def list_gate_staff(self, organizer_id: int) -> list[User]:
+        return list(
+            self.session.exec(
+                select(User).where(User.role == UserRole.gate, User.organizer_id == organizer_id)
+            )
+        )

@@ -50,27 +50,6 @@ export function register(data: { name: string; email: string; password: string }
   });
 }
 
-export interface CredentialRegisterInput {
-  name: string;
-  email: string;
-  password: string;
-  code: string;
-}
-
-export function registerOrganizer(data: CredentialRegisterInput) {
-  return request<User>("/auth/register/organizador", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-}
-
-export function registerGate(data: CredentialRegisterInput) {
-  return request<User>("/auth/register/portaria", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-}
-
 export function me(token: string) {
   return request<User>("/auth/me", {
     headers: { Authorization: `Bearer ${token}` },
@@ -393,5 +372,32 @@ export function sendContactMessage(data: ContactMessageInput) {
 export function listContactMessages(token: string) {
   return request<ContactMessage[]>("/contact-messages", {
     headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export interface GateStaff {
+  id: number;
+  name: string;
+  email: string;
+  is_active: boolean;
+}
+
+export interface GateStaffInput {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export function listGateStaff(token: string) {
+  return request<GateStaff[]>("/organizador/porteiros", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function createGateStaff(token: string, data: GateStaffInput) {
+  return request<GateStaff>("/organizador/porteiros", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
   });
 }

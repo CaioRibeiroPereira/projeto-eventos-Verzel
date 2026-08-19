@@ -16,3 +16,5 @@ class User(SQLModel, table=True):
     password_hash: str
     role: UserRole
     is_active: bool = True
+    # Só preenchido pra role=gate: qual organizador cadastrou esse porteiro.
+    organizer_id: int | None = Field(default=None, foreign_key="user.id")

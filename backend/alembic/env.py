@@ -6,7 +6,6 @@ from sqlmodel import SQLModel
 
 from app.core.config import settings
 from app.models.contact_message import ContactMessage  # noqa: F401 — registra o modelo no metadata
-from app.models.credential import StaffCredential  # noqa: F401 — registra o modelo no metadata
 from app.models.event import Event  # noqa: F401 — registra o modelo no metadata
 from app.models.payment_card import PaymentCard  # noqa: F401 — registra o modelo no metadata
 from app.models.reservation import Reservation  # noqa: F401 — registra o modelo no metadata

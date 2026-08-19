@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { ApiError } from "@/lib/api";
@@ -89,10 +88,7 @@ export default function LoginPortariaPage() {
         </button>
 
         <p className="caption mt-4 text-center">
-          Ainda não tem conta?{" "}
-          <Link href="/portaria/cadastro" className="text-accent">
-            Cadastre-se com sua credencial
-          </Link>
+          Conta de portaria é criada pelo organizador no painel dele.
         </p>
       </form>
     </main>
