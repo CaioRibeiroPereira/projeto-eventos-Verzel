@@ -67,6 +67,20 @@ export function AdminCinemaBackdrop() {
             "radial-gradient(ellipse, color-mix(in srgb, var(--color-accent) 7%, transparent), transparent 70%)",
         }}
       />
+      <div
+        className="absolute left-[10%] top-[110%] h-[400px] w-[680px]"
+        style={{
+          background:
+            "radial-gradient(ellipse, color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 70%)",
+        }}
+      />
+      <div
+        className="absolute right-[15%] top-[150%] h-[340px] w-[560px]"
+        style={{
+          background:
+            "radial-gradient(ellipse, color-mix(in srgb, var(--color-accent) 6%, transparent), transparent 70%)",
+        }}
+      />
 
       <Reel className="absolute -right-8 top-[6%] h-36 w-36 opacity-[0.07]" />
       <Popcorn className="absolute -left-6 top-[18%] h-32 w-32 opacity-[0.06]" />
@@ -75,6 +89,21 @@ export function AdminCinemaBackdrop() {
       <Reel className="absolute right-[8%] top-[62%] h-20 w-20 opacity-[0.05]" />
       <Popcorn className="absolute -left-4 top-[78%] h-28 w-28 rotate-3 opacity-[0.05]" />
       <Clapper className="absolute right-[12%] top-[90%] h-24 w-24 -rotate-6 opacity-[0.05]" />
+
+      <Ticket className="absolute right-[30%] top-[10%] h-20 w-20 rotate-6 opacity-[0.05]" />
+      <Reel className="absolute left-[38%] top-[24%] h-16 w-16 opacity-[0.045]" />
+      <Popcorn className="absolute right-[38%] top-[40%] h-24 w-24 -rotate-6 opacity-[0.05]" />
+      <Clapper className="absolute left-[42%] top-[56%] h-20 w-20 rotate-12 opacity-[0.045]" />
+      <Reel className="absolute -left-8 top-[68%] h-28 w-28 opacity-[0.055]" />
+      <Ticket className="absolute right-[4%] top-[80%] h-20 w-20 rotate-3 opacity-[0.05]" />
+      <Popcorn className="absolute left-[45%] top-[92%] h-20 w-20 rotate-6 opacity-[0.045]" />
+
+      <Clapper className="absolute -left-6 top-[104%] h-28 w-28 -rotate-3 opacity-[0.05]" />
+      <Reel className="absolute right-[20%] top-[116%] h-24 w-24 opacity-[0.05]" />
+      <Ticket className="absolute left-[30%] top-[128%] h-20 w-20 -rotate-6 opacity-[0.045]" />
+      <Popcorn className="absolute -right-8 top-[140%] h-32 w-32 rotate-3 opacity-[0.05]" />
+      <Clapper className="absolute left-[6%] top-[152%] h-24 w-24 rotate-6 opacity-[0.045]" />
+      <Reel className="absolute right-[40%] top-[164%] h-20 w-20 opacity-[0.04]" />
     </div>
   );
 }
