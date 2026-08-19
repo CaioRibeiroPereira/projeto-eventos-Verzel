@@ -6,6 +6,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { ApiError, registerGate } from "@/lib/api";
 
+const ROLE_HOME: Record<string, string> = {
+  organizer: "/organizador",
+  gate: "/portaria",
+  customer: "/cliente",
+};
+
 export default function CadastroPortariaPage() {
   const { user, loading, login } = useAuth();
   const router = useRouter();
@@ -17,10 +23,10 @@ export default function CadastroPortariaPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!loading && user?.role === "gate") router.replace("/portaria");
+    if (!loading && user) router.replace(ROLE_HOME[user.role]);
   }, [loading, user, router]);
 
-  if (loading || user?.role === "gate") {
+  if (loading || user) {
     return (
       <main className="flex flex-1 items-center justify-center">
         <p className="label">Carregando...</p>

@@ -6,6 +6,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { ApiError, registerOrganizer } from "@/lib/api";
 
+const ROLE_HOME: Record<string, string> = {
+  organizer: "/organizador",
+  gate: "/portaria",
+  customer: "/cliente",
+};
+
 export default function CadastroOrganizadorPage() {
   const { user, loading, login } = useAuth();
   const router = useRouter();
@@ -17,10 +23,10 @@ export default function CadastroOrganizadorPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!loading && user?.role === "organizer") router.replace("/organizador");
+    if (!loading && user) router.replace(ROLE_HOME[user.role]);
   }, [loading, user, router]);
 
-  if (loading || user?.role === "organizer") {
+  if (loading || user) {
     return (
       <main className="flex flex-1 items-center justify-center">
         <p className="label">Carregando...</p>
