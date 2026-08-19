@@ -5,12 +5,21 @@ import { useRoleGuard } from "@/hooks/use-role-guard";
 import { CameraScanner } from "@/components/camera-scanner";
 import {
   ApiError,
+  backdropUrl,
   listPublicEvents,
   validateTicket,
   type Event,
   type ValidationResult,
 } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
+
+function todayLocal(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
 
 export default function PortariaPage() {
   const { ready } = useRoleGuard("gate");
@@ -36,6 +45,7 @@ function Portaria() {
   const [events, setEvents] = useState<Event[] | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [picking, setPicking] = useState(true);
+  const [dateFilter, setDateFilter] = useState(todayLocal());
   const [mode, setMode] = useState<"camera" | "manual">("manual");
   const [code, setCode] = useState("");
   const [result, setResult] = useState<ValidationResult | null>(null);
@@ -82,6 +92,7 @@ function Portaria() {
   }
 
   const selectedEvents = events?.filter((e) => selectedIds.includes(e.id)) ?? [];
+  const eventsOnDate = events?.filter((e) => e.starts_at.slice(0, 10) === dateFilter) ?? [];
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
@@ -92,37 +103,55 @@ function Portaria() {
 
       {picking && (
         <div className="flex flex-col gap-3">
-          <p className="label">Marque as sessões que você está cobrindo agora:</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="label">Marque as sessões que você está cobrindo:</p>
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="rounded border border-border bg-surface-2 px-2 py-1 text-sm text-text outline-none focus:border-accent"
+            />
+          </div>
           <div className="flex flex-col gap-2">
             {events === null &&
               [0, 1, 2].map((i) => (
-                <div key={i} className="h-14 animate-pulse rounded border border-border bg-surface-1" />
+                <div key={i} className="h-20 animate-pulse rounded border border-border bg-surface-1" />
               ))}
-            {events?.length === 0 && <p className="label">Nenhum evento publicado.</p>}
-            {events?.map((event) => {
+            {events !== null && eventsOnDate.length === 0 && (
+              <p className="label">Nenhuma sessão nessa data.</p>
+            )}
+            {eventsOnDate.map((event) => {
               const checked = selectedIds.includes(event.id);
+              const banner = backdropUrl(event.backdrop_path, "w780");
               return (
                 <button
                   key={event.id}
                   type="button"
                   onClick={() => toggleEvent(event.id)}
-                  className={`flex items-start gap-3 rounded border px-4 py-3 text-left transition-colors ${
+                  className={`flex items-center gap-3 overflow-hidden rounded border text-left transition-colors ${
                     checked ? "border-accent bg-accent/10" : "border-border bg-surface-1 hover:border-border-strong"
                   }`}
                 >
-                  <span
-                    className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
-                      checked ? "border-accent bg-accent" : "border-border"
-                    }`}
-                  >
-                    {checked && <span className="h-2 w-2 rounded-sm bg-on-accent" />}
-                  </span>
-                  <span>
-                    <p className="text-text">{event.title}</p>
-                    <p className="caption">
-                      {event.local} — {formatDateTime(event.starts_at)}
-                    </p>
-                  </span>
+                  <div className="relative h-16 w-28 shrink-0 overflow-hidden bg-surface-2">
+                    {banner && (
+                      <img src={banner} alt="" className="h-full w-full object-cover" />
+                    )}
+                  </div>
+                  <div className="flex flex-1 items-center gap-3 py-2 pr-3">
+                    <span
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                        checked ? "border-accent bg-accent" : "border-border"
+                      }`}
+                    >
+                      {checked && <span className="h-2 w-2 rounded-sm bg-on-accent" />}
+                    </span>
+                    <span>
+                      <p className="text-text">{event.title}</p>
+                      <p className="caption">
+                        {event.local} — {formatDateTime(event.starts_at)}
+                      </p>
+                    </span>
+                  </div>
                 </button>
               );
             })}
