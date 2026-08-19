@@ -36,6 +36,11 @@ function Dashboard() {
     }
   }
 
+  const published = events?.filter((e) => e.status === "published").length ?? 0;
+  const drafts = events?.filter((e) => e.status === "draft").length ?? 0;
+  const ticketsSold = events?.reduce((sum, e) => sum + e.seats_sold, 0) ?? 0;
+  const revenue = events?.reduce((sum, e) => sum + e.seats_sold * e.price, 0) ?? 0;
+
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-6 py-10">
       <div className="flex items-center justify-between">
@@ -50,6 +55,27 @@ function Dashboard() {
           Criar evento
         </Link>
       </div>
+
+      {events && events.length > 0 && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-lg border border-border bg-surface-1 p-4">
+            <p className="caption">Publicados</p>
+            <p className="text-2xl font-medium text-text">{published}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-surface-1 p-4">
+            <p className="caption">Rascunhos</p>
+            <p className="text-2xl font-medium text-text">{drafts}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-surface-1 p-4">
+            <p className="caption">Ingressos vendidos</p>
+            <p className="text-2xl font-medium text-text">{ticketsSold}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-surface-1 p-4">
+            <p className="caption">Receita total</p>
+            <p className="text-2xl font-medium text-text">{formatPrice(revenue)}</p>
+          </div>
+        </div>
+      )}
 
       {events === null && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -89,7 +115,9 @@ function Dashboard() {
               <p className="label">{event.local}</p>
               <p className="label">{formatDateTime(event.starts_at)}</p>
               <p className="label">{formatPrice(event.price)}</p>
-              <p className="caption">{event.seat_count} assentos</p>
+              <p className="caption">
+                {event.seats_sold}/{event.seat_count} assentos vendidos
+              </p>
               <span
                 className={`caption mt-1 inline-block w-fit rounded px-2 py-0.5 ${
                   event.status === "published"

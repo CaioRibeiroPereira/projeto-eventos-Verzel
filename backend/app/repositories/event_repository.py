@@ -3,7 +3,9 @@ from datetime import date, datetime
 from sqlmodel import Session, func, select
 
 from app.models.event import Event, EventStatus
+from app.models.reservation import Reservation, ReservationStatus
 from app.models.seat import Seat
+from app.models.ticket import Ticket, TicketStatus
 from app.schemas.events import EventFilters
 
 
@@ -27,6 +29,18 @@ class EventRepository:
     def seat_count(self, event_id: int) -> int:
         return self.session.exec(
             select(func.count()).select_from(Seat).where(Seat.event_id == event_id)
+        ).one()
+
+    def seats_sold(self, event_id: int) -> int:
+        return self.session.exec(
+            select(func.count())
+            .select_from(Ticket)
+            .join(Reservation, Ticket.reservation_id == Reservation.id)
+            .where(
+                Ticket.event_id == event_id,
+                Ticket.status != TicketStatus.cancelled,
+                Reservation.status == ReservationStatus.paid,
+            )
         ).one()
 
     def list_by_organizer(self, organizer_id: int) -> list[Event]:

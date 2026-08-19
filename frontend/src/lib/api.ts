@@ -172,6 +172,7 @@ export interface Event {
   language: EventLanguage;
   status: EventStatus;
   seat_count: number;
+  seats_sold: number;
 }
 
 export interface EventFilters {

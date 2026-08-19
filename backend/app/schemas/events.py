@@ -52,6 +52,7 @@ class EventRead(SQLModel):
     language: EventLanguage
     status: EventStatus
     seat_count: int
+    seats_sold: int
 
 
 class EventFilters(SQLModel):

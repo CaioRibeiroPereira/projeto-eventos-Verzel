@@ -8,7 +8,7 @@ from app.schemas.events import EventCreate, EventFilters, EventRead, SeatRowInpu
 from app.services.seat_layouts import ROOM_LAYOUTS
 
 
-def _to_read(event: Event, seat_count: int) -> EventRead:
+def _to_read(event: Event, seat_count: int, seats_sold: int) -> EventRead:
     return EventRead(
         id=event.id,
         organizer_id=event.organizer_id,
@@ -31,6 +31,7 @@ def _to_read(event: Event, seat_count: int) -> EventRead:
         language=event.language,
         status=event.status,
         seat_count=seat_count,
+        seats_sold=seats_sold,
     )
 
 
@@ -103,32 +104,38 @@ class EventService:
         )
         seats = _build_seats(event.id, layout)
         self.repository.add_seats(seats)
-        return _to_read(event, len(seats))
+        return _to_read(event, len(seats), 0)
 
     def publish_event(self, organizer_id: int, event_id: int) -> EventRead:
         event = self.repository.get(event_id)
         if not event or event.organizer_id != organizer_id:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
         event = self.repository.publish(event)
-        return _to_read(event, self.repository.seat_count(event.id))
+        return _to_read(event, self.repository.seat_count(event.id), self.repository.seats_sold(event.id))
 
     def list_my_events(self, organizer_id: int) -> list[EventRead]:
         events = self.repository.list_by_organizer(organizer_id)
-        return [_to_read(e, self.repository.seat_count(e.id)) for e in events]
+        return [
+            _to_read(e, self.repository.seat_count(e.id), self.repository.seats_sold(e.id)) for e in events
+        ]
 
     def list_public_events(self, filters: EventFilters) -> list[EventRead]:
         events = self.repository.list_published(filters)
-        return [_to_read(e, self.repository.seat_count(e.id)) for e in events]
+        return [
+            _to_read(e, self.repository.seat_count(e.id), self.repository.seats_sold(e.id)) for e in events
+        ]
 
     def get_public_event(self, event_id: int) -> EventRead:
         event = self.repository.get(event_id)
         if not event or event.status.value != "published":
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
-        return _to_read(event, self.repository.seat_count(event.id))
+        return _to_read(event, self.repository.seat_count(event.id), self.repository.seats_sold(event.id))
 
     def get_event_sessions(self, event_id: int) -> list[EventRead]:
         event = self.repository.get(event_id)
         if not event or event.status.value != "published":
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
         sessions = self.repository.list_sessions(event)
-        return [_to_read(e, self.repository.seat_count(e.id)) for e in sessions]
+        return [
+            _to_read(e, self.repository.seat_count(e.id), self.repository.seats_sold(e.id)) for e in sessions
+        ]
