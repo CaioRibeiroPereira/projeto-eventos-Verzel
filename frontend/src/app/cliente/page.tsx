@@ -12,14 +12,13 @@ export default function ClientePage() {
 }
 
 function MeusIngressos() {
-  const { user } = useRoleGuard("customer");
+  const { user, token } = useRoleGuard("customer");
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("auth_token");
     if (!token) return;
     listMyTickets(token).then(setTickets);
-  }, []);
+  }, [token]);
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">

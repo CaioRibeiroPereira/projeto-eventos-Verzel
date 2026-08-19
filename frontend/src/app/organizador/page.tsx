@@ -12,22 +12,20 @@ export default function OrganizadorPage() {
 }
 
 function Dashboard() {
-  const { user } = useRoleGuard("organizer");
+  const { user, token } = useRoleGuard("organizer");
   const [events, setEvents] = useState<Event[] | null>(null);
   const [publishingId, setPublishingId] = useState<number | null>(null);
 
   const load = useCallback(() => {
-    const token = localStorage.getItem("auth_token");
     if (!token) return;
     listMyEvents(token).then(setEvents);
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     load();
   }, [load]);
 
   async function handlePublish(id: number) {
-    const token = localStorage.getItem("auth_token");
     if (!token) return;
     setPublishingId(id);
     try {

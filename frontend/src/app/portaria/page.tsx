@@ -32,7 +32,7 @@ const RESULT_TITLE: Record<ValidationResult["result"], string> = {
 };
 
 function Portaria() {
-  const { user } = useRoleGuard("gate");
+  const { user, token } = useRoleGuard("gate");
   const [events, setEvents] = useState<Event[] | null>(null);
   const [eventId, setEventId] = useState<number | null>(null);
   const [mode, setMode] = useState<"camera" | "manual">("manual");
@@ -46,7 +46,6 @@ function Portaria() {
 
   const handleValidate = useCallback(
     async (submittedCode: string) => {
-      const token = localStorage.getItem("auth_token");
       if (!token || !eventId || !submittedCode.trim() || busy) return;
       setBusy(true);
       try {
@@ -64,7 +63,7 @@ function Portaria() {
         setBusy(false);
       }
     },
-    [eventId, busy],
+    [eventId, busy, token],
   );
 
   function handleManualSubmit(e: React.FormEvent) {

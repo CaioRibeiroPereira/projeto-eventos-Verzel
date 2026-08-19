@@ -26,6 +26,7 @@ export default function NovoEventoPage() {
 
 function Wizard() {
   const router = useRouter();
+  const { token } = useRoleGuard("organizer");
   const [movie, setMovie] = useState<Movie | null>(null);
   const [rooms, setRooms] = useState<Record<string, SeatRow[]> | null>(null);
   const [local, setLocal] = useState("");
@@ -37,14 +38,13 @@ function Wizard() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("auth_token");
     if (!token) return;
     getRoomLayouts(token).then((data) => {
       setRooms(data);
       const first = Object.keys(data)[0];
       if (first) setLocal(first);
     });
-  }, []);
+  }, [token]);
 
   const currentLayout = rooms && local ? rooms[local] : null;
   const seatCount = currentLayout
@@ -57,7 +57,6 @@ function Wizard() {
     setError(null);
     setSubmitting(true);
     try {
-      const token = localStorage.getItem("auth_token");
       if (!token) throw new Error("sem sessão");
       await createEvent(token, {
         tmdb_movie_id: movie.id,
@@ -100,7 +99,7 @@ function Wizard() {
             </button>
           </div>
         ) : (
-          <MovieSearchGate onSelect={setMovie} />
+          <MovieSearchGate token={token} onSelect={setMovie} />
         )}
       </section>
 
@@ -218,8 +217,13 @@ function Wizard() {
   );
 }
 
-function MovieSearchGate({ onSelect }: { onSelect: (movie: Movie) => void }) {
-  const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+function MovieSearchGate({
+  token,
+  onSelect,
+}: {
+  token: string | null;
+  onSelect: (movie: Movie) => void;
+}) {
   if (!token) return null;
   return <MovieSearch token={token} onSelect={onSelect} />;
 }
