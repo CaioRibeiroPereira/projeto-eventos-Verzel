@@ -81,7 +81,7 @@ export default function EventoPage() {
             background: "linear-gradient(180deg, rgba(18,16,14,0.25) 0%, var(--color-bg) 92%)",
           }}
         />
-        <div className="relative mx-auto flex w-full max-w-3xl gap-4 px-6 py-6">
+        <div className="relative mx-auto flex w-full max-w-6xl gap-4 px-6 py-6">
           {posterUrl(event.poster_path, "w185") && (
             <img
               src={posterUrl(event.poster_path, "w185")!}
@@ -107,118 +107,122 @@ export default function EventoPage() {
         </div>
       </section>
 
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
-        <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface-1 p-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="ticket-code rounded bg-surface-2 px-2 py-1 text-xs">{activeEvent.format}</span>
-            <span className="ticket-code rounded bg-surface-2 px-2 py-1 text-xs">{activeEvent.language}</span>
-            <span className="label">{activeEvent.local}</span>
-          </div>
-
-          {dayGroups.length > 1 && (
-            <div className="flex flex-wrap gap-2">
-              {dayGroups.map((group) => (
-                <button
-                  key={group.key}
-                  onClick={() => {
-                    setSelectedDay(group.key);
-                    setActiveId(group.items[0].id);
-                  }}
-                  className={`rounded border px-3 py-1.5 text-sm transition-colors ${
-                    group.key === currentGroup?.key
-                      ? "border-accent bg-accent text-on-accent"
-                      : "border-border text-text-secondary hover:border-accent hover:text-accent"
-                  }`}
-                >
-                  {formatDayLabel(group.items[0].starts_at)}
-                </button>
-              ))}
+      <div className="mx-auto grid w-full max-w-6xl flex-1 gap-8 px-6 py-10 lg:grid-cols-[1fr_320px]">
+        <div className="order-2 flex flex-col gap-6 lg:order-1">
+          {event.youtube_key && (
+            <div className="flex flex-col gap-2">
+              <h2 className="text-lg font-medium">Trailer</h2>
+              <div className="aspect-video w-full overflow-hidden rounded-lg border border-border">
+                <iframe
+                  src={`https://www.youtube.com/embed/${event.youtube_key}`}
+                  title={`Trailer de ${event.title}`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="h-full w-full"
+                />
+              </div>
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2">
-            {currentGroup?.items.map((session) => (
-              <button
-                key={session.id}
-                onClick={() => setActiveId(session.id)}
-                className={`ticket-code rounded border px-4 py-2 text-sm transition-colors ${
-                  session.id === activeEvent.id
-                    ? "border-accent bg-accent !text-on-accent"
-                    : "border-border text-text-secondary hover:border-accent hover:text-accent"
-                }`}
-              >
-                {formatTime(session.starts_at)}
-              </button>
-            ))}
-          </div>
+          {event.overview && (
+            <div className="flex flex-col gap-2">
+              <h2 className="text-lg font-medium">Sobre o filme</h2>
+              <p className="label leading-relaxed">{event.overview}</p>
+            </div>
+          )}
 
-          <p className="label">{formatPrice(activeEvent.price)}</p>
-
-          {soldOut ? (
-            <span className="w-fit rounded bg-surface-3 px-5 py-2 text-text-muted">Esgotado</span>
-          ) : loading ? null : !user ? (
-            <Link
-              href={`/login?next=${encodeURIComponent(reservarHref)}`}
-              className="w-fit rounded bg-accent px-5 py-2 font-medium text-on-accent hover:bg-accent-hover"
-            >
-              Entrar para comprar
-            </Link>
-          ) : user.role !== "customer" ? (
-            <p className="caption">Disponível apenas para contas de cliente.</p>
-          ) : (
-            <Link
-              href={reservarHref}
-              className="w-fit rounded bg-accent px-5 py-2 font-medium text-on-accent hover:bg-accent-hover"
-            >
-              Comprar ingresso
-            </Link>
+          {event.cast && event.cast.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <h2 className="text-lg font-medium">Elenco</h2>
+              <div className="flex flex-wrap gap-4">
+                {event.cast.map((member) => (
+                  <div key={member.name} className="flex w-20 shrink-0 flex-col items-center gap-1.5 text-center">
+                    <div className="h-20 w-20 overflow-hidden rounded-full bg-surface-2">
+                      {profileUrl(member.profile_path) && (
+                        <img
+                          src={profileUrl(member.profile_path)!}
+                          alt={member.name}
+                          className="h-full w-full object-cover"
+                        />
+                      )}
+                    </div>
+                    <p className="caption text-text">{member.name}</p>
+                    {member.character && <p className="caption">{member.character}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 
-        {event.youtube_key && (
-          <div className="flex flex-col gap-2">
-            <h2 className="text-lg font-medium">Trailer</h2>
-            <div className="aspect-video w-full overflow-hidden rounded-lg border border-border">
-              <iframe
-                src={`https://www.youtube.com/embed/${event.youtube_key}`}
-                title={`Trailer de ${event.title}`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="h-full w-full"
-              />
+        <div className="order-1 lg:order-2">
+          <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface-1 p-5 lg:sticky lg:top-20">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="ticket-code rounded bg-surface-2 px-2 py-1 text-xs">{activeEvent.format}</span>
+              <span className="ticket-code rounded bg-surface-2 px-2 py-1 text-xs">{activeEvent.language}</span>
+              <span className="label">{activeEvent.local}</span>
             </div>
-          </div>
-        )}
 
-        {event.overview && (
-          <div className="flex flex-col gap-2">
-            <h2 className="text-lg font-medium">Sobre o filme</h2>
-            <p className="label leading-relaxed">{event.overview}</p>
-          </div>
-        )}
+            {dayGroups.length > 1 && (
+              <div className="flex flex-wrap gap-2">
+                {dayGroups.map((group) => (
+                  <button
+                    key={group.key}
+                    onClick={() => {
+                      setSelectedDay(group.key);
+                      setActiveId(group.items[0].id);
+                    }}
+                    className={`rounded border px-3 py-1.5 text-sm transition-colors ${
+                      group.key === currentGroup?.key
+                        ? "border-accent bg-accent text-on-accent"
+                        : "border-border text-text-secondary hover:border-accent hover:text-accent"
+                    }`}
+                  >
+                    {formatDayLabel(group.items[0].starts_at)}
+                  </button>
+                ))}
+              </div>
+            )}
 
-        {event.cast && event.cast.length > 0 && (
-          <div className="flex flex-col gap-3">
-            <h2 className="text-lg font-medium">Elenco</h2>
-            <div className="flex gap-4 overflow-x-auto pb-2">
-              {event.cast.map((member) => (
-                <div key={member.name} className="flex w-20 shrink-0 flex-col items-center gap-1.5 text-center">
-                  <div className="h-20 w-20 overflow-hidden rounded-full bg-surface-2">
-                    {profileUrl(member.profile_path) && (
-                      <img
-                        src={profileUrl(member.profile_path)!}
-                        alt={member.name}
-                        className="h-full w-full object-cover"
-                      />
-                    )}
-                  </div>
-                  <p className="caption text-text">{member.name}</p>
-                  {member.character && <p className="caption">{member.character}</p>}
-                </div>
+            <div className="flex flex-wrap gap-2">
+              {currentGroup?.items.map((session) => (
+                <button
+                  key={session.id}
+                  onClick={() => setActiveId(session.id)}
+                  className={`ticket-code rounded border px-4 py-2 text-sm transition-colors ${
+                    session.id === activeEvent.id
+                      ? "border-accent bg-accent !text-on-accent"
+                      : "border-border text-text-secondary hover:border-accent hover:text-accent"
+                  }`}
+                >
+                  {formatTime(session.starts_at)}
+                </button>
               ))}
             </div>
+
+            <p className="label">{formatPrice(activeEvent.price)}</p>
+
+            {soldOut ? (
+              <span className="w-fit rounded bg-surface-3 px-5 py-2 text-text-muted">Esgotado</span>
+            ) : loading ? null : !user ? (
+              <Link
+                href={`/login?next=${encodeURIComponent(reservarHref)}`}
+                className="w-fit rounded bg-accent px-5 py-2 font-medium text-on-accent hover:bg-accent-hover"
+              >
+                Entrar para comprar
+              </Link>
+            ) : user.role !== "customer" ? (
+              <p className="caption">Disponível apenas para contas de cliente.</p>
+            ) : (
+              <Link
+                href={reservarHref}
+                className="w-fit rounded bg-accent px-5 py-2 font-medium text-on-accent hover:bg-accent-hover"
+              >
+                Comprar ingresso
+              </Link>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </main>
   );
