@@ -20,8 +20,13 @@ const STATUS_CLASS: Record<Event["status"], string> = {
 
 const CANCEL_MIN_NOTICE_MS = 24 * 60 * 60 * 1000;
 
-function canCancel(event: Event): boolean {
-  return event.status !== "cancelled" && new Date(event.starts_at).getTime() - Date.now() >= CANCEL_MIN_NOTICE_MS;
+type CancelEligibility = "cancellable" | "past" | "too_soon";
+
+function cancelEligibility(event: Event): CancelEligibility {
+  const msLeft = new Date(event.starts_at).getTime() - Date.now();
+  if (msLeft < 0) return "past";
+  if (msLeft < CANCEL_MIN_NOTICE_MS) return "too_soon";
+  return "cancellable";
 }
 
 export default function OrganizadorPage() {
@@ -209,13 +214,15 @@ function Dashboard() {
                         Voltar
                       </button>
                     </div>
-                  ) : canCancel(event) ? (
+                  ) : cancelEligibility(event) === "cancellable" ? (
                     <button
                       onClick={() => setConfirmingCancelId(event.id)}
                       className="w-fit rounded border border-red px-3 py-1 text-sm text-red transition-colors hover:bg-red hover:text-on-red"
                     >
                       Cancelar evento
                     </button>
+                  ) : cancelEligibility(event) === "past" ? (
+                    <span className="caption">Sessão já aconteceu</span>
                   ) : (
                     <span className="caption">Faltam menos de 24h — não dá mais pra cancelar</span>
                   ))}
