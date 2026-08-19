@@ -361,3 +361,36 @@ export function listPublicEvents(filters: EventFilters = {}) {
   const qs = params.toString();
   return request<Event[]>(`/events${qs ? `?${qs}` : ""}`);
 }
+
+export type ContactOrigin = "contato" | "para-empresas";
+
+export interface ContactMessageInput {
+  name: string;
+  email: string;
+  company?: string;
+  message: string;
+  origin: ContactOrigin;
+}
+
+export interface ContactMessage {
+  id: number;
+  name: string;
+  email: string;
+  company: string | null;
+  message: string;
+  origin: string;
+  created_at: string;
+}
+
+export function sendContactMessage(data: ContactMessageInput) {
+  return request<ContactMessage>("/contact-messages", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function listContactMessages(token: string) {
+  return request<ContactMessage[]>("/contact-messages", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ApiError, sendContactMessage } from "@/lib/api";
 
 export default function ParaEmpresasPage() {
   const [name, setName] = useState("");
@@ -8,10 +9,21 @@ export default function ParaEmpresasPage() {
   const [company, setCompany] = useState("");
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSent(true);
+    setError(null);
+    setSubmitting(true);
+    try {
+      await sendContactMessage({ name, email, company, message, origin: "para-empresas" });
+      setSent(true);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Não foi possível enviar. Tente de novo.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -88,11 +100,14 @@ export default function ParaEmpresasPage() {
             </div>
           </div>
 
+          {error && <p className="text-sm text-red">{error}</p>}
+
           <button
             type="submit"
-            className="w-fit rounded-lg bg-accent px-6 py-3 font-medium text-on-accent hover:bg-accent-hover"
+            disabled={submitting}
+            className="w-fit rounded-lg bg-accent px-6 py-3 font-medium text-on-accent hover:bg-accent-hover disabled:opacity-60"
           >
-            Enviar mensagem
+            {submitting ? "Enviando..." : "Enviar mensagem"}
           </button>
         </form>
       )}

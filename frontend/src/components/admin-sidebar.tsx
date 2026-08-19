@@ -4,12 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { Logo } from "@/components/logo";
-import { GridIcon, ScanIcon, UserIcon } from "@/components/icons";
+import { GridIcon, MailIcon, ScanIcon, UserIcon } from "@/components/icons";
 
 type IconComponent = (props: { className?: string }) => React.ReactElement;
 
 const NAV_ITEMS: Record<"organizer" | "gate", { href: string; label: string; icon: IconComponent }[]> = {
-  organizer: [{ href: "/organizador", label: "Gerencie eventos", icon: GridIcon }],
+  organizer: [
+    { href: "/organizador", label: "Gerencie eventos", icon: GridIcon },
+    { href: "/organizador/mensagens", label: "Mensagens", icon: MailIcon },
+  ],
   gate: [{ href: "/portaria", label: "Portaria", icon: ScanIcon }],
 };
 
