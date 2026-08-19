@@ -12,10 +12,6 @@ type Area = "organizer" | "gate" | "customer";
 function resolveArea(pathname: string): Area {
   if (pathname.startsWith("/organizador")) return "organizer";
   if (pathname.startsWith("/portaria")) return "gate";
-  if (pathname === "/perfil" && typeof window !== "undefined") {
-    const area = new URLSearchParams(window.location.search).get("area");
-    if (area === "organizer" || area === "gate") return area;
-  }
   return "customer";
 }
 

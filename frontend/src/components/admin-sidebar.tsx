@@ -12,8 +12,12 @@ const NAV_ITEMS: Record<"organizer" | "gate", { href: string; label: string; ico
   organizer: [
     { href: "/organizador", label: "Gerencie eventos", icon: GridIcon },
     { href: "/organizador/mensagens", label: "Mensagens", icon: MailIcon },
+    { href: "/organizador/perfil", label: "Meu perfil", icon: UserIcon },
   ],
-  gate: [{ href: "/portaria", label: "Portaria", icon: ScanIcon }],
+  gate: [
+    { href: "/portaria", label: "Portaria", icon: ScanIcon },
+    { href: "/portaria/perfil", label: "Meu perfil", icon: UserIcon },
+  ],
 };
 
 const ROLE_LABEL: Record<"organizer" | "gate", string> = {
@@ -27,10 +31,7 @@ export function AdminSidebar() {
 
   if (!user || (user.role !== "organizer" && user.role !== "gate")) return null;
 
-  const items = [
-    ...NAV_ITEMS[user.role],
-    { href: `/perfil?area=${user.role}`, label: "Meu perfil", icon: UserIcon },
-  ];
+  const items = NAV_ITEMS[user.role];
 
   return (
     <aside className="flex w-56 shrink-0 flex-col border-r border-border bg-surface-1 px-3 py-5">
@@ -41,7 +42,7 @@ export function AdminSidebar() {
 
       <nav className="flex flex-1 flex-col gap-1">
         {items.map((item) => {
-          const active = pathname === item.href.split("?")[0];
+          const active = pathname === item.href;
           return (
             <Link
               key={item.href}
