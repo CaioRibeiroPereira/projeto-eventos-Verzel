@@ -338,37 +338,47 @@ export function PerfilContent({ fallbackLoginHref }: { fallbackLoginHref: string
         </form>
       </section>
 
-      <section className="flex flex-col gap-3 rounded-lg border border-border-danger bg-bg-danger p-6">
-        <h2 className="text-text-danger">Apagar conta</h2>
-        <p className="caption">
-          Sua conta é desativada e seus dados pessoais são removidos. Ingressos e eventos já
-          emitidos continuam valendo normalmente. Essa ação não pode ser desfeita.
-        </p>
-        {!confirmingDelete ? (
-          <button
-            onClick={() => setConfirmingDelete(true)}
-            className="w-fit rounded border border-red px-4 py-2 text-sm text-red hover:bg-red hover:text-on-red"
-          >
-            Apagar minha conta
-          </button>
-        ) : (
-          <div className="flex items-center gap-3">
+      {user.role === "organizer" ? (
+        <section className="flex flex-col gap-2 rounded-lg border border-border bg-surface-1 p-6">
+          <h2>Apagar conta</h2>
+          <p className="caption">
+            Conta de organizador é provisionada pela equipe do Cine Verzel e não pode ser apagada
+            por aqui. Fale com a equipe se precisar encerrar o acesso.
+          </p>
+        </section>
+      ) : (
+        <section className="flex flex-col gap-3 rounded-lg border border-border-danger bg-bg-danger p-6">
+          <h2 className="text-text-danger">Apagar conta</h2>
+          <p className="caption">
+            Sua conta é desativada e seus dados pessoais são removidos. Ingressos e eventos já
+            emitidos continuam valendo normalmente. Essa ação não pode ser desfeita.
+          </p>
+          {!confirmingDelete ? (
             <button
-              onClick={handleDeleteAccount}
-              disabled={deleting}
-              className="rounded bg-red px-4 py-2 text-sm font-medium text-on-red hover:bg-red-hover disabled:opacity-60"
+              onClick={() => setConfirmingDelete(true)}
+              className="w-fit rounded border border-red px-4 py-2 text-sm text-red hover:bg-red hover:text-on-red"
             >
-              {deleting ? "Apagando..." : "Sim, apagar definitivamente"}
+              Apagar minha conta
             </button>
-            <button
-              onClick={() => setConfirmingDelete(false)}
-              className="text-sm text-text-secondary hover:text-text"
-            >
-              Cancelar
-            </button>
-          </div>
-        )}
-      </section>
+          ) : (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+                className="rounded bg-red px-4 py-2 text-sm font-medium text-on-red hover:bg-red-hover disabled:opacity-60"
+              >
+                {deleting ? "Apagando..." : "Sim, apagar definitivamente"}
+              </button>
+              <button
+                onClick={() => setConfirmingDelete(false)}
+                className="text-sm text-text-secondary hover:text-text"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+        </section>
+      )}
     </main>
   );
 }

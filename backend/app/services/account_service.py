@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 from app.core.cards import detect_brand
 from app.core.security import hash_password, verify_password
 from app.models.payment_card import PaymentCard
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.repositories.card_repository import CardRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.account import AddCardRequest, ChangePasswordRequest, UpdateProfileRequest
@@ -62,6 +62,11 @@ class AccountService:
         ingressos já emitidos continuam íntegros para a portaria e o
         histórico, mas a pessoa não consegue mais logar nem fica com dados
         reais visíveis."""
+        if user.role == UserRole.organizer:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Conta de organizador não pode ser apagada por aqui — é provisionada pela equipe do Cine Verzel",
+            )
         user.name = "Conta removida"
         user.email = f"conta-removida-{user.id}-{secrets.token_hex(4)}@cineverzel.local"
         user.password_hash = hash_password(secrets.token_urlsafe(32))
