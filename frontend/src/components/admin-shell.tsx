@@ -9,7 +9,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className={`theme-admin ${isGate ? "theme-gate" : ""} flex min-h-screen w-full bg-bg text-text`}
+      className={`theme-admin ${isGate ? "theme-gate" : ""} flex min-h-screen w-full flex-col bg-bg text-text md:flex-row`}
     >
       <AdminSidebar />
       <div className="flex flex-1 flex-col">{children}</div>

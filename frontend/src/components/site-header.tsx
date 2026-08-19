@@ -19,7 +19,7 @@ export function SiteHeader() {
   const user = sessionUser?.role === "customer" ? sessionUser : null;
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-border bg-bg/85 px-6 py-3 backdrop-blur-md">
+    <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-border bg-bg/85 px-3 py-3 backdrop-blur-md sm:gap-4 sm:px-6">
       <Link href="/" className="shrink-0 transition-opacity hover:opacity-80">
         <Logo />
       </Link>
@@ -38,33 +38,33 @@ export function SiteHeader() {
 
       {!loading &&
         (user ? (
-          <div className="flex shrink-0 items-center gap-4">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-4">
             <Link
               href="/cliente"
               className="flex items-center gap-1.5 text-base text-text hover:text-accent"
             >
-              <TicketIcon className="h-4 w-4" />
-              Meus ingressos
+              <TicketIcon className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Meus ingressos</span>
             </Link>
             <Link
               href="/perfil"
               className="flex items-center gap-1.5 text-base text-text-secondary hover:text-accent"
             >
-              <UserIcon className="h-4 w-4" />
-              Meu perfil
+              <UserIcon className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Meu perfil</span>
             </Link>
           </div>
         ) : (
-          <div className="flex shrink-0 gap-2">
+          <div className="flex shrink-0 gap-1.5 sm:gap-2">
             <Link
               href="/login"
-              className="rounded px-3 py-1.5 text-base text-text-secondary hover:text-accent"
+              className="rounded px-2.5 py-1.5 text-sm text-text-secondary hover:text-accent sm:px-3 sm:text-base"
             >
               Entrar
             </Link>
             <Link
               href="/registro"
-              className="rounded bg-accent px-3 py-1.5 text-base font-medium text-on-accent hover:bg-accent-hover"
+              className="rounded bg-accent px-2.5 py-1.5 text-sm font-medium text-on-accent hover:bg-accent-hover sm:px-3 sm:text-base"
             >
               Criar conta
             </Link>

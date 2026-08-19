@@ -34,33 +34,33 @@ export function AdminSidebar() {
   const items = NAV_ITEMS[user.role];
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col border-r border-border bg-surface-1 px-3 py-5">
-      <div className="mb-8 px-2">
+    <aside className="flex w-full shrink-0 flex-col border-b border-border bg-surface-1 px-3 py-3 md:h-screen md:w-56 md:border-b-0 md:border-r md:py-5">
+      <div className="flex items-center justify-between gap-3 px-2 md:mb-8 md:block">
         <Logo />
-        <p className="caption mt-1">{ROLE_LABEL[user.role]}</p>
+        <p className="caption md:mt-1">{ROLE_LABEL[user.role]}</p>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1">
+      <nav className="mt-3 flex gap-1 overflow-x-auto md:mt-0 md:flex-1 md:flex-col md:overflow-visible">
         {items.map((item) => {
           const active = pathname === item.href;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 rounded px-3 py-2 text-sm transition-colors ${
+              className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded px-3 py-2 text-sm transition-colors md:gap-3 ${
                 active
                   ? "bg-accent text-on-accent"
                   : "text-text-secondary hover:bg-surface-2 hover:text-text"
               }`}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-5 w-5 shrink-0" />
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="border-t border-border pt-3">
+      <div className="hidden border-t border-border pt-3 md:mt-auto md:block">
         <p className="label truncate px-2">{user.name}</p>
       </div>
     </aside>

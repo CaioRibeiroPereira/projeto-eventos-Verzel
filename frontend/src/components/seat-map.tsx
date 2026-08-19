@@ -49,47 +49,51 @@ export function SeatMap({
 
   return (
     <div className="flex flex-col items-center gap-2.5">
-      {rows.map(([rowLabel, rowSeats]) => {
-        const width = Math.max(...rowSeats.map((s) => s.col)) + 1;
-        const byCol = new Map(rowSeats.map((s) => [s.col, s]));
+      <div className="max-w-full overflow-x-auto pb-1">
+        <div className="flex w-fit flex-col items-center gap-1.5 sm:gap-2.5">
+          {rows.map(([rowLabel, rowSeats]) => {
+            const width = Math.max(...rowSeats.map((s) => s.col)) + 1;
+            const byCol = new Map(rowSeats.map((s) => [s.col, s]));
 
-        return (
-          <div key={rowLabel} className="flex items-center gap-1.5">
-            <span className="label w-6 text-right text-sm">{rowLabel}</span>
-            {Array.from({ length: width }, (_, col) => {
-              const seat = byCol.get(col);
-              if (!seat) return <span key={col} className="h-11 w-11" />;
+            return (
+              <div key={rowLabel} className="flex items-center gap-1 sm:gap-1.5">
+                <span className="label w-5 shrink-0 text-right text-sm sm:w-6">{rowLabel}</span>
+                {Array.from({ length: width }, (_, col) => {
+                  const seat = byCol.get(col);
+                  if (!seat) return <span key={col} className="h-8 w-8 shrink-0 sm:h-11 sm:w-11" />;
 
-              const isSelected = selectedSeatIds.includes(seat.id);
-              const state = isSelected
-                ? "selected"
-                : seat.occupied
-                  ? "occupied"
-                  : seat.accessible
-                    ? "accessible"
-                    : "available";
+                  const isSelected = selectedSeatIds.includes(seat.id);
+                  const state = isSelected
+                    ? "selected"
+                    : seat.occupied
+                      ? "occupied"
+                      : seat.accessible
+                        ? "accessible"
+                        : "available";
 
-              return (
-                <button
-                  key={col}
-                  type="button"
-                  disabled={seat.occupied}
-                  onClick={() => onToggle(seat)}
-                  title={seat.accessible ? `${seat.label} — assento acessível` : seat.label}
-                  className="flex h-11 w-11 items-center justify-center rounded-md text-sm font-medium transition-colors disabled:cursor-not-allowed"
-                  style={SEAT_STYLES[state]}
-                >
-                  {seat.accessible ? (
-                    <WheelchairIcon className="h-5 w-5" />
-                  ) : (
-                    seat.col + 1
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        );
-      })}
+                  return (
+                    <button
+                      key={col}
+                      type="button"
+                      disabled={seat.occupied}
+                      onClick={() => onToggle(seat)}
+                      title={seat.accessible ? `${seat.label} — assento acessível` : seat.label}
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-xs font-medium transition-colors disabled:cursor-not-allowed sm:h-11 sm:w-11 sm:text-sm"
+                      style={SEAT_STYLES[state]}
+                    >
+                      {seat.accessible ? (
+                        <WheelchairIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                      ) : (
+                        seat.col + 1
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       <div className="mt-4 flex flex-wrap justify-center gap-4">
         <Legend swatch="var(--seat-available-bg)" border="var(--seat-available-border)" label="Disponível" />
