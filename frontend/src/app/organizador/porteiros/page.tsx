@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRoleGuard } from "@/hooks/use-role-guard";
-import { ApiError, createGateStaff, listGateStaff, type GateStaff } from "@/lib/api";
+import { ApiError, createGateStaff, deleteGateStaff, listGateStaff, type GateStaff } from "@/lib/api";
+import { TrashIcon } from "@/components/icons";
 
 export default function PorteirosPage() {
   const { ready } = useRoleGuard("organizer");
@@ -17,11 +18,27 @@ function Porteiros() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [confirmingId, setConfirmingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!token) return;
     listGateStaff(token).then(setStaff);
   }, [token]);
+
+  async function handleDelete(id: number) {
+    if (!token) return;
+    setDeletingId(id);
+    try {
+      await deleteGateStaff(token, id);
+      setStaff((prev) => prev?.filter((s) => s.id !== id) ?? prev);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Não foi possível remover o porteiro.");
+    } finally {
+      setDeletingId(null);
+      setConfirmingId(null);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -129,7 +146,36 @@ function Porteiros() {
               <p className="text-text">{s.name}</p>
               <p className="caption">{s.email}</p>
             </div>
-            <span className="rounded bg-bg-success px-2 py-0.5 text-xs text-text-success">Ativo</span>
+
+            {confirmingId === s.id ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleDelete(s.id)}
+                  disabled={deletingId === s.id}
+                  className="rounded bg-red px-3 py-1.5 text-xs font-medium text-on-red hover:bg-red-hover disabled:opacity-60"
+                >
+                  {deletingId === s.id ? "Removendo..." : "Confirmar"}
+                </button>
+                <button
+                  onClick={() => setConfirmingId(null)}
+                  className="text-xs text-text-secondary hover:text-text"
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <span className="rounded bg-bg-success px-2 py-0.5 text-xs text-text-success">Ativo</span>
+                <button
+                  onClick={() => setConfirmingId(s.id)}
+                  title="Remover porteiro"
+                  aria-label="Remover porteiro"
+                  className="text-text-muted hover:text-red"
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>

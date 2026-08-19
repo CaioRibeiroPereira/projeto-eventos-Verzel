@@ -32,3 +32,12 @@ def create_gate_staff(
     user: User = Depends(require_organizer),
 ):
     return service.create_gate_staff(user.id, data)
+
+
+@router.delete("/{staff_id}", status_code=204)
+def delete_gate_staff(
+    staff_id: int,
+    service: StaffService = Depends(get_staff_service),
+    user: User = Depends(require_organizer),
+):
+    service.delete_gate_staff(user.id, staff_id)

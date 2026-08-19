@@ -401,3 +401,10 @@ export function createGateStaff(token: string, data: GateStaffInput) {
     body: JSON.stringify(data),
   });
 }
+
+export function deleteGateStaff(token: string, id: number) {
+  return request<void>(`/organizador/porteiros/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}

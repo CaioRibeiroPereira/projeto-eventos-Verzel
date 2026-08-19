@@ -28,6 +28,10 @@ class UserRepository:
     def list_gate_staff(self, organizer_id: int) -> list[User]:
         return list(
             self.session.exec(
-                select(User).where(User.role == UserRole.gate, User.organizer_id == organizer_id)
+                select(User).where(
+                    User.role == UserRole.gate,
+                    User.organizer_id == organizer_id,
+                    User.is_active == True,  # noqa: E712 — comparação de coluna SQLModel, não booleano Python
+                )
             )
         )
