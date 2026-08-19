@@ -6,7 +6,8 @@ import { Logo } from "@/components/logo";
 import { TicketIcon, UserIcon } from "@/components/icons";
 
 const NAV_LINKS = [
-  { href: "/sobre", label: "Sobre" },
+  { href: "/", label: "Em cartaz" },
+  { href: "/sobre", label: "Nossa história" },
   { href: "/para-empresas", label: "Para empresas" },
   { href: "/parcerias", label: "Parcerias" },
   { href: "/contato", label: "Contato" },

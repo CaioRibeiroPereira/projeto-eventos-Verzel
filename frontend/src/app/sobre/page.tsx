@@ -2,7 +2,7 @@ import { PageShell } from "@/components/page-shell";
 
 export default function SobrePage() {
   return (
-    <PageShell title="Sobre">
+    <PageShell title="Nossa história">
       <p>
         O Cine Verzel é uma plataforma de eventos de cinema: o organizador escolhe um
         filme do catálogo, a sala — já com o mapa de assentos pronto —, o formato, o
