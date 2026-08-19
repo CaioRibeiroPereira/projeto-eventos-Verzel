@@ -24,3 +24,5 @@ Thumbs.db
 # Material de referência e configuração local do Claude Code
 reference/
 .claude/
+CLAUDE.md
+DECISIONS.md
