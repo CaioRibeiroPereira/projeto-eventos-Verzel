@@ -338,12 +338,13 @@ export function PerfilContent({ fallbackLoginHref }: { fallbackLoginHref: string
         </form>
       </section>
 
-      {user.role === "organizer" ? (
+      {user.role === "organizer" || user.role === "gate" ? (
         <section className="flex flex-col gap-2 rounded-lg border border-border bg-surface-1 p-6">
           <h2>Apagar conta</h2>
           <p className="caption">
-            Conta de organizador é provisionada pela equipe do Cine Verzel e não pode ser apagada
-            por aqui. Fale com a equipe se precisar encerrar o acesso.
+            {user.role === "organizer"
+              ? "Conta de organizador é provisionada pela equipe do Cine Verzel e não pode ser apagada por aqui. Fale com a equipe se precisar encerrar o acesso."
+              : "Conta de portaria não pode ser apagada por aqui — peça pro organizador remover na Equipe da portaria, no painel dele."}
           </p>
         </section>
       ) : (
