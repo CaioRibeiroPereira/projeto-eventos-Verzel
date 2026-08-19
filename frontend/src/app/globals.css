@@ -220,6 +220,13 @@
   --seat-available-text: #4b5563;
 }
 
+/* Portaria usa a mesma paleta administrativa, só com um acento próprio
+   (verde-azulado) pra não parecer a mesma tela do organizador. */
+.theme-gate {
+  --color-accent: #0f6f5c;
+  --color-accent-hover: #12876f;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-text);
