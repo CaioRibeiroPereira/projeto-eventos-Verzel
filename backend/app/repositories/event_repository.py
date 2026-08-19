@@ -66,7 +66,9 @@ class EventRepository:
         )
 
     def list_published(self, filters: EventFilters) -> list[Event]:
-        query = select(Event).where(Event.status == EventStatus.published)
+        query = select(Event).where(
+            Event.status == EventStatus.published, Event.starts_at > datetime.utcnow()
+        )
 
         if filters.q:
             query = query.where(Event.title.ilike(f"%{filters.q}%"))
@@ -98,6 +100,7 @@ class EventRepository:
                     Event.format == event.format,
                     Event.language == event.language,
                     Event.status == EventStatus.published,
+                    Event.starts_at > datetime.utcnow(),
                 )
                 .order_by(Event.starts_at)
             )

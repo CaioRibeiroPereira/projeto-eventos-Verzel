@@ -177,13 +177,13 @@ class EventService:
 
     def get_public_event(self, event_id: int) -> EventRead:
         event = self.repository.get(event_id)
-        if not event or event.status.value != "published":
+        if not event or event.status.value != "published" or event.starts_at <= datetime.utcnow():
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
         return _to_read(event, self.repository.seat_count(event.id), self.repository.seats_sold(event.id))
 
     def get_event_sessions(self, event_id: int) -> list[EventRead]:
         event = self.repository.get(event_id)
-        if not event or event.status.value != "published":
+        if not event or event.status.value != "published" or event.starts_at <= datetime.utcnow():
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
         sessions = self.repository.list_sessions(event)
         return [

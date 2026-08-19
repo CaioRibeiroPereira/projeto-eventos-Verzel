@@ -40,7 +40,7 @@ class ReservationService:
 
     def get_seat_map(self, event_id: int) -> list[SeatState]:
         event = self.repository.get_event(event_id)
-        if not event or event.status != EventStatus.published:
+        if not event or event.status != EventStatus.published or event.starts_at <= datetime.utcnow():
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
 
         return [
@@ -67,7 +67,7 @@ class ReservationService:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Assento duplicado na seleção")
 
         event = self.repository.get_event(event_id)
-        if not event or event.status != EventStatus.published:
+        if not event or event.status != EventStatus.published or event.starts_at <= datetime.utcnow():
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
 
         already_held = self.repository.count_active_tickets_for_customer(customer_id, event_id)
