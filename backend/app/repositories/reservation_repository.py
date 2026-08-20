@@ -29,6 +29,23 @@ class ReservationRepository:
     def get_reservation(self, reservation_id: int) -> Reservation | None:
         return self.session.get(Reservation, reservation_id)
 
+    def list_pending_for_customer(self, customer_id: int, event_id: int) -> list[Reservation]:
+        """Reservas `pending` (ainda não pagas, nem recusadas/expiradas) do
+        cliente nesse evento — usado pra mostrar "você tem uma reserva em
+        aberto" quando ele volta pra tela de reserva em vez de deixar a
+        reserva abandonada, invisível, só contando pro limite até expirar."""
+        now = datetime.utcnow()
+        return list(
+            self.session.exec(
+                select(Reservation).where(
+                    Reservation.customer_id == customer_id,
+                    Reservation.event_id == event_id,
+                    Reservation.status == ReservationStatus.pending,
+                    Reservation.expires_at > now,
+                )
+            )
+        )
+
     def get_tickets_for_reservation(self, reservation_id: int) -> list[Ticket]:
         return list(
             self.session.exec(

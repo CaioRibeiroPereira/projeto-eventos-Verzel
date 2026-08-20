@@ -56,6 +56,15 @@ class ReservationService:
             for seat, occupied in self.repository.seat_map(event_id)
         ]
 
+    def get_my_pending_reservations(self, customer_id: int, event_id: int) -> list[ReservationRead]:
+        reservations = self.repository.list_pending_for_customer(customer_id, event_id)
+        result = []
+        for reservation in reservations:
+            tickets = self.repository.get_tickets_for_reservation(reservation.id)
+            seats_by_id = {t.seat_id: self.repository.get_seat(t.seat_id) for t in tickets}
+            result.append(_to_read(reservation, tickets, seats_by_id))
+        return result
+
     def create_reservation(self, customer_id: int, event_id: int, data: ReservationCreate) -> ReservationRead:
         if not data.seat_ids:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Selecione ao menos um assento")
@@ -156,10 +165,14 @@ class ReservationService:
         if not reservation or reservation.customer_id != customer_id:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
 
-        if reservation.status not in (ReservationStatus.paid, ReservationStatus.awaiting_door_payment):
+        if reservation.status not in (
+            ReservationStatus.pending,
+            ReservationStatus.paid,
+            ReservationStatus.awaiting_door_payment,
+        ):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Só é possível cancelar reservas pagas ou aguardando pagamento na portaria",
+                detail="Essa reserva já foi finalizada — não há mais o que cancelar",
             )
 
         tickets = self.repository.get_tickets_for_reservation(reservation.id)

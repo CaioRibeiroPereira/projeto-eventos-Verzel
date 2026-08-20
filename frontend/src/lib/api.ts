@@ -262,7 +262,7 @@ export interface SeatState {
   occupied: boolean;
 }
 
-export type ReservationStatus = "pending" | "paid" | "failed" | "cancelled";
+export type ReservationStatus = "pending" | "paid" | "failed" | "cancelled" | "awaiting_door_payment";
 
 export const MAX_SEATS_PER_RESERVATION = 2;
 
@@ -282,6 +282,12 @@ export interface Reservation {
 
 export function getSeatMap(eventId: number) {
   return request<SeatState[]>(`/events/${eventId}/seats`);
+}
+
+export function getMyPendingReservations(token: string, eventId: number) {
+  return request<Reservation[]>(`/events/${eventId}/reservations/pending`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
 
 export function createReservation(token: string, eventId: number, seatIds: number[]) {

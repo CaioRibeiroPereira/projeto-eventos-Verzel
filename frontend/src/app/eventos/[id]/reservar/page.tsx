@@ -8,9 +8,11 @@ import { SeatMap } from "@/components/seat-map";
 import { PaymentPanel } from "@/components/payment-panel";
 import {
   ApiError,
+  cancelReservation,
   confirmPayment,
   createReservation,
   declinePayment,
+  getMyPendingReservations,
   getPublicEvent,
   getSeatMap,
   payAtDoor,
@@ -39,6 +41,8 @@ export default function ReservarPage() {
   const [busy, setBusy] = useState(false);
   const [flashSeatIds, setFlashSeatIds] = useState<Set<number>>(new Set());
   const [liveWarning, setLiveWarning] = useState<string | null>(null);
+  const [pendingReservations, setPendingReservations] = useState<Reservation[]>([]);
+  const [resolvingId, setResolvingId] = useState<number | null>(null);
 
   // refs pra ler o estado mais recente de dentro do listener do WebSocket
   // sem precisar reabrir a conexão toda vez que `seats`/`selected` mudam.
@@ -58,10 +62,19 @@ export default function ReservarPage() {
     getSeatMap(eventId).then(setSeats);
   }, [eventId]);
 
+  const loadPendingReservations = useCallback(() => {
+    if (!token) return;
+    getMyPendingReservations(token, eventId).then(setPendingReservations);
+  }, [eventId, token]);
+
   useEffect(() => {
     getPublicEvent(eventId).then(setEvent);
     loadSeats();
   }, [eventId, loadSeats]);
+
+  useEffect(() => {
+    loadPendingReservations();
+  }, [loadPendingReservations]);
 
   // Mapa de assentos em tempo real: enquanto o cliente está escolhendo o
   // lugar, um WebSocket avisa quando alguém mais reserva/libera um assento
@@ -170,6 +183,26 @@ export default function ReservarPage() {
     setError(null);
     setLiveWarning(null);
     loadSeats();
+    loadPendingReservations();
+  }
+
+  function handleResumePending(res: Reservation) {
+    setReservation(res);
+    setStep("payment");
+  }
+
+  async function handleCancelPending(res: Reservation) {
+    if (!token) return;
+    setResolvingId(res.id);
+    try {
+      await cancelReservation(token, res.id);
+      loadSeats();
+      loadPendingReservations();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Não foi possível cancelar essa reserva.");
+    } finally {
+      setResolvingId(null);
+    }
   }
 
   if (loading || !user || user.role !== "customer" || !event || !seats) {
@@ -188,6 +221,39 @@ export default function ReservarPage() {
         </Link>
         <h1 className="movie-title !text-2xl">{event.title}</h1>
       </div>
+
+      {step === "select" && pendingReservations.length > 0 && (
+        <div className="flex flex-col gap-3">
+          {pendingReservations.map((res) => (
+            <div
+              key={res.id}
+              className="flex flex-col items-center gap-2 rounded-lg border border-border-warning bg-bg-warning p-4 text-center sm:flex-row sm:justify-between sm:text-left"
+            >
+              <p className="text-sm text-text-warning">
+                Você tem uma reserva em aberto (assento
+                {res.seats.length > 1 ? "s" : ""} {res.seats.map((s) => s.seat_label).join(", ")},{" "}
+                {formatPrice(res.total)}) que ainda não foi paga nem cancelada.
+              </p>
+              <div className="flex shrink-0 items-center gap-3">
+                <button
+                  onClick={() => handleResumePending(res)}
+                  disabled={resolvingId === res.id}
+                  className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-on-accent hover:bg-accent-hover disabled:opacity-60"
+                >
+                  Continuar pagamento
+                </button>
+                <button
+                  onClick={() => handleCancelPending(res)}
+                  disabled={resolvingId === res.id}
+                  className="caption text-text-secondary underline hover:text-text disabled:opacity-60"
+                >
+                  {resolvingId === res.id ? "Cancelando..." : "Cancelar e liberar"}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {step === "select" && (
         <>

@@ -357,8 +357,33 @@ não quebra nada.
 Testado o backend de ponta a ponta com um cliente WebSocket real: conecta,
 outra "pessoa" reserva um assento, o primeiro recebe o aviso com o id do
 assento certo; mesma coisa pro caminho de liberação (pagamento recusado).
-Não pude testar via navegador de verdade nessa sessão (sem ferramenta de
-automação de browser disponível) — validei o lado React por revisão de
-código: apuração via WebSocket nativo do browser (sem lib extra), refs pra
-não usar estado desatualizado dentro do listener do socket, e checagem de
-tipo limpa.
+
+## 2026-08-20 — Cliente pode cancelar uma reserva `pending` abandonada
+
+Bug reportado: comprar 1 assento e pagar, depois tentar comprar outro na
+mesma sessão, dava "você já tem 2 assentos" mesmo tendo pago só 1. Não era
+contagem errada — era efeito colateral confuso de uma decisão de alguns
+dias atrás (reserva `pending` conta pro limite de 2 por pessoa, proposital,
+pra ninguém furar o limite abrindo várias reservas sem nunca pagar
+nenhuma). O problema real: um checkout aberto e abandonado (foi até a tela
+de pagamento e saiu sem confirmar nem recusar) fica `pending`, segurando o
+assento e contando pro limite por até 10 minutos — e não existia nenhum
+jeito do cliente ver ou cancelar essa reserva presa, só esperar expirar.
+
+Duas peças novas:
+- `GET /events/{id}/reservations/pending` — lista as reservas `pending`
+  (não vencidas) do próprio cliente naquele evento.
+- `cancel_reservation` (que já existia pra reserva paga) passou a aceitar
+  `pending` também — marca como `cancelled` (ação explícita do cliente),
+  não `failed` (que já é usado pra "recusou o pagamento" ou "expirou
+  sozinha", distinção que vale manter no histórico).
+
+Na tela de reserva, se o cliente tem uma reserva `pending` parada nesse
+evento, aparece um aviso acima do mapa de assentos: "Continuar pagamento"
+(retoma de onde parou) ou "Cancelar e liberar" (devolve o assento na hora).
+
+Reproduzi o bug relatado de ponta a ponta contra o backend de verdade
+(comprar 1 + pagar, abrir um segundo checkout e abandonar, confirmar que a
+terceira tentativa bloqueia, cancelar a reserva presa pelo endpoint novo,
+confirmar que a compra seguinte funciona) antes de considerar corrigido.
+

@@ -40,6 +40,18 @@ def get_seat_map(
     return service.get_seat_map(event_id)
 
 
+@router.get("/events/{event_id}/reservations/pending", response_model=list[ReservationRead])
+def get_my_pending_reservations(
+    event_id: int,
+    service: ReservationService = Depends(get_reservation_service),
+    user: User = Depends(require_customer),
+):
+    """Reservas do próprio cliente nesse evento que ainda estão `pending`
+    (abriu o checkout, não pagou nem recusou) — pra ele ver e cancelar em
+    vez de ficar preso, sem saber, até os 10 minutos de espera passarem."""
+    return service.get_my_pending_reservations(user.id, event_id)
+
+
 @router.post("/events/{event_id}/reservations", response_model=ReservationRead, status_code=201)
 def create_reservation(
     event_id: int,
