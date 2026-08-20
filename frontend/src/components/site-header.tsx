@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { Logo } from "@/components/logo";
 import { TicketIcon, UserIcon } from "@/components/icons";
@@ -15,22 +16,24 @@ const NAV_LINKS = [
 
 export function SiteHeader() {
   const { user: sessionUser, loading } = useAuth();
+  const pathname = usePathname();
   // Sessão de organizador/portaria não vale nada aqui — a área do cliente
   // não reflete login das outras duas, mesmo estando no mesmo navegador.
   const user = sessionUser?.role === "customer" ? sessionUser : null;
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-border bg-bg/85 px-3 py-3 backdrop-blur-md sm:gap-4 sm:px-6">
+    <header className="site-header-surface sticky top-0 z-20 flex items-center justify-between gap-2 px-3 py-4 backdrop-blur-md sm:gap-6 sm:px-8">
       <Link href="/" className="shrink-0 transition-opacity hover:opacity-80">
-        <Logo />
+        <Logo className="site-header-logo" size={32} />
       </Link>
 
-      <nav className="hidden flex-1 items-center justify-center gap-6 md:flex">
+      <nav className="hidden flex-1 items-center justify-center gap-8 md:flex">
         {NAV_LINKS.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className="text-base text-text-secondary hover:text-accent"
+            data-active={pathname === link.href}
+            className="nav-link-underline text-base font-medium text-text-secondary transition-colors hover:text-accent data-[active=true]:text-accent"
           >
             {link.label}
           </Link>

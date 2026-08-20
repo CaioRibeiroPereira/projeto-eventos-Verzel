@@ -7,11 +7,18 @@ export function LogoMark({ size = 26 }: { size?: number }) {
   );
 }
 
-export function Logo({ className = "" }: { className?: string }) {
+export function Logo({ className = "", size = 26 }: { className?: string; size?: number }) {
+  // texto escala junto com o ícone, mantendo a proporção do text-2xl
+  // (1.5rem) original quando size fica no padrão (26).
   return (
     <span className={`flex items-center gap-2 text-accent ${className}`}>
-      <LogoMark />
-      <span className="font-display text-2xl font-medium leading-none">Cine Verzel</span>
+      <LogoMark size={size} />
+      <span
+        className="font-display font-medium leading-none"
+        style={{ fontSize: `${(size / 26) * 1.5}rem` }}
+      >
+        Cine Verzel
+      </span>
     </span>
   );
 }

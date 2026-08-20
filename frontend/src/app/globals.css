@@ -28,6 +28,43 @@
   animation: seat-flash 600ms ease-in-out 3;
 }
 
+/* Cabeçalho: gradiente com clima de cinema (mais escuro nas pontas, leve
+   vinheta âmbar no canto) + glow fino no acento na borda inferior. */
+.site-header-surface {
+  background:
+    radial-gradient(120% 180% at 12% -40%, rgba(234, 177, 76, 0.1) 0%, rgba(234, 177, 76, 0) 55%),
+    linear-gradient(112deg, rgba(18, 16, 14, 0.97) 0%, rgba(30, 25, 20, 0.92) 45%, rgba(18, 16, 14, 0.97) 100%);
+  box-shadow:
+    0 1px 0 rgba(234, 177, 76, 0.32),
+    0 14px 30px -20px rgba(234, 177, 76, 0.4);
+}
+
+.site-header-logo {
+  text-shadow: 0 0 24px rgba(234, 177, 76, 0.4);
+}
+
+/* Sublinhado animado nos links do menu central — expande do centro no
+   hover/rota ativa, em vez de aparecer de repente. */
+.nav-link-underline {
+  position: relative;
+}
+.nav-link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transition: transform 200ms ease;
+}
+.nav-link-underline:hover::after,
+.nav-link-underline[data-active="true"]::after {
+  transform: scaleX(1);
+}
+
 /* ============================================================
    Paleta A — Cinema clássico (reference/design/paleta.md)
    Tema escuro, fundo e superfícies quentes, acento âmbar.
