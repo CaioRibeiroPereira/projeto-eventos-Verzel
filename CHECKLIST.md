@@ -20,7 +20,7 @@ implementado e testado. O porquê de cada decisão está no [DECISIONS.md](DECIS
 - [x] Garantia de que o mesmo ingresso não é validado duas vezes (update atômico)
 - [x] Cobrança simulada, sem transação financeira real
 - [x] Dados de teste semeados: 2 organizadores, clientes, portaria e eventos publicados com ingressos disponíveis
-- [ ] README detalhado com passo a passo e seção de uso de IA
+- [x] README detalhado com passo a passo e seção de uso de IA
 
 ## Opcionais
 
