@@ -302,3 +302,26 @@ travando o assento pra sempre) — e um teste contrário, provando que um
 hold ainda dentro do prazo continua bloqueando normalmente. A ideia é que
 um teste sozinho provando "o bug sumiu" não é suficiente; precisa também
 provar que a trava de concorrência não foi enfraquecida no processo.
+
+## 2026-08-19 — Docker Compose completo
+
+Opcional item 7. O `docker-compose.yml` só subia o Postgres; agora sobe a
+aplicação inteira com um comando. Duas decisões técnicas que valem
+registrar:
+
+- O backend roda `alembic upgrade head` e o seed (idempotente) como parte
+  do próprio `CMD` da imagem, antes do uvicorn — assim `docker compose up`
+  já deixa tudo pronto pra avaliar, sem passo manual de migration/seed
+  depois. `DATABASE_URL` precisa ser sobrescrita no serviço (aponta pro
+  hostname `db` da rede do compose, não `localhost` — o `.env` local usa
+  `localhost` porque é pensado pra rodar fora do Docker).
+- O frontend ganhou Dockerfile multi-stage com `output: "standalone"` do
+  Next.js. `NEXT_PUBLIC_API_URL` entra como build arg, não só variável de
+  ambiente do container: o Next.js inlina variáveis `NEXT_PUBLIC_*` no
+  bundle do cliente já na hora do `next build`, então setar isso só em
+  runtime não teria efeito nenhum no código que já rodou no browser.
+
+Testado de ponta a ponta antes de considerar pronto: build das duas
+imagens, subida dos 3 serviços, login e listagem de eventos direto pela
+API containerizada, e o bundle do front realmente com a URL certa da API
+embutida (não só "buildou sem erro").

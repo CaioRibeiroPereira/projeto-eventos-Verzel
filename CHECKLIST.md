@@ -27,8 +27,8 @@ implementado e testado. O porquê de cada decisão está no [DECISIONS.md](DECIS
 - [x] Busca e filtro de eventos
 - [x] Painel do organizador (com dashboard: métricas e gráficos de ocupação/vendas)
 - [x] Cancelamento com devolução ao estoque — de reserva individual e de evento inteiro
-- [ ] Docker Compose subindo a aplicação inteira (hoje só sobe o Postgres)
-- [ ] Testes automatizados da lógica crítica
+- [x] Docker Compose subindo a aplicação inteira (front + API + banco)
+- [x] Testes automatizados da lógica crítica
 - [ ] Mapa de assentos em tempo real (websockets)
 - [ ] Aplicação publicada
 
