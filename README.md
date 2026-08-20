@@ -12,6 +12,58 @@ Feito para o Desafio Elite Dev 2026.
 - **Decisões tomadas, o que foi descartado e por quê**: [DECISIONS.md](DECISIONS.md)
 - **Uso de IA no desenvolvimento**: [seção mais abaixo](#uso-de-ia)
 
+## Roteiro de teste
+
+Pra quem for avaliar: ordem sugerida pra percorrer o fluxo inteiro rápido,
+direto na [aplicação publicada](#deploy). Credenciais na seção [Dados de
+teste](#dados-de-teste-seed) logo abaixo. Cada item prova um requisito do
+desafio.
+
+**Vitrine pública** (sem login)
+- [ ] Abrir o front-end, navegar pelos filmes em cartaz, buscar por nome,
+      filtrar por data/preço.
+
+**Organizador** (`/organizador/login`)
+- [ ] Criar um evento a partir de um filme do catálogo TMDb (sala, data,
+      preço, formato) e publicar.
+- [ ] Ver o dashboard: métricas e gráficos de ocupação/vendas.
+- [ ] Cancelar um evento (até 24h antes da sessão) — a lixeira pra apagar
+      só aparece depois de cancelado.
+- [ ] Cadastrar e remover um porteiro em "Equipe da portaria".
+
+**Cliente** (`/login`)
+- [ ] Reservar um lugar no mapa de assentos de um evento.
+- [ ] Pagamento simulado: aprovar numa tentativa, recusar em outra.
+- [ ] Ver o ingresso com QR em "Meus ingressos" e compartilhar o link.
+- [ ] Cancelar uma reserva paga — o assento volta a ficar disponível.
+- [ ] Escolher "pagar na hora do filme" — o ingresso já sai com QR,
+      marcado como pagamento pendente.
+
+**Garantia: mesmo lugar não é vendido duas vezes**
+- [ ] Duas abas (ou dois clientes) na mesma sessão, reservando o mesmo
+      assento — a segunda tentativa tem que falhar.
+
+**Garantia: mapa de assentos em tempo real**
+- [ ] Com as duas abas abertas na tela de reserva do mesmo evento,
+      reservar de um lado e ver o assento ficar ocupado sozinho do outro,
+      sem recarregar a página.
+
+**Portaria** (`/portaria/login`)
+- [ ] Validar um ingresso pela câmera ou digitando o código curto —
+      **válido**.
+- [ ] Validar o mesmo ingresso de novo — **já utilizado**.
+- [ ] Validar um ingresso de uma sessão não selecionada — **evento
+      errado**.
+- [ ] Digitar um código qualquer — **inválido**.
+- [ ] Escanear um ingresso "pagar na hora" — **pagamento pendente** com o
+      valor; só libera a entrada depois de cobrar.
+
+**Rodando local** (opcional, se preferir testar fora do ambiente publicado)
+- [ ] `docker compose up` sobe tudo com um comando — ver [Como
+      rodar](#como-rodar).
+- [ ] `cd backend && pytest` roda a suíte automatizada das garantias
+      críticas.
+
 ## Stack
 
 - **Back-end**: Python 3.13, FastAPI, SQLModel (SQLAlchemy), Alembic
