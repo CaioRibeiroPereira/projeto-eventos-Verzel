@@ -9,6 +9,7 @@ Uso: python -m app.seed
 import random
 from datetime import datetime, timedelta
 
+from fastapi import HTTPException
 from sqlmodel import Session, select
 
 from app.core.database import engine
@@ -176,11 +177,19 @@ def seed_events(session: Session, organizer: User) -> None:
         return
 
     for i, title in enumerate(MOVIES):
-        results = tmdb.search_movies(title)
-        if not results:
-            print(f"Filme não encontrado no TMDb: {title}")
+        try:
+            results = tmdb.search_movies(title)
+            if not results:
+                print(f"Filme não encontrado no TMDb: {title}")
+                continue
+            movie = tmdb.get_movie(results[0].id)
+        except HTTPException as exc:
+            # Uma falha no TMDb (rede, rate limit, chave errada) não pode
+            # derrubar o seed inteiro — pula esse filme e segue pros
+            # próximos; usuários e o resto do seed já rodaram antes daqui,
+            # não tem por que perdê-los junto.
+            print(f"Falha consultando o TMDb pra \"{title}\": {exc.detail} — pulando esse filme.")
             continue
-        movie = tmdb.get_movie(results[0].id)
 
         local = ROOMS[i % len(ROOMS)]
         format = FORMATS[i % len(FORMATS)]

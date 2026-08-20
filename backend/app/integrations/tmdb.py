@@ -54,9 +54,12 @@ def _get(path: str, params: dict) -> dict:
     response = httpx.get(
         f"{BASE_URL}{path}",
         params={**params, "api_key": settings.tmdb_api_key, "language": "pt-BR"},
-        timeout=10,
+        timeout=15,
     )
     if response.status_code != 200:
+        # o motivo real (chave inválida, rate limit, etc.) só importa nos
+        # logs do servidor — pro cliente da API basta saber que falhou.
+        print(f"TMDb respondeu {response.status_code} em {path}: {response.text[:300]}")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Falha ao consultar o TMDb",

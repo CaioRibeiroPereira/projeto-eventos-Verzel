@@ -439,3 +439,26 @@ nada depois de já estar no ar:
   Vercel sem precisar mexer em código — em dev local ela fica vazia e o
   comportamento não muda nada.
 
+## 2026-08-20 — Falha no TMDb não pode mais derrubar o deploy inteiro
+
+Bug real encontrado no primeiro deploy no Render: o `seed.py` não tinha
+nenhuma proteção contra o TMDb falhar, e como o `Dockerfile` encadeava
+migration → seed → servidor com `&&`, uma falha na busca de filme
+(nesse caso, chave da API inválida) derrubava o script inteiro — e o
+`uvicorn` nunca chegava a subir. O servidor inteiro ficava fora do ar por
+causa de um problema que só afetava o catálogo de filmes do seed.
+
+Duas camadas de correção: `seed_events` agora pula só o filme que falhou
+e segue pros próximos (os usuários, que já tinham sido criados antes,
+não se perdiam mais); e o `Dockerfile` trocou `python -m app.seed &&` por
+`(python -m app.seed || true) &&`, então nenhuma falha de seed — essa ou
+qualquer outra no futuro — impede o servidor de subir. Migration continua
+obrigatória de verdade (sem tabela não tem app), só o seed virou best-effort.
+
+De quebra, o cliente do TMDb (`integrations/tmdb.py`) ganhou um log do
+status e corpo reais da resposta quando falha — antes só existia
+"Falha ao consultar o TMDb" sem detalhe nenhum, impossível de diagnosticar
+remotamente sem acesso ao container. Reproduzi o erro de propósito com uma
+chave inválida antes de considerar corrigido: confirma que o formato do
+erro bate com o que apareceu no log do Render (401, chave inválida).
+
