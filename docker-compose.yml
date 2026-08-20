@@ -16,5 +16,33 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file:
+      - backend/.env
+    environment:
+      # dentro da rede do compose o banco é o serviço "db", não localhost —
+      # sobrescreve o que vier do .env (feito pra rodar fora do Docker).
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/eventos
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # variável NEXT_PUBLIC_* é inlinada no build do Next.js, por isso
+        # entra como build arg, não só como environment do container.
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
 volumes:
   db_data:
