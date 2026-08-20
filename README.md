@@ -177,6 +177,8 @@ IA entrou em pontos específicos do processo:
 - **Busca de informações**: usei como fonte de consulta rápida durante o
   desenvolvimento.
 - **Versionamento do código**: me ajudou a criar os commits ao longo da semana, com mensagem descritiva por passo lógico, e cuidou de manter o histórico do Git organizado.
+- **População de dados**: me ajudou a popular o ambiente publicado com uma semana de sessões (vários filmes por dia) e uma leva de ingressos vendidos simulados, pra o catálogo ter cara de cenário real na hora da avaliação.
+
 
 O [DECISIONS.md](DECISIONS.md) registra o processo com mais detalhe,
 decisão por decisão, com data e o porquê.
