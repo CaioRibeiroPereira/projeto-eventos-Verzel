@@ -515,3 +515,25 @@ por fim o evento em si, nessa ordem (por causa das FKs). Testado
 end-to-end: tentar apagar um evento publicado dá 409; apagar um cancelado
 dá 204 e o evento some de verdade (404 depois).
 
+## 2026-08-20 — Cogitamos editar evento, decidimos não
+
+Cogitei implementar edição de evento (sala, data, preço, formato, idioma),
+mas a real necessidade por trás do pedido era só "cometi um engano, quero
+recomeçar sem sujeira" — e isso o fluxo que já existe cobre: cancela (dá
+pra cancelar mesmo em rascunho, não só publicado) → aparece a lixeira →
+apaga → cria de novo do zero. Editar só faria diferença de verdade se o
+evento já tivesse venda de ingresso (aí cancelar devolveria dinheiro de
+gente que talvez só quisesse corrigir um detalhe) — decisão de produto
+mais delicada, não entramos nela agora.
+
+## 2026-08-20 — Bug real: dava pra criar evento no passado
+
+Achado testando a aplicação: o formulário de criar evento deixava marcar
+uma sessão numa data/hora que já tinha passado. Não existia nenhuma
+checagem no service — só o `min` do input de data no formulário, que é só
+uma dica visual do navegador, fácil de burlar (ex: mudar a hora pra antes
+de agora no mesmo dia, ou chamar a API direto). Corrigido no
+`EventService.create_event`: rejeita com 400 se `starts_at` não for
+estritamente no futuro, antes até de consultar o TMDb. Testado end-to-end
+contra o backend de verdade antes de considerar corrigido.
+

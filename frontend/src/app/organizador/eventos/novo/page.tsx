@@ -19,6 +19,14 @@ import {
 const FORMATS: EventFormat[] = ["2D", "3D"];
 const LANGUAGES: EventLanguage[] = ["Dublado", "Legendado"];
 
+function todayLocal(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 export default function NovoEventoPage() {
   const { ready } = useRoleGuard("organizer");
   return ready ? <Wizard /> : null;
@@ -152,6 +160,7 @@ function Wizard() {
                   id="date"
                   type="date"
                   required
+                  min={todayLocal()}
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   className="rounded border border-border bg-surface-2 px-3 py-2 text-text outline-none focus:border-accent"

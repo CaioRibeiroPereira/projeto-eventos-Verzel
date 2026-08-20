@@ -87,6 +87,11 @@ class EventService:
         layout = ROOM_LAYOUTS.get(data.local)
         if not layout:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Sala inválida")
+        if data.starts_at <= datetime.utcnow():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A sessão precisa ser marcada pra uma data e hora futuras",
+            )
 
         movie = tmdb.get_movie(data.tmdb_movie_id)
 
