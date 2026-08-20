@@ -392,10 +392,27 @@ confirmar que a compra seguinte funciona) antes de considerar corrigido.
 Por algum motivo, ao longo da semana, boa parte dos commits acabou saindo
 com um trailer `Co-Authored-By: Claude Sonnet 5` no final da mensagem —
 provavelmente ficou ali de quando estava mexendo mais a fundo caçando bug,
-sem eu prestar atenção nisso depois. Removido a pedido: reescrevi a
+sem eu prestar atenção nisso depois. Removido: reescrevi a
 mensagem de todos os commits (110 no total) tirando só essa linha — datas,
 ordem e conteúdo de cada commit continuam exatamente iguais, só o hash
 muda — e forcei o push pra atualizar o histórico já publicado no GitHub
 também, já que boa parte desses commits já tinha ido pra lá antes da
 remoção.
+
+## 2026-08-19 — Por que `frontend/AGENTS.md` e `frontend/CLAUDE.md` existem
+
+Não foram arquivos que eu criei de propósito. O Next.js 16 (a versão usada
+aqui) tem um mecanismo próprio: quando `next dev` roda e detecta um agente
+de IA em uso, ele gera e mantém sozinho um `AGENTS.md`/`CLAUDE.md` na pasta
+do front-end, avisando que essa versão tem mudanças que quebram convenções
+antigas e mandando ler a documentação local
+(`node_modules/next/dist/docs/`) antes de escrever código —
+`generate-agent-files.js`, dentro do próprio pacote `next`. `CLAUDE.md`
+só tem `@AGENTS.md` (um include).
+
+Estão rastreados desde o primeiro commit do projeto ("Fase 1: esqueleto"),
+porque apareceram sozinhos assim que `next dev` rodou pela primeira vez. Se
+forem removidos do repo, o `next dev` recria na próxima execução — por
+isso ficam versionados, senão viram um "arquivo sujo" toda hora. Não são
+lixo nem acidente: são infraestrutura do próprio framework.
 
