@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from fastapi import HTTPException, status
 
+from app.core.ws import broadcaster
 from app.integrations import tmdb
 from app.models.event import Event, EventStatus
 from app.models.seat import Seat
@@ -157,7 +158,8 @@ class EventService:
                 detail="Só é possível cancelar até 1 dia antes da sessão",
             )
 
-        cancelled_reservations = self.repository.cancel_with_active_reservations(event)
+        cancelled_reservations, freed_seat_ids = self.repository.cancel_with_active_reservations(event)
+        broadcaster.notify_seats_changed(event.id, freed_seat_ids)
         event_read = _to_read(
             event, self.repository.seat_count(event.id), self.repository.seats_sold(event.id)
         )

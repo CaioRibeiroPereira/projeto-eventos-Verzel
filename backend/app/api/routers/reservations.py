@@ -1,14 +1,28 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlmodel import Session
 
 from app.core.database import get_session
 from app.core.security import require_role
+from app.core.ws import broadcaster
 from app.models.user import User, UserRole
 from app.repositories.reservation_repository import ReservationRepository
 from app.schemas.reservations import ReservationCreate, ReservationRead, SeatState
 from app.services.reservation_service import ReservationService
 
 router = APIRouter(tags=["reservations"])
+
+
+@router.websocket("/ws/events/{event_id}/seats")
+async def seat_map_updates(websocket: WebSocket, event_id: int):
+    """Avisa quem está com o mapa de assentos aberto quando algum lugar
+    muda de ocupação — o cliente reage buscando o mapa atualizado de novo,
+    esse socket só carrega o aviso ("mudou algo"), não o estado inteiro."""
+    await broadcaster.connect(event_id, websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        broadcaster.disconnect(event_id, websocket)
 
 
 def get_reservation_service(session: Session = Depends(get_session)) -> ReservationService:

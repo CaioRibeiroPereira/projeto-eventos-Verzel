@@ -40,10 +40,13 @@ export function SeatMap({
   seats,
   selectedSeatIds,
   onToggle,
+  flashSeatIds,
 }: {
   seats: SeatState[];
   selectedSeatIds: number[];
   onToggle: (seat: SeatState) => void;
+  /** Assentos que acabaram de mudar de ocupação (aviso em tempo real) — piscam por um instante. */
+  flashSeatIds?: Set<number>;
 }) {
   const rows = groupByRow(seats);
 
@@ -78,7 +81,9 @@ export function SeatMap({
                       disabled={seat.occupied}
                       onClick={() => onToggle(seat)}
                       title={seat.accessible ? `${seat.label} — assento acessível` : seat.label}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-xs font-medium transition-colors disabled:cursor-not-allowed sm:h-11 sm:w-11 sm:text-sm"
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-xs font-medium transition-colors disabled:cursor-not-allowed sm:h-11 sm:w-11 sm:text-sm ${
+                        flashSeatIds?.has(seat.id) ? "seat-flash" : ""
+                      }`}
                       style={SEAT_STYLES[state]}
                     >
                       {seat.accessible ? (

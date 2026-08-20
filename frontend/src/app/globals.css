@@ -12,6 +12,22 @@
   animation: hero-fade 700ms ease-out;
 }
 
+/* Mapa de assentos em tempo real: pisca o assento que acabou de mudar de
+   ocupação (avisado por outro cliente via WebSocket), pra chamar atenção
+   sem precisar de texto. */
+@keyframes seat-flash {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--seat-occupied-bg);
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--seat-occupied-bg);
+  }
+}
+.seat-flash {
+  animation: seat-flash 600ms ease-in-out 3;
+}
+
 /* ============================================================
    Paleta A — Cinema clássico (reference/design/paleta.md)
    Tema escuro, fundo e superfícies quentes, acento âmbar.

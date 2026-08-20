@@ -1,5 +1,9 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+export function seatMapWsUrl(eventId: number): string {
+  return `${API_URL.replace(/^http/, "ws")}/ws/events/${eventId}/seats`;
+}
+
 export type UserRole = "organizer" | "customer" | "gate";
 
 export interface User {

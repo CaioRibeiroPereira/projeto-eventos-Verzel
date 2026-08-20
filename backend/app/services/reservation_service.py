@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import HTTPException, status
 
 from app.core.qr import generate_share_token, sign_ticket
+from app.core.ws import broadcaster
 from app.models.event import EventStatus
 from app.models.reservation import Reservation, ReservationStatus
 from app.models.seat import Seat
@@ -96,6 +97,7 @@ class ReservationService:
             )
 
         seats_by_id = {seat.id: seat for seat in seats}
+        broadcaster.notify_seats_changed(event_id, [t.seat_id for t in tickets])
         return _to_read(reservation, tickets, seats_by_id)
 
     def _get_owned_pending_reservation(self, customer_id: int, reservation_id: int) -> Reservation:
@@ -113,6 +115,7 @@ class ReservationService:
             tickets = self.repository.get_tickets_for_reservation(reservation.id)
             if tickets:
                 self.repository.mark_failed(reservation, tickets)
+                broadcaster.notify_seats_changed(reservation.event_id, [t.seat_id for t in tickets])
             raise HTTPException(
                 status_code=status.HTTP_410_GONE,
                 detail="O tempo para pagar essa reserva expirou, os assentos foram liberados",
@@ -145,6 +148,7 @@ class ReservationService:
         tickets = self.repository.get_tickets_for_reservation(reservation.id)
         seats_by_id = {t.seat_id: self.repository.get_seat(t.seat_id) for t in tickets}
         reservation = self.repository.mark_failed(reservation, tickets)
+        broadcaster.notify_seats_changed(reservation.event_id, [t.seat_id for t in tickets])
         return _to_read(reservation, tickets, seats_by_id)
 
     def cancel_reservation(self, customer_id: int, reservation_id: int) -> ReservationRead:
@@ -167,4 +171,5 @@ class ReservationService:
 
         seats_by_id = {t.seat_id: self.repository.get_seat(t.seat_id) for t in tickets}
         reservation = self.repository.cancel(reservation, tickets)
+        broadcaster.notify_seats_changed(reservation.event_id, [t.seat_id for t in tickets])
         return _to_read(reservation, tickets, seats_by_id)

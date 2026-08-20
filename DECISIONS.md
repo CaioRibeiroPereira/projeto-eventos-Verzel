@@ -325,3 +325,40 @@ Testado de ponta a ponta antes de considerar pronto: build das duas
 imagens, subida dos 3 serviços, login e listagem de eventos direto pela
 API containerizada, e o bundle do front realmente com a URL certa da API
 embutida (não só "buildou sem erro").
+
+## 2026-08-20 — Mapa de assentos em tempo real
+
+Opcional item 10, deixado por último de propósito por ser o mais
+arriscado. WebSocket em `/ws/events/{id}/seats`: quando um assento muda de
+ocupação (reserva criada, cancelada, recusada, ou evento cancelado em
+cascata), o backend avisa quem está com aquele mapa aberto; o cliente
+busca o mapa atualizado de novo (o socket só carrega "algo mudou", não o
+estado inteiro — mais simples e sempre consistente com o banco). Se o
+assento que a própria pessoa tinha escolhido acabou de ser levado por
+outra, ele sai da seleção dela sozinho, com aviso, e pisca no mapa por um
+instante.
+
+Duas decisões técnicas:
+- As sessões do banco (SQLModel/psycopg2) são síncronas, mas o WebSocket é
+  assíncrono. A ponte é `asyncio.run_coroutine_threadsafe`: os services
+  continuam chamando uma função síncrona normal depois do commit, que
+  agenda o broadcast de volta na event loop principal (capturada uma vez
+  no `lifespan` de startup do FastAPI).
+- Conexões ficam em memória, agrupadas por evento — funciona bem com um
+  processo de backend só (o caso do desafio). Múltiplas instâncias em
+  produção precisariam de um pub/sub compartilhado (Redis, por exemplo);
+  registro pra não esquecer se algum dia isso for além do desafio.
+
+Não fiz reconexão automática se o socket cair (ex: backend reinicia no
+meio da sessão do cliente) — mantém o escopo enxuto; sem o socket, o mapa
+volta a funcionar do jeito antigo (só atualiza ao recarregar a página),
+não quebra nada.
+
+Testado o backend de ponta a ponta com um cliente WebSocket real: conecta,
+outra "pessoa" reserva um assento, o primeiro recebe o aviso com o id do
+assento certo; mesma coisa pro caminho de liberação (pagamento recusado).
+Não pude testar via navegador de verdade nessa sessão (sem ferramenta de
+automação de browser disponível) — validei o lado React por revisão de
+código: apuração via WebSocket nativo do browser (sem lib extra), refs pra
+não usar estado desatualizado dentro do listener do socket, e checagem de
+tipo limpa.

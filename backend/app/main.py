@@ -1,9 +1,24 @@
+import asyncio
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routers import account, auth, contact, events, gate, reservations, staff, tickets
+from app.core.ws import broadcaster
 
-app = FastAPI(title="Plataforma de Eventos e Ingressos")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    # o broadcaster do mapa de assentos em tempo real recebe chamadas de
+    # código síncrono (services) e precisa da referência da event loop
+    # principal pra conseguir despachar o broadcast assíncrono.
+    broadcaster.bind_loop(asyncio.get_running_loop())
+    yield
+
+
+app = FastAPI(title="Plataforma de Eventos e Ingressos", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

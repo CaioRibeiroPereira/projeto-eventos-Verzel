@@ -113,11 +113,12 @@ class EventRepository:
         self.session.refresh(event)
         return event
 
-    def cancel_with_active_reservations(self, event: Event) -> int:
+    def cancel_with_active_reservations(self, event: Event) -> tuple[int, list[int]]:
         """Cancela o evento e, na mesma transação, cancela toda reserva paga
         ou aguardando pagamento na portaria (e seus tickets) desse evento —
         a sessão não vai mais acontecer, os ingressos deixam de valer.
-        Retorna quantas reservas foram afetadas."""
+        Retorna quantas reservas foram afetadas e os ids dos assentos
+        liberados (pro broadcast do mapa em tempo real)."""
         event.status = EventStatus.cancelled
         self.session.add(event)
 
@@ -131,6 +132,7 @@ class EventRepository:
                 )
             )
         )
+        freed_seat_ids: list[int] = []
         for reservation in reservations:
             reservation.status = ReservationStatus.cancelled
             self.session.add(reservation)
@@ -140,7 +142,8 @@ class EventRepository:
             for ticket in tickets:
                 ticket.status = TicketStatus.cancelled
                 self.session.add(ticket)
+                freed_seat_ids.append(ticket.seat_id)
 
         self.session.commit()
         self.session.refresh(event)
-        return len(reservations)
+        return len(reservations), freed_seat_ids

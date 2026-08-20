@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
@@ -14,6 +14,7 @@ import {
   getPublicEvent,
   getSeatMap,
   payAtDoor,
+  seatMapWsUrl,
   MAX_SEATS_PER_RESERVATION,
   type Event,
   type Reservation,
@@ -36,6 +37,15 @@ export default function ReservarPage() {
   const [step, setStep] = useState<Step>("select");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [flashSeatIds, setFlashSeatIds] = useState<Set<number>>(new Set());
+  const [liveWarning, setLiveWarning] = useState<string | null>(null);
+
+  // refs pra ler o estado mais recente de dentro do listener do WebSocket
+  // sem precisar reabrir a conexão toda vez que `seats`/`selected` mudam.
+  const seatsRef = useRef<SeatState[] | null>(null);
+  const selectedRef = useRef<SeatState[]>([]);
+  seatsRef.current = seats;
+  selectedRef.current = selected;
 
   useEffect(() => {
     if (loading) return;
@@ -53,8 +63,43 @@ export default function ReservarPage() {
     loadSeats();
   }, [eventId, loadSeats]);
 
+  // Mapa de assentos em tempo real: enquanto o cliente está escolhendo o
+  // lugar, um WebSocket avisa quando alguém mais reserva/libera um assento
+  // — busca o mapa atualizado de novo e, se o próprio cliente tinha
+  // escolhido um assento que acabou de ser levado, tira da seleção dele.
+  useEffect(() => {
+    if (step !== "select") return;
+
+    const ws = new WebSocket(seatMapWsUrl(eventId));
+    ws.onmessage = async () => {
+      const fresh = await getSeatMap(eventId);
+      const before = seatsRef.current;
+
+      const newlyOccupied = fresh
+        .filter((s) => s.occupied && !before?.find((p) => p.id === s.id)?.occupied)
+        .map((s) => s.id);
+      if (newlyOccupied.length > 0) {
+        setFlashSeatIds(new Set(newlyOccupied));
+        setTimeout(() => setFlashSeatIds(new Set()), 1800);
+      }
+
+      setSeats(fresh);
+
+      const stillAvailable = selectedRef.current.filter(
+        (s) => !fresh.find((f) => f.id === s.id)?.occupied,
+      );
+      if (stillAvailable.length !== selectedRef.current.length) {
+        setSelected(stillAvailable);
+        setLiveWarning("Um assento que você tinha escolhido acabou de ser reservado por outra pessoa.");
+      }
+    };
+
+    return () => ws.close();
+  }, [eventId, step]);
+
   function handleToggle(seat: SeatState) {
     setError(null);
+    setLiveWarning(null);
     setSelected((prev) => {
       const already = prev.some((s) => s.id === seat.id);
       if (already) return prev.filter((s) => s.id !== seat.id);
@@ -123,6 +168,7 @@ export default function ReservarPage() {
     setSelected([]);
     setReservation(null);
     setError(null);
+    setLiveWarning(null);
     loadSeats();
   }
 
@@ -145,11 +191,17 @@ export default function ReservarPage() {
 
       {step === "select" && (
         <>
-          <SeatMap seats={seats} selectedSeatIds={selected.map((s) => s.id)} onToggle={handleToggle} />
+          <SeatMap
+            seats={seats}
+            selectedSeatIds={selected.map((s) => s.id)}
+            onToggle={handleToggle}
+            flashSeatIds={flashSeatIds}
+          />
 
           <p className="text-center caption">Até {MAX_SEATS_PER_RESERVATION} assentos por pessoa.</p>
 
           {error && <p className="text-center text-sm text-red">{error}</p>}
+          {liveWarning && <p className="text-center text-sm text-text-warning">{liveWarning}</p>}
 
           {selected.length > 0 && (
             <div className="flex flex-col items-center gap-2">

@@ -29,7 +29,7 @@ implementado e testado. O porquê de cada decisão está no [DECISIONS.md](DECIS
 - [x] Cancelamento com devolução ao estoque — de reserva individual e de evento inteiro
 - [x] Docker Compose subindo a aplicação inteira (front + API + banco)
 - [x] Testes automatizados da lógica crítica
-- [ ] Mapa de assentos em tempo real (websockets)
+- [x] Mapa de assentos em tempo real (websockets)
 - [ ] Aplicação publicada
 
 ## Além do pedido
