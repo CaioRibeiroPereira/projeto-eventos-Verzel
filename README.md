@@ -176,9 +176,7 @@ IA entrou em pontos específicos do processo:
   a aplicação.
 - **Busca de informações**: usei como fonte de consulta rápida durante o
   desenvolvimento.
-- **Versionamento do código**: criou os commits ao longo da semana, com
-  mensagem descritiva por passo lógico, e cuidou de manter o histórico do
-  Git organizado.
+- **Versionamento do código**: me ajudou a criar os commits ao longo da semana, com mensagem descritiva por passo lógico, e cuidou de manter o histórico do Git organizado.
 
 O [DECISIONS.md](DECISIONS.md) registra o processo com mais detalhe,
 decisão por decisão, com data e o porquê.

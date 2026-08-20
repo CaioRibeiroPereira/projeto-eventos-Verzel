@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routers import account, auth, contact, events, gate, reservations, staff, tickets
+from app.core.config import settings
 from app.core.ws import broadcaster
 
 
@@ -20,9 +21,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="Plataforma de Eventos e Ingressos", lifespan=lifespan)
 
+# settings.frontend_url é o domínio publicado (ex: Vercel) — vazio em dev
+# local, então só entra na lista se de fato configurado.
+allow_origins = ["http://localhost:3000"]
+if settings.frontend_url:
+    allow_origins.append(settings.frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=allow_origins,
     # permite acessar pelo IP da rede local também (ex: testar no celular
     # na mesma Wi-Fi) — só faixas privadas, não abre pra internet.
     allow_origin_regex=r"http://(192\.168|10\.\d+)\.\d+\.\d+:3000",

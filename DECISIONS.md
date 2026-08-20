@@ -416,3 +416,26 @@ forem removidos do repo, o `next dev` recria na próxima execução — por
 isso ficam versionados, senão viram um "arquivo sujo" toda hora. Não são
 lixo nem acidente: são infraestrutura do próprio framework.
 
+## 2026-08-20 — Deploy: Vercel + Render, sem Neon
+
+Duas contas em vez de três: front no Vercel, back e banco os dois no
+Render (não usei Neon pro Postgres). O Postgres grátis do Render se apaga
+sozinho 30 dias depois de criado — normalmente um problema sério pra
+produção, mas o prazo do desafio é amanhã, então o risco real de a
+avaliação demorar mais que um mês é baixo. Trade-off consciente: uma conta
+a menos pra criar agora, contra um prazo de validade que quase certamente
+não vai importar.
+
+Preparei o código pra funcionar nas duas plataformas sem precisar reescrever
+nada depois de já estar no ar:
+- `DATABASE_URL` agora aceita o formato que o Render entrega
+  (`postgres://...`, sem o driver) — um validator no `Settings` reescreve
+  pra `postgresql+psycopg2://...` sozinho, sem precisar montar a URL na
+  mão.
+- A porta do servidor agora respeita a variável `PORT` que o Render define
+  em runtime (`--port ${PORT:-8000}`), com fallback pro 8000 de sempre
+  quando ela não existe (dev local, `docker compose`).
+- CORS ganhou uma variável nova, `FRONTEND_URL`, pra liberar o domínio do
+  Vercel sem precisar mexer em código — em dev local ela fica vazia e o
+  comportamento não muda nada.
+
