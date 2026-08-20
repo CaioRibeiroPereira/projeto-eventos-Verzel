@@ -480,3 +480,24 @@ antes de considerar corrigido: `npm run build` local sem a variável gera
 o `.next` padrão (com o arquivo de rastreamento que faltava), e o
 `docker compose build` continua gerando `.next/standalone` normalmente.
 
+## 2026-08-20 — Trailer sem chave em quase todo o seed do deploy
+
+Depois do primeiro seed bem-sucedido no Render, reparei que 19 dos 20
+eventos ficaram sem `youtube_key` (nenhum trailer aparecendo), mesmo pra
+filmes que localmente têm. Não era bug de código nem do TMDb em geral:
+testei na hora, direto na API do TMDb com os mesmos parâmetros que o app
+usa, e ela devolveu o trailer certinho pro Matrix — e um dos 20 eventos do
+próprio seed (A Odisseia) veio com o trailer correto. Foi uma instabilidade
+pontual do TMDb bem na hora daquela leva de ~20 chamadas em sequência
+durante o seed, não algo sistemático.
+
+O problema é que `seed_events` só cria evento se o organizador ainda não
+tiver nenhum — então um redeploy novo não ia corrigir isso sozinho, só
+pular achando que já está seedado. Decisão: apaguei os 20 eventos (e
+assentos/reservas/ingressos ligados a eles) direto no banco do Render, sem
+mexer nos usuários, pra recriar os filmes na mão pelo painel do
+organizador — cada criação chama o TMDb na hora, então sai com o trailer
+certo dessa vez. Não copiei o `seed.py` pra rodar de novo automaticamente
+porque criar na mão já é rápido pra ~20 filmes e evita depender de uma
+chamada em lote instável de novo.
+
