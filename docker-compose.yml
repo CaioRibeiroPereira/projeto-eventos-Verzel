@@ -25,6 +25,9 @@ services:
       # dentro da rede do compose o banco é o serviço "db", não localhost —
       # sobrescreve o que vier do .env (feito pra rodar fora do Docker).
       DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/eventos
+      # só liga o seed automático aqui, em dev local — em produção (Render)
+      # essa variável não é definida, então o seed vira ação manual.
+      RUN_SEED: "true"
     ports:
       - "8000:8000"
     depends_on:

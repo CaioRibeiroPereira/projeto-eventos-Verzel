@@ -537,3 +537,23 @@ de agora no mesmo dia, ou chamar a API direto). Corrigido no
 estritamente no futuro, antes até de consultar o TMDb. Testado end-to-end
 contra o backend de verdade antes de considerar corrigido.
 
+## 2026-08-20 — Seed automático reapareceu sozinho no deploy: virou opt-in
+
+Depois de apagar os 20 eventos do deploy pra recriar na mão, um redeploy
+seguinte (disparado por um push que corrigia outra coisa, nem mexia no
+seed) encontrou a tabela de eventos vazia de novo e rodou o seed
+automático sozinho — recriou 3 filmes fantasma (sem trailer, de novo) no
+meio dos que eu tinha criado na mão. Cada `git push` que reimplanta o
+back-end no Render roda `alembic + seed + uvicorn` do zero, e `seed_events`
+só pula se o organizador **já tiver** algum evento — então qualquer
+momento em que a tabela ficar vazia (limpeza manual, banco recriado, etc.)
+vira reseed automático sem avisar ninguém.
+
+Virou opt-in: `RUN_SEED=true` precisa estar explicitamente definida pro
+seed rodar. Ligada no `docker-compose.yml` (dev local continua saindo
+pronto pra usar com um comando só); nunca definida no Render, então lá o
+seed nunca mais roda sozinho — vira ação manual, do jeito que a curadoria
+de filmes no deploy já estava sendo feita mesmo. Migration continua
+rodando sempre, independente dessa variável (isso nunca pode ser opt-in).
+Testado local com e sem a variável antes de considerar corrigido.
+
