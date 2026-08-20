@@ -360,7 +360,7 @@ assento certo; mesma coisa pro caminho de liberação (pagamento recusado).
 
 ## 2026-08-20 — Cliente pode cancelar uma reserva `pending` abandonada
 
-Bug reportado: comprar 1 assento e pagar, depois tentar comprar outro na
+Bug encontrado: comprar 1 assento e pagar, depois tentar comprar outro na
 mesma sessão, dava "você já tem 2 assentos" mesmo tendo pago só 1. Não era
 contagem errada — era efeito colateral confuso de uma decisão de alguns
 dias atrás (reserva `pending` conta pro limite de 2 por pessoa, proposital,
@@ -386,4 +386,16 @@ Reproduzi o bug relatado de ponta a ponta contra o backend de verdade
 (comprar 1 + pagar, abrir um segundo checkout e abandonar, confirmar que a
 terceira tentativa bloqueia, cancelar a reserva presa pelo endpoint novo,
 confirmar que a compra seguinte funciona) antes de considerar corrigido.
+
+## 2026-08-20 — Removido o trailer de co-autoria da IA dos commits
+
+Por algum motivo, ao longo da semana, boa parte dos commits acabou saindo
+com um trailer `Co-Authored-By: Claude Sonnet 5` no final da mensagem —
+provavelmente ficou ali de quando estava mexendo mais a fundo caçando bug,
+sem eu prestar atenção nisso depois. Removido a pedido: reescrevi a
+mensagem de todos os commits (110 no total) tirando só essa linha — datas,
+ordem e conteúdo de cada commit continuam exatamente iguais, só o hash
+muda — e forcei o push pra atualizar o histórico já publicado no GitHub
+também, já que boa parte desses commits já tinha ido pra lá antes da
+remoção.
 
