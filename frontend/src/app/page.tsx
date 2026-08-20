@@ -54,7 +54,7 @@ export default function Home() {
   return (
     <main className="flex flex-1 flex-col">
       {featured && (
-        <section className="relative flex min-h-[360px] items-end overflow-hidden">
+        <section className="relative flex aspect-[21/9] min-h-[280px] items-end overflow-hidden">
           {backdropUrl(featured.backdrop_path) && (
             <img
               key={`img-${featured.id}`}
