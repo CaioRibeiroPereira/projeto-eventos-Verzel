@@ -239,6 +239,13 @@ export function cancelEvent(token: string, id: number) {
   });
 }
 
+export function deleteEvent(token: string, id: number) {
+  return request<void>(`/events/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function listMyEvents(token: string) {
   return request<Event[]>("/events/mine", {
     headers: { Authorization: `Bearer ${token}` },

@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRoleGuard } from "@/hooks/use-role-guard";
-import { ApiError, cancelEvent, listMyEvents, publishEvent, posterUrl, type Event } from "@/lib/api";
+import { TrashIcon } from "@/components/icons";
+import { ApiError, cancelEvent, deleteEvent, listMyEvents, publishEvent, posterUrl, type Event } from "@/lib/api";
 import { formatDateTime, formatPrice } from "@/lib/format";
 
 const STATUS_LABEL: Record<Event["status"], string> = {
@@ -46,6 +47,9 @@ function Dashboard() {
   const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [cancelMessage, setCancelMessage] = useState<string | null>(null);
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     if (!token) return;
@@ -84,6 +88,21 @@ function Dashboard() {
     } finally {
       setCancellingId(null);
       setConfirmingCancelId(null);
+    }
+  }
+
+  async function handleDelete(id: number) {
+    if (!token) return;
+    setDeletingId(id);
+    setDeleteError(null);
+    try {
+      await deleteEvent(token, id);
+      load();
+    } catch (err) {
+      setDeleteError(err instanceof ApiError ? err.message : "Não foi possível apagar o evento.");
+    } finally {
+      setDeletingId(null);
+      setConfirmingDeleteId(null);
     }
   }
 
@@ -226,6 +245,34 @@ function Dashboard() {
                   ) : (
                     <span className="caption">Faltam menos de 24h — não dá mais pra cancelar</span>
                   ))}
+
+                {event.status === "cancelled" &&
+                  (confirmingDeleteId === event.id ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleDelete(event.id)}
+                        disabled={deletingId === event.id}
+                        className="rounded bg-red px-3 py-1 text-sm font-medium text-on-red hover:bg-red-hover disabled:opacity-60"
+                      >
+                        {deletingId === event.id ? "Apagando..." : "Confirmar exclusão"}
+                      </button>
+                      <button
+                        onClick={() => setConfirmingDeleteId(null)}
+                        className="text-sm text-text-secondary hover:text-text"
+                      >
+                        Voltar
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmingDeleteId(event.id)}
+                      title="Apagar evento"
+                      aria-label="Apagar evento"
+                      className="text-text-muted hover:text-red"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  ))}
               </div>
 
               {confirmingCancelId === event.id && event.seats_sold > 0 && (
@@ -235,6 +282,14 @@ function Dashboard() {
               )}
               {confirmingCancelId === event.id && cancelError && (
                 <p className="caption text-red">{cancelError}</p>
+              )}
+              {confirmingDeleteId === event.id && (
+                <p className="caption text-text-secondary">
+                  Apaga o evento, os assentos e o histórico de reservas dele pra sempre. Não dá pra desfazer.
+                </p>
+              )}
+              {confirmingDeleteId === event.id && deleteError && (
+                <p className="caption text-red">{deleteError}</p>
               )}
             </div>
           </div>

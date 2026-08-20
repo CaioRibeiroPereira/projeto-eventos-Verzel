@@ -63,6 +63,15 @@ def cancel_event(
     return service.cancel_event(user.id, event_id)
 
 
+@router.delete("/events/{event_id}", status_code=204)
+def delete_event(
+    event_id: int,
+    service: EventService = Depends(get_event_service),
+    user: User = Depends(require_organizer),
+):
+    service.delete_event(user.id, event_id)
+
+
 @router.get("/events/mine", response_model=list[EventRead])
 def list_my_events(
     service: EventService = Depends(get_event_service),

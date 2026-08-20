@@ -501,3 +501,17 @@ certo dessa vez. Não copiei o `seed.py` pra rodar de novo automaticamente
 porque criar na mão já é rápido pra ~20 filmes e evita depender de uma
 chamada em lote instável de novo.
 
+## 2026-08-20 — Apagar evento, mas só depois de cancelado
+
+Painel do organizador ganhou uma lixeira pra apagar o evento de vez —
+útil pra limpar teste/engano sem deixar lixo acumulando na lista pra
+sempre. Regra: só apaga se o evento já estiver `cancelled`. Em vez de
+duplicar a checagem de segurança (nenhuma reserva paga ou aguardando
+pagamento pendurada nele), reaproveita a garantia que o cancelamento já
+dá — se chegou cancelado, já é seguro apagar, ponto.
+
+`DELETE /events/{id}` limpa tickets/reservations/seats daquele evento e
+por fim o evento em si, nessa ordem (por causa das FKs). Testado
+end-to-end: tentar apagar um evento publicado dá 409; apagar um cancelado
+dá 204 e o evento some de verdade (404 depois).
+

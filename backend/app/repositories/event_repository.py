@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlmodel import Session, func, select
+from sqlmodel import Session, delete, func, select
 
 from app.models.event import Event, EventStatus
 from app.models.reservation import Reservation, ReservationStatus
@@ -147,3 +147,15 @@ class EventRepository:
         self.session.commit()
         self.session.refresh(event)
         return len(reservations), freed_seat_ids
+
+    def delete(self, event: Event) -> None:
+        """Apaga o evento de vez — só chamado depois que o service já
+        garantiu que ele está cancelado (nenhuma reserva ativa pendurada
+        nele). Reservas/tickets de um evento cancelado já foram todos
+        marcados cancelled, mas as linhas continuam no banco; apagar
+        precisa limpar elas primeiro por causa da FK."""
+        self.session.execute(delete(Ticket).where(Ticket.event_id == event.id))
+        self.session.execute(delete(Reservation).where(Reservation.event_id == event.id))
+        self.session.execute(delete(Seat).where(Seat.event_id == event.id))
+        self.session.delete(event)
+        self.session.commit()

@@ -193,3 +193,29 @@ def test_cannot_cancel_an_already_cancelled_event(session, make_user, make_event
     with pytest.raises(HTTPException) as exc_info:
         service.cancel_event(organizer.id, event.id)
     assert exc_info.value.status_code == 409
+
+
+def test_cannot_delete_an_event_that_is_not_cancelled(session, make_user, make_event):
+    organizer = make_user(UserRole.organizer, "org@teste.local")
+    event = make_event(organizer.id)  # published, por padrão da fixture
+
+    service = EventService(EventRepository(session))
+    with pytest.raises(HTTPException) as exc_info:
+        service.delete_event(organizer.id, event.id)
+    assert exc_info.value.status_code == 409
+
+
+def test_deleting_a_cancelled_event_removes_it_and_its_seats(
+    session, make_user, make_event, make_seat
+):
+    from app.models.event import EventStatus
+
+    organizer = make_user(UserRole.organizer, "org@teste.local")
+    event = make_event(organizer.id, status=EventStatus.cancelled)
+    make_seat(event.id)
+
+    service = EventService(EventRepository(session))
+    service.delete_event(organizer.id, event.id)
+
+    repo = EventRepository(session)
+    assert repo.get(event.id) is None

@@ -165,6 +165,21 @@ class EventService:
         )
         return EventCancelResult(event=event_read, cancelled_reservations=cancelled_reservations)
 
+    def delete_event(self, organizer_id: int, event_id: int) -> None:
+        """Apaga o evento de vez — só permitido se já estiver cancelado.
+        Reaproveita a garantia do cancelamento (nenhuma reserva paga ou
+        aguardando pagamento continua ativa) em vez de duplicar essa
+        checagem aqui: se chegou cancelado, já está seguro apagar."""
+        event = self.repository.get(event_id)
+        if not event or event.organizer_id != organizer_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")
+        if event.status != EventStatus.cancelled:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Só é possível apagar um evento depois de cancelado",
+            )
+        self.repository.delete(event)
+
     def list_my_events(self, organizer_id: int) -> list[EventRead]:
         events = self.repository.list_by_organizer(organizer_id)
         return [
