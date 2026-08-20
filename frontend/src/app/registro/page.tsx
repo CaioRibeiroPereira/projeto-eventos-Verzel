@@ -38,7 +38,7 @@ function RegistroForm() {
     try {
       await register({ name, email, password });
       await login(email, password);
-      router.push(next || "/cliente");
+      router.push(next || "/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível criar a conta.");
     } finally {

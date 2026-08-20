@@ -36,7 +36,7 @@ function LoginForm() {
     setSubmitting(true);
     try {
       await login(email, password);
-      router.push(next || "/cliente");
+      router.push(next || "/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível entrar.");
     } finally {
