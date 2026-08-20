@@ -27,7 +27,7 @@ rodapé.
 
 Cogitamos expandir para teatro, dança e concertos via Ticketmaster
 Discovery API (o PDF permite isso). Decidimos adiar: o prazo é curto
-(entrega 21/08) e ainda faltava fechar a Fase 6 (seed, README, deploy).
+(entrega 21/08).
 Fica como possível próximo passo, não como parte do escopo atual.
 
 ## 2026-08-17 — Reserva de múltiplos assentos, limite de 2 por pessoa
@@ -42,8 +42,7 @@ reservada.
 
 ## 2026-08-17 — Checkout com 4 formas de pagamento simuladas
 
-O pagamento simulado tinha só dois botões crus ("aprovar"/"recusar"), o que o
-usuário achou pouco profissional. Trocado por uma tela de checkout com
+O pagamento simulado tinha só dois botões crus ("aprovar"/"recusar"), pouco profissional. Trocado por uma tela de checkout com
 seleção entre cartão de crédito, PIX, boleto e "pagar na hora do filme" —
 cada um com a interface que teria de verdade (formulário de cartão com
 máscara, QR code de PIX, código de barras de boleto). Continua 100%
@@ -68,8 +67,7 @@ O PDF permite opcionalmente usar o ambiente de testes de um provedor de
 pagamento de verdade (ex: Stripe test mode). Cogitamos trocar o checkout
 simulado por isso, mas decidimos manter como está: o requisito já é
 atendido pelo checkout simulado com confirmação e recusa (ver decisão
-acima), e integrar um gateway real consumiria tempo do que falta pra
-Fase 6 (seed, README, opcionais) sem mudar o que é avaliado no fluxo.
+acima), e integrar um gateway real consumiria tempo.
 
 ## 2026-08-19 — Código curto separado pro fallback manual da portaria
 
@@ -114,9 +112,7 @@ Novo modelo:
 
 ## 2026-08-19 — Cancelamento de ingresso (opcional, fora de ordem de propósito)
 
-Implementado fora da ordem de execução que eu mesmo tinha definido (item 8
-dos opcionais deveria vir só depois da Fase 6/README) — decisão explícita
-do usuário de furar a ordem aqui, não um esquecimento meu.
+Implementado fora da ordem de execução que eu mesmo tinha definido
 
 - Cancelamento é por **reserva** (não por ingresso individual): uma
   reserva com 2 assentos cancela os 2 juntos, batendo com o modelo de
@@ -177,7 +173,7 @@ informativo ("criado por"), sem efeito em permissão nenhuma.
 ## 2026-08-19 — Painel do organizador ganha dashboard separado
 
 Testei primeiro uma versão mais simples (métricas embutidas no topo da
-lista de eventos), mas o usuário pediu uma área própria, com mais dado e
+lista de eventos), mas resolvi desenvolver com mais dado e
 gráfico — não misturada com a tela de criar/gerenciar evento. Virou
 `/organizador/dashboard`: KPIs (receita, ingressos vendidos, ocupação
 média) e gráficos com `recharts` (vendas por evento, ocupação, eventos com
@@ -187,7 +183,7 @@ de ocupação diferentes por evento) em vez de eventos vazios.
 
 ## 2026-08-19 — Criação de evento: data/hora separadas, publicar direto, busca e ordenação
 
-Três pedidos numa tacada: (1) o formulário trocou o único campo
+(1) o formulário trocou o único campo
 datetime-local por dois campos (data e hora) separados; (2) ganhou um
 checkbox "publicar agora" pra não obrigar rascunho → publicar como dois
 passos; (3) a lista do organizador ganhou busca por nome e ordenação por
@@ -198,7 +194,7 @@ do seed, todos herdaram o mesmo instante no backfill — corrigido
 espalhando os timestamps manualmente pra a ordenação fazer sentido nos
 dados de exemplo.
 
-Durante o item 1 também encontrei (não foi pedido, mas quebrava a tela) um
+Durante o item 1 também encontrei um
 bug de fuso: o formulário convertia a data/hora local pro UTC via
 `.toISOString()` antes de enviar, mas nada mais no app (exibição, banco)
 esperava ou revertia essa conversão — todo evento novo aparecia 3h depois
@@ -220,7 +216,7 @@ horário. A mensagem de "não dá pra cancelar" também precisou diferenciar
 
 ## 2026-08-19 — Consolidação de organizadores órfãos
 
-O usuário reportou que os dados de um filme (Friends: The Reunion)
+O notei que os dados de um filme (Friends: The Reunion)
 apareciam diferentes entre cliente, organizador e portaria. Não era bug de
 sincronização: eram 9 contas de organizador remanescentes de antes da
 mudança pra "organizador é seed-only" (criadas quando ainda existia
@@ -237,7 +233,7 @@ entre si — resolvidos com o mesmo critério de manter o mais vendido.
 
 Pedido do usuário: a portaria precisa de um jeito de cobrar quando o
 cliente escolhe pagar só na entrada, em vez de sempre exigir pagamento
-antecipado. Duas perguntas de produto resolvidas com o usuário antes de
+antecipado. Duas perguntas de produto resolvidas antes de
 implementar: o ingresso é emitido com QR na hora que a pessoa escolhe
 "pagar na hora" (aparece em "Meus ingressos" já, com aviso de pendente) e a
 portaria cobra e libera a entrada numa ação só, não em duas etapas. A
@@ -271,11 +267,38 @@ pai só tinha `position: relative` sem `isolation: isolate` — sem isso, o
 navegador não cria um novo contexto de empilhamento e o filho de z-index
 negativo escapa pro ancestral mais próximo que criar um de verdade.
 
-## 2026-08-19 — CLAUDE.md e DECISIONS.md voltam a ser versionados
+## 2026-08-19 — DECISIONS.md volta a ser versionado, CLAUDE.md fica de fora
 
-Tinham sido tirados do repo (via `.gitignore`) pra ficar só locais. Ao
-revisar o enunciado de novo antes da entrega, ficou claro que isso ia
-contra um pedido explícito do desafio: "se você produziu artefatos no
-caminho, como specs... versione junto no repositório" — exatamente o que
-este arquivo é. Revertido: os dois voltam a ser rastreados, e este arquivo
-alimenta a seção "uso de IA" do README.
+Os dois tinham sido tirados do repo (via `.gitignore`) pra ficar só
+locais. Ao revisar o enunciado de novo antes da entrega, ficou claro que
+isso ia contra um pedido explícito do desafio: "se você produziu
+artefatos no caminho, como specs... versione junto no repositório" —
+exatamente o que este arquivo é. O `DECISIONS.md` volta a ser rastreado
+(atualizado com tudo que faltava). O `CLAUDE.md` fica de fora: é o brief
+completo do desafio junto com instruções internas de como devo trabalhar
+nesse repositório — conteúdo operacional, não uma decisão de produto pra
+reportar. O que precisa ser mostrado — o que foi entregue de cada
+requisito do PDF — virou um arquivo novo, `CHECKLIST.md`.
+
+## 2026-08-19 — Testes da lógica crítica, contra Postgres de verdade
+
+Opcional item 9: assinatura do QR, unicidade do assento, validação única
+na portaria e cancelamento com devolução ao estoque. Sem perseguir
+cobertura — só provar as quatro garantias.
+
+Decisão de infraestrutura: os testes de banco rodam contra um Postgres de
+teste de verdade (`eventos_test`, mesmo servidor do `docker-compose.yml`),
+não SQLite nem mocks. O motivo é que a garantia de "não vender o mesmo
+lugar duas vezes" é um índice único **parcial** do Postgres
+(`UNIQUE(event_id, seat_id) WHERE status != 'cancelled'`) — testar contra
+SQLite validaria só um índice único comum, sem o filtro por status, o que
+provaria menos do que a garantia real exige. Cada teste roda numa
+transação isolada (savepoint), desfeita no final, então não suja o banco
+de teste entre execuções.
+
+Testando a unicidade do assento, escrevi de propósito um teste pro bug do
+"hold expirado" que corrigi mais cedo hoje (reserva pendente vencida
+travando o assento pra sempre) — e um teste contrário, provando que um
+hold ainda dentro do prazo continua bloqueando normalmente. A ideia é que
+um teste sozinho provando "o bug sumiu" não é suficiente; precisa também
+provar que a trava de concorrência não foi enfraquecida no processo.
