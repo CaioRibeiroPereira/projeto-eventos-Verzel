@@ -11,6 +11,9 @@ COPY . .
 # Next.js inlina essas variáveis no bundle do cliente na hora do `next build`.
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# liga o output "standalone" só pra esse build (ver next.config.ts) — no
+# Vercel essa variável não existe, e o build usa a saída padrão.
+ENV DOCKER_BUILD=true
 RUN npm run build
 
 FROM node:22-alpine AS runner

@@ -462,3 +462,21 @@ remotamente sem acesso ao container. Reproduzi o erro de propósito com uma
 chave inválida antes de considerar corrigido: confirma que o formato do
 erro bate com o que apareceu no log do Render (401, chave inválida).
 
+## 2026-08-20 — `output: "standalone"` quebrava o build no Vercel
+
+Bug real do primeiro deploy no Vercel: `next.config.ts` tinha
+`output: "standalone"` fixo (adicionado antes, só pra imagem Docker). O
+Vercel tem o próprio pipeline de bundling e espera a saída padrão do
+`.next` — com "standalone" ligado, ele procura um arquivo de rastreamento
+(`next-server.js.nft.json`) que o modo standalone não gera do mesmo jeito,
+e o build quebra com `ENOENT`.
+
+Corrigido deixando o `output: "standalone"` condicional a uma variável
+(`DOCKER_BUILD=true`, setada só dentro do `frontend/Dockerfile`) em vez de
+fixo — no Vercel essa variável não existe, então o build usa a saída
+padrão normalmente; no Docker (local ou qualquer plataforma que use a
+imagem) continua gerando o standalone de sempre. Testei os dois caminhos
+antes de considerar corrigido: `npm run build` local sem a variável gera
+o `.next` padrão (com o arquivo de rastreamento que faltava), e o
+`docker compose build` continua gerando `.next/standalone` normalmente.
+
