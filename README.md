@@ -189,7 +189,13 @@ linha em nenhum commit (detalhe em
 
 ## Deploy
 
-_(a preencher)_
+- **Front-end**: https://projeto-eventos-verzel.vercel.app (Vercel)
+- **Back-end / docs da API**: https://projeto-eventos-verzel.onrender.com/docs (Render)
+- **Banco**: PostgreSQL gerenciado pelo Render
+
+Front no Vercel, back-end e banco os dois no Render — decisão e detalhes
+técnicos em
+[DECISIONS.md](DECISIONS.md#2026-08-20--deploy-vercel--render-sem-neon).
 
 ## Fora de escopo (por decisão do desafio)
 
@@ -205,3 +211,11 @@ pontua no desafio e foram deixados de fora de propósito.
   um pub/sub compartilhado (Redis, por exemplo). Também não reconecta
   automaticamente se a conexão cair; o mapa continua funcionando do jeito
   tradicional (atualiza ao recarregar a página).
+- O back-end está no plano free do Render: depois de 15 minutos sem
+  nenhuma requisição, a instância "dorme", e a primeira requisição
+  seguinte demora uns 30-60 segundos pra acordar (reinicia o container do
+  zero). Isso se repete indefinidamente, não é bug — é assim que o plano
+  gratuito funciona.
+- O banco Postgres também é do plano free do Render, que se apaga
+  automaticamente 30 dias depois de criado. Criado em 20/08/2026; se
+  passar 1 mês sem ninguém reativar/migrar, os dados somem.

@@ -30,7 +30,7 @@ implementado e testado. O porquê de cada decisão está no [DECISIONS.md](DECIS
 - [x] Docker Compose subindo a aplicação inteira (front + API + banco)
 - [x] Testes automatizados da lógica crítica
 - [x] Mapa de assentos em tempo real (websockets)
-- [ ] Aplicação publicada
+- [x] Aplicação publicada
 
 ## Além do pedido
 
