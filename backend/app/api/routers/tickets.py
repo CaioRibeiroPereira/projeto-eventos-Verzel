@@ -5,7 +5,7 @@ from app.core.database import get_session
 from app.core.security import require_role
 from app.models.user import User, UserRole
 from app.repositories.ticket_repository import TicketRepository
-from app.schemas.tickets import TicketRead
+from app.schemas.tickets import SharedTicketRead, TicketRead
 from app.services.ticket_service import TicketService
 
 router = APIRouter(tags=["tickets"])
@@ -26,7 +26,7 @@ def list_my_tickets(
     return service.list_mine(user.id)
 
 
-@router.get("/tickets/shared/{token}", response_model=TicketRead)
+@router.get("/tickets/shared/{token}", response_model=SharedTicketRead)
 def get_shared_ticket(
     token: str,
     service: TicketService = Depends(get_ticket_service),

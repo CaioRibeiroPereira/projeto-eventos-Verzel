@@ -12,7 +12,7 @@ from app.models.reservation import Reservation, ReservationStatus
 from app.models.seat import Seat
 from app.models.ticket import Ticket
 from app.repositories.ticket_repository import TicketRepository
-from app.schemas.tickets import TicketRead
+from app.schemas.tickets import SharedTicketRead, TicketRead
 
 
 def _ensure_issued(repository: TicketRepository, ticket: Ticket) -> Ticket:
@@ -57,9 +57,21 @@ class TicketService:
             for ticket, event, seat, reservation in rows
         ]
 
-    def get_shared(self, token: str) -> TicketRead:
+    def get_shared(self, token: str) -> SharedTicketRead:
+        """Rota pública, sem autenticação — não pode devolver qr_payload
+        nem manual_code, senão qualquer um com o link consegue entrar no
+        lugar do dono (escaneando ou digitando), não só ver o ingresso."""
         row = self.repository.get_by_share_token(token)
         if not row:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingresso não encontrado")
         ticket, event, seat, reservation = row
-        return _to_read(self.repository, ticket, event, seat, reservation)
+        return SharedTicketRead(
+            event_title=event.title,
+            event_poster_path=event.poster_path,
+            event_local=event.local,
+            event_starts_at=event.starts_at,
+            seat_label=seat.label,
+            status=ticket.status,
+            used_at=ticket.used_at,
+            awaiting_door_payment=reservation.status == ReservationStatus.awaiting_door_payment,
+        )

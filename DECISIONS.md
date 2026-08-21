@@ -557,3 +557,37 @@ de filmes no deploy já estava sendo feita mesmo. Migration continua
 rodando sempre, independente dessa variável (isso nunca pode ser opt-in).
 Testado local com e sem a variável antes de considerar corrigido.
 
+## 2026-08-20 — Falha de segurança apontada na devolutiva: link compartilhado expunha QR e código
+
+Achado real da avaliação: `GET /tickets/shared/{token}` (rota pública,
+sem login) devolvia o `TicketRead` inteiro — incluindo `qr_payload` (QR
+assinado, válido) e `manual_code`. Ou seja, qualquer um com o link
+conseguia entrar no lugar do dono do ingresso, escaneando ou digitando,
+não só visualizar. O `share_token` até tinha sido separado no schema
+desde o início, mas isso nunca se traduziu numa resposta pública
+reduzida — o mesmo DTO da tela autenticada ("Meus ingressos") vazava
+pra rota sem autenticação.
+
+Corrigido criando um DTO específico, `SharedTicketRead`: só os campos de
+exibição (filme, pôster, local, data, assento, status) — sem
+`qr_payload`, `manual_code` nem o próprio `share_token`. `TicketService.get_shared`
+monta esse schema direto, sem reusar o builder da tela autenticada, e o
+router troca o `response_model` junto (a filtragem do FastAPI pelo
+response_model é o que garante que nada extra escapa, mesmo se o service
+um dia devolver algo a mais por engano).
+
+Efeito colateral consciente: compartilhar um ingresso agora é só pra
+**mostrar** que a pessoa tem aquele lugar — quem recebe o link não
+consegue mais usar o link pra entrar no evento (nem QR nem código
+aparecem lá). Pra alguém realmente usar um ingresso compartilhado, o
+dono da conta precisa mostrar o QR/código pessoalmente, de dentro de
+"Meus ingressos". Reduz a superfície do que um link público consegue
+fazer, na linha do que a devolutiva pediu.
+
+Escrevi um teste (`test_shared_ticket.py`) provando duas coisas:
+que a resposta não tem `qr_payload`/`manual_code`/`share_token`, e que o
+próprio schema `SharedTicketRead` não declara esses campos — não é só o
+service "esquecer" de preencher, é estruturalmente impossível vazar por
+aí. Testado também end-to-end contra o backend de verdade antes de
+considerar corrigido.
+

@@ -352,6 +352,17 @@ export interface Ticket {
   awaiting_door_payment: boolean;
 }
 
+export interface SharedTicket {
+  event_title: string;
+  event_poster_path: string | null;
+  event_local: string;
+  event_starts_at: string;
+  seat_label: string;
+  status: TicketStatus;
+  used_at: string | null;
+  awaiting_door_payment: boolean;
+}
+
 export function listMyTickets(token: string) {
   return request<Ticket[]>("/tickets/mine", {
     headers: { Authorization: `Bearer ${token}` },
@@ -359,7 +370,7 @@ export function listMyTickets(token: string) {
 }
 
 export function getSharedTicket(token: string) {
-  return request<Ticket>(`/tickets/shared/${token}`);
+  return request<SharedTicket>(`/tickets/shared/${token}`);
 }
 
 export type ValidationOutcome = "valid" | "invalid" | "already_used" | "wrong_event" | "payment_due";
