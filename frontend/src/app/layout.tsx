@@ -23,7 +23,7 @@ const mono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cine Verzel",
+  title: "CineSpot",
   description: "Reserve ingressos e valide na portaria com QR code.",
 };
 

@@ -1,4 +1,4 @@
-# Cine Verzel
+# CineSpot
 
 Plataforma de eventos e ingressos para sessões de cinema. Um **organizador**
 publica sessões a partir do catálogo do TMDb, o **cliente** reserva um lugar
@@ -6,7 +6,7 @@ num mapa de assentos, paga (de forma simulada) e recebe um ingresso com QR
 que pode compartilhar por link, e a **portaria** valida o ingresso na
 entrada — com leitura por câmera ou digitação manual.
 
-Feito para o Desafio Elite Dev 2026.
+Feito para o Desafio Elite Dev 2026 da Verzel.
 
 - **O que foi entregue de cada requisito**: [CHECKLIST.md](CHECKLIST.md)
 - **Decisões tomadas, o que foi descartado e por quê**: [DECISIONS.md](DECISIONS.md)

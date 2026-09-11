@@ -32,7 +32,7 @@ export default function ParaEmpresasPage() {
         <span className="label text-accent">Organizadores</span>
         <h1 className="movie-title !text-3xl">Para empresas</h1>
         <p className="leading-relaxed text-text-secondary">
-          Sua empresa pode usar o Cine Verzel pra publicar sessões e vender ingressos
+          Sua empresa pode usar o CineSpot pra publicar sessões e vender ingressos
           online, sem depender de planilha ou balcão físico pra controlar lugares.
         </p>
         <p className="leading-relaxed text-text-secondary">Quer saber mais? Preencha o formulário abaixo.</p>

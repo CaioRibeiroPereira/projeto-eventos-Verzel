@@ -88,7 +88,7 @@ export default function LoginOrganizadorPage() {
         </button>
 
         <p className="caption mt-4 text-center">
-          Conta de organizador é provisionada pela equipe do Cine Verzel.
+          Conta de organizador é provisionada pela equipe do CineSpot.
         </p>
       </form>
     </main>

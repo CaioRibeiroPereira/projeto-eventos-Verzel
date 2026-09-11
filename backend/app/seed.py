@@ -213,7 +213,7 @@ def seed_events(session: Session, organizer: User) -> None:
 
 def _synthetic_customers(session: Session) -> list[User]:
     return [
-        _get_or_create_user(session, name, f"cliente.sim{i:02d}@cineverzel.local", UserRole.customer)
+        _get_or_create_user(session, name, f"cliente.sim{i:02d}@cinespot.local", UserRole.customer)
         for i, name in enumerate(SYNTHETIC_CUSTOMER_NAMES, start=1)
     ]
 

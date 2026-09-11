@@ -11,7 +11,7 @@ export default function AcessibilidadePage() {
       </p>
       <p>
         Se você encontrar uma barreira de acessibilidade em alguma tela, escreva para{" "}
-        <span className="ticket-code">contato@cineverzel.com.br</span>.
+        <span className="ticket-code">contato@cinespot.com.br</span>.
       </p>
     </PageShell>
   );

@@ -17,7 +17,7 @@ export function Logo({ className = "", size = 26 }: { className?: string; size?:
         className="font-display font-medium leading-none"
         style={{ fontSize: `${(size / 26) * 1.5}rem` }}
       >
-        Cine Verzel
+        CineSpot
       </span>
     </span>
   );

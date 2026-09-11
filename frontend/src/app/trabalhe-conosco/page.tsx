@@ -6,7 +6,7 @@ export default function TrabalheConoscoPage() {
       <p>Não temos vagas abertas no momento.</p>
       <p>
         Se você quer deixar seu contato para o futuro, escreva para{" "}
-        <span className="ticket-code">contato@cineverzel.com.br</span>.
+        <span className="ticket-code">contato@cinespot.com.br</span>.
       </p>
     </PageShell>
   );

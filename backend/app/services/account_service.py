@@ -65,7 +65,7 @@ class AccountService:
         if user.role == UserRole.organizer:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Conta de organizador não pode ser apagada por aqui — é provisionada pela equipe do Cine Verzel",
+                detail="Conta de organizador não pode ser apagada por aqui — é provisionada pela equipe do CineSpot",
             )
         if user.role == UserRole.gate:
             raise HTTPException(
@@ -73,7 +73,7 @@ class AccountService:
                 detail="Conta de portaria não pode ser apagada por aqui — peça pro organizador remover no painel dele",
             )
         user.name = "Conta removida"
-        user.email = f"conta-removida-{user.id}-{secrets.token_hex(4)}@cineverzel.local"
+        user.email = f"conta-removida-{user.id}-{secrets.token_hex(4)}@cinespot.local"
         user.password_hash = hash_password(secrets.token_urlsafe(32))
         user.is_active = False
         self.users.save(user)

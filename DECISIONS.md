@@ -18,7 +18,7 @@ público/compartilhável, então qualquer pessoa que soubesse um código virava
 organizador de verdade, sem nenhum vínculo com quem realmente era o dono
 daquela credencial. Ver a entrada de 19/08 com o modelo que substituiu isso.
 
-## 2026-08-17 — Nome da plataforma
+## 2026-08-17 — Nome da plataforma (renomeado em 11/09, ver entrada de 11/09)
 
 O cinema/plataforma se chama **Cine Verzel**. Usado na logo, no header e no
 rodapé.
@@ -590,4 +590,11 @@ próprio schema `SharedTicketRead` não declara esses campos — não é só o
 service "esquecer" de preencher, é estruturalmente impossível vazar por
 aí. Testado também end-to-end contra o backend de verdade antes de
 considerar corrigido.
+
+## 2026-09-11 — Renomeado para CineSpot
+
+Antes de publicar o projeto, tirei a referência à empresa do desafio do nome
+público do produto. Pedi sugestões e escolhi **CineSpot** entre as opções
+levantadas. Trocado em toda a interface (logo, títulos, textos institucionais)
+e nos e-mails de exemplo/seed (`@cineverzel.*` → `@cinespot.*`).
 

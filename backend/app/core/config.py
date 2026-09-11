@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     jwt_expires_minutes: int = 60 * 24
     tmdb_api_key: str = ""
     ticket_secret: str = "change-me-in-env-too"
-    # domínio do front-end publicado (ex: https://cine-verzel.vercel.app),
+    # domínio do front-end publicado (ex: https://cinespot.vercel.app),
     # liberado no CORS além do localhost — vazio em dev local.
     frontend_url: str = ""
 

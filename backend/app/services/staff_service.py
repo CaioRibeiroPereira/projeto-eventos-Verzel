@@ -41,7 +41,7 @@ class StaffService:
         # Desativa e anonimiza em vez de apagar a linha: ticket.validated_by
         # continua íntegro pro histórico de quem validou cada ingresso.
         staff.name = "Porteiro removido"
-        staff.email = f"porteiro-removido-{staff.id}-{secrets.token_hex(4)}@cineverzel.local"
+        staff.email = f"porteiro-removido-{staff.id}-{secrets.token_hex(4)}@cinespot.local"
         staff.password_hash = hash_password(secrets.token_urlsafe(32))
         staff.is_active = False
         self.repository.save(staff)
